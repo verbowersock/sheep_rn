@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "sheep-rn",
+    "slug": "sheep-rn",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
