@@ -126,7 +126,7 @@ WHERE
     );
     results.forEach((result) => {
       for (let index = 0; index < result.rows.length; index++) {
-        console.log(result);
+        //   console.log(result);
         allSheep.push(result.rows.item(index));
       }
     });
