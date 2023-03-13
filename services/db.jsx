@@ -1,6 +1,9 @@
 import * as SQLite from "expo-sqlite";
 
 const database = SQLite.openDatabase("sheep.db");
+database.exec([{ sql: "PRAGMA foreign_keys = ON;", args: [] }], false, () =>
+  console.log("Foreign keys turned on")
+);
 
 const testDataBreeds = ["katahdin", "shetland", "dorper", "icelandic", "mix"];
 const testDataColors = ["gray", "black", "white", "red", "brown"];
@@ -9,10 +12,10 @@ const testDataSheep = [
   {
     tag_id: "abc",
     scrapie_id: "abc1245",
-    name: "Bree",
-    dob: "2021-09-02",
+    name: "Bree1",
+    dob: "02/09/2022",
     sex: "f",
-    purchase_date: "2022-02-02",
+    purchase_date: "03/09/2022",
     breed_id: 1,
     color_id: 2,
     marking_id: 1,
@@ -20,8 +23,8 @@ const testDataSheep = [
   {
     tag_id: "def",
     scrapie_id: "def1245",
-    name: "Buffy",
-    dob: "2021-10-02",
+    name: "Buffy1",
+    dob: "02/10/2022",
     sex: "m",
     breed_id: 2,
     color_id: 3,
@@ -34,7 +37,7 @@ export const dropDbTablesAsync = async () => {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        "drop table if exists sheep",
+        "PRAGMA foreign_keys = 'ON'; drop table if exists sheep",
         [],
         (_, result) => {
           console.log("table sheep deleted");
@@ -46,7 +49,7 @@ export const dropDbTablesAsync = async () => {
         }
       );
       tx.executeSql(
-        "drop table if exists  colors",
+        "PRAGMA foreign_keys = 'ON'; drop table if exists  colors",
         [],
         (_, result) => {
           console.log("table colors deleted");
@@ -59,7 +62,7 @@ export const dropDbTablesAsync = async () => {
       );
 
       tx.executeSql(
-        "drop table if exists markings",
+        "PRAGMA foreign_keys = 'ON'; drop table if exists markings",
         [],
         (_, result) => {
           console.log("table markings deleted");
@@ -71,7 +74,7 @@ export const dropDbTablesAsync = async () => {
         }
       );
       tx.executeSql(
-        "drop table if exists breeds",
+        "PRAGMA foreign_keys = 'ON'; drop table if exists breeds",
         [],
         (_, result) => {
           console.log("table breeds deleted");
@@ -144,11 +147,13 @@ export function init() {
                 sire BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
                 dam BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
                 purchase_date VARCHAR(50), 
-                weight_at_birth INTEGER, date_deceased VARCHAR(255), 
+                weight_at_birth INTEGER, 
+                date_deceased VARCHAR(255), 
+                date_last_bred VARCHAR(255),
                 breed_id BIGINT NOT NULL REFERENCES breeds (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
                 color_id BIGINT REFERENCES colors (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-                marking_id BIGINT REFERENCES markings (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-                date_last_bred VARCHAR(255));`,
+                marking_id BIGINT REFERENCES markings (id) ON DELETE RESTRICT ON UPDATE CASCADE
+               )`,
         [],
         (_, success) => {
           resolve(success);
@@ -174,7 +179,7 @@ export function insertBreedData() {
             resolve(success);
           },
           (t, error) => {
-            console.log("db error insertbreed");
+            console.log("db error insertbreed", el);
             console.log(error);
             reject(error);
           }
@@ -268,20 +273,35 @@ export function fetchSheep() {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `SELECT children.sheep_id, children.tag_id, children.name, children.dob, children.sex, breeds.breed_name,colors.color_name,
-	sires.name AS father_name,
- dams.name AS mother_name
+        `SELECT 
+  children.sheep_id, 
+  children.tag_id, 
+  children.name, 
+  children.dob, 
+  children.sex, 
+  children.purchase_date,
+  children.weight_at_birth,
+  children.date_last_bred,
+  children.date_deceased,
+  children.picture,
+  children.scrapie_id,
+  children.breed_id,
+  children.color_id,
+  children.marking_id,
+  breeds.breed_name,
+  children.sire,
+  children.dam,
+  COALESCE(colors.color_name, 'N/A') as color_name,
+  COALESCE(markings.marking_name, 'N/A') as marking_name,
+  sires.name AS father_name,
+  dams.name AS mother_name
 FROM
-	sheep children,
-	breeds breeds,
-	colors colors
-left join sheep sires
-on sires.sheep_id = children.sire
-left join sheep dams
-on dams.sheep_id=children.dam
-WHERE
-	children.breed_id = breeds.id AND
-	children.color_id = colors.id`,
+  sheep children
+  JOIN breeds ON children.breed_id = breeds.id
+  LEFT JOIN colors ON children.color_id = colors.id
+  LEFT JOIN markings ON children.marking_id = markings.id
+  LEFT JOIN sheep sires ON children.sire = sires.sheep_id
+  LEFT JOIN sheep dams ON children.dam = dams.sheep_id;`,
         //  `select * from sheep`,
         [],
         (_, result) => {
@@ -387,32 +407,199 @@ export function fetchFemales() {
 }
 
 export function addSheep(sheepData) {
-  console.log(sheepData);
   return new Promise((resolve, reject) => {
-    database.transaction(function (tx) {
+    database.transaction((tx) => {
+      try {
+        tx.executeSql(
+          `INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, sex, sire, dam, breed_id, color_id, marking_id) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            //"1222122",
+            sheepData.picture,
+            sheepData.tag_id,
+            sheepData.scrapieTagId,
+            // "1222122",
+            sheepData.name,
+            //"testvk1122vv",
+            sheepData.dob,
+            //"2020-12-12",
+            sheepData.sex,
+            //"m",
+            sheepData.sire,
+            //undefined,
+            sheepData.dam,
+            //undefined,
+            sheepData.breed,
+            //1,
+            sheepData.color,
+            //1,
+            sheepData.marking,
+            //1,
+          ],
+          (t, success) => {
+            console.log("sucess");
+            resolve(success);
+          },
+          (t, error) => {
+            console.log("db error insert sheep");
+            console.log(error);
+            reject(error);
+          }
+        );
+      } catch (error) {
+        console.error(error);
+        reject(error);
+      }
+    });
+  });
+}
+export function addBreed(val) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO sheep (tag_id, scrapie_id, name, dob, sex, sire, dam, purchase_date, weight_at_birth, breed_id, color_id, marking_id, date_last_bred) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          sheepData.tag_id,
-          sheepData.scrapie_id,
-          sheepData.name,
-          sheepData.dob,
-          sheepData.sex,
-          sheepData.father,
-          sheepData.mother,
-          sheepData.purchase_date,
-          sheepData.weight_at_birth,
-          sheepData.breed_id,
-          sheepData.color_id,
-          sheepData.marking_id,
-          sheepData.date_last_bred,
-        ],
+        `INSERT INTO breeds (breed_name) 
+            VALUES (?)`,
+        [val],
+        (t, success) => {
+          resolve(success.insertId);
+        },
+        (t, error) => {
+          console.log("db error inserting breed");
+          console.log(error);
+          reject(error);
+        }
+      );
+    });
+  });
+}
+
+export function addColor(val) {
+  return new Promise((resolve, reject) => {
+    console.log("!!!val", val);
+    database.transaction((tx) => {
+      tx.executeSql(
+        `SELECT * FROM colors WHERE color_name = ?`,
+        [val],
+        (t, results) => {
+          if (results.rows.length > 0) {
+            // Color already exists, resolve with the existing color's ID
+            console.log(`value ${val} already exists`);
+            resolve(results.rows.item(0).id);
+          } else {
+            // Color does not exist, insert it and resolve with the new color's ID
+            tx.executeSql(
+              `INSERT INTO colors (color_name) VALUES (?)`,
+              [val],
+              (t, success) => {
+                resolve(success.insertId);
+              },
+              (t, error) => {
+                console.log("db error inserting color");
+                console.log(error);
+                reject(error);
+              }
+            );
+          }
+        },
+        (t, error) => {
+          console.log("db error checking for color");
+          console.log(error);
+          reject(error);
+        }
+      );
+    });
+  });
+}
+export function addMarking(val) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `INSERT INTO markings (marking_name) 
+            VALUES (?)`,
+        [val],
+        (t, success) => {
+          resolve(success.insertId);
+        },
+        (t, error) => {
+          console.log("db error inserting marking");
+          console.log(error);
+          reject(error);
+        }
+      );
+    });
+  });
+}
+
+export function deleteMarking(val) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM markings WHERE id = ?`,
+        [val],
+        (t, success) => {
+          console.log("val", val);
+          console.log("success", success);
+          resolve(success);
+        },
+        (t, error) => {
+          console.log("db error deleting marking");
+          console.log(error);
+          reject(error);
+        }
+      );
+    });
+  });
+}
+
+export function deleteColor(val) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM colors WHERE id = ?`,
+        [val],
         (t, success) => {
           resolve(success);
         },
         (t, error) => {
-          console.log("db error insert sheep");
+          console.log("db error deleting color");
+          console.log(error);
+          reject(error);
+        }
+      );
+    });
+  });
+}
+
+export function deleteBreed(val) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM breeds WHERE id = ?`,
+        [val],
+        (t, success) => {
+          resolve(success);
+        },
+        (t, error) => {
+          console.log("db error deleting breed");
+          console.log(error);
+          reject(error);
+        }
+      );
+    });
+  });
+}
+
+export function deleteSheep(val) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM sheep WHERE sheep_id = ?`,
+        [val],
+        (t, success) => {
+          resolve(success);
+        },
+        (t, error) => {
+          console.log("db error deleting sheep");
           console.log(error);
           reject(error);
         }

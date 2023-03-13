@@ -2,12 +2,12 @@ import React, { useEffect } from "react";
 import { Masks, useMaskedInputProps } from "react-native-mask-input";
 import MyTextInput from "./MyTextInput";
 
-const DateTextInput = ({ label, field, onChangeText, value }) => {
+const DateTextInput = ({ label, field, onChangeText, value, error }) => {
   const [date, setDate] = React.useState(value);
 
-  useEffect(() => {
-    console.log({ label, field, onChangeText, value });
-  }, []);
+  //useEffect(() => {
+  //  console.log({ label, field, onChangeText, value });
+  //}, []);
 
   const maskedInputPropsDate = useMaskedInputProps({
     value: date,
@@ -16,13 +16,14 @@ const DateTextInput = ({ label, field, onChangeText, value }) => {
   });
 
   const handleChange = (text) => {
-    console.log(text);
     setDate(text);
     onChangeText(text);
   };
 
   return (
     <MyTextInput
+      keyboardType="numeric"
+      error={error}
       placeholder={label}
       value={date}
       label={label}
