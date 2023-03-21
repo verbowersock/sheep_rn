@@ -41,7 +41,6 @@ export const dropDbTablesAsync = async () => {
         [],
         (_, result) => {
           console.log("table sheep deleted");
-          resolve(result);
         },
         (_, error) => {
           console.log("error dropping sheep table");
@@ -53,7 +52,6 @@ export const dropDbTablesAsync = async () => {
         [],
         (_, result) => {
           console.log("table colors deleted");
-          resolve(result);
         },
         (_, error) => {
           console.log("error dropping colors table");
@@ -66,7 +64,6 @@ export const dropDbTablesAsync = async () => {
         [],
         (_, result) => {
           console.log("table markings deleted");
-          resolve(result);
         },
         (_, error) => {
           console.log("error dropping markings table");
@@ -78,11 +75,16 @@ export const dropDbTablesAsync = async () => {
         [],
         (_, result) => {
           console.log("table breeds deleted");
+          // If this is the last query to execute, call resolve() here
           resolve(result);
         },
         (_, error) => {
           console.log("error dropping breeds table");
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -162,6 +164,10 @@ export function init() {
           console.log("db error creating table sheep");
           console.log("error", error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -182,6 +188,10 @@ export function insertBreedData() {
             console.log("db error insertbreed", el);
             console.log(error);
             reject(error);
+          },
+          () => {
+            // After the query has completed (successfully or not), call database.close()
+            database.close();
           }
         );
       });
@@ -204,6 +214,10 @@ export function insertColorData() {
             console.log("db error insertColors");
             console.log(error);
             reject(error);
+          },
+          () => {
+            // After the query has completed (successfully or not), call database.close()
+            database.close();
           }
         );
       });
@@ -226,6 +240,10 @@ export function insertMarkingData() {
             console.log("db error insertMarkings");
             console.log(error);
             reject(error);
+          },
+          () => {
+            // After the query has completed (successfully or not), call database.close()
+            database.close();
           }
         );
       });
@@ -263,6 +281,10 @@ export function insertSheepData() {
             console.log("db error insert sheep");
             console.log(error);
             reject(error);
+          },
+          () => {
+            // After the query has completed (successfully or not), call database.close()
+            database.close();
           }
         );
       });
@@ -311,6 +333,10 @@ FROM
         (_, error) => {
           console.log("error", error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -329,6 +355,10 @@ export function fetchBreeds() {
         (_, error) => {
           console.log("error", error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -347,6 +377,10 @@ export function fetchColors() {
         (_, error) => {
           console.log("error", error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -365,6 +399,10 @@ export function fetchMarkings() {
         (_, error) => {
           console.log("error", error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -383,6 +421,10 @@ export function fetchMales() {
         (_, error) => {
           console.log("error", error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -401,6 +443,10 @@ export function fetchFemales() {
         (_, error) => {
           console.log("error", error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -453,6 +499,10 @@ export function addSheep(sheepData) {
         console.error(error);
         reject(error);
       }
+      () => {
+        // After the query has completed (successfully or not), call database.close()
+        database.close();
+      };
     });
   });
 }
@@ -470,6 +520,10 @@ export function addBreed(val) {
           console.log("db error inserting breed");
           console.log(error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -507,11 +561,16 @@ export function addColor(val) {
           console.log("db error checking for color");
           console.log(error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
   });
 }
+
 export function addMarking(val) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
@@ -526,6 +585,10 @@ export function addMarking(val) {
           console.log("db error inserting marking");
           console.log(error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -547,6 +610,10 @@ export function deleteMarking(val) {
           console.log("db error deleting marking");
           console.log(error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -566,6 +633,10 @@ export function deleteColor(val) {
           console.log("db error deleting color");
           console.log(error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -585,6 +656,10 @@ export function deleteBreed(val) {
           console.log("db error deleting breed");
           console.log(error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -604,6 +679,10 @@ export function deleteSheep(val) {
           console.log("db error deleting sheep");
           console.log(error);
           reject(error);
+        },
+        () => {
+          // After the query has completed (successfully or not), call database.close()
+          database.close();
         }
       );
     });
@@ -640,6 +719,10 @@ export function editSheep(sheepData, id) {
           console.log(error);
           reject(error);
         }
+        //() => {
+        // After the query has completed (successfully or not), call database.close()
+        //  database.close();
+        // }
       );
     });
   });
