@@ -8,12 +8,16 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { Provider } from "react-redux";
 import store from "./store/Config";
 import MainScreen from "./components/MainScreen";
+import ErrorBoundary from "react-native-error-boundary";
+import Error from "./components/Error";
 
 export default function App() {
   return (
     <Provider store={store}>
       <PaperProvider>
-        <MainScreen />
+        <ErrorBoundary FallbackComponent={Error}>
+          <MainScreen />
+        </ErrorBoundary>
       </PaperProvider>
     </Provider>
   );

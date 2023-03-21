@@ -31,6 +31,7 @@ const sheepSlice = createSlice({
   },
 });
 
-export const { setSheep, addSheep, deleteSheep } = sheepSlice.actions;
+export const { setSheep, addSheep, deleteSheep, filterSheep } =
+  sheepSlice.actions;
 export const sheepDataSelector = (state) => state.sheep;
 export default sheepSlice.reducer;

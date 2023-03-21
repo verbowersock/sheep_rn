@@ -146,9 +146,9 @@ export function init() {
                 sex VARCHAR(255) NOT NULL, 
                 sire BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
                 dam BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-                purchase_date VARCHAR(50), 
+                dop VARCHAR(50), 
                 weight_at_birth INTEGER, 
-                date_deceased VARCHAR(255), 
+                dod VARCHAR(255), 
                 date_last_bred VARCHAR(255),
                 breed_id BIGINT NOT NULL REFERENCES breeds (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
                 color_id BIGINT REFERENCES colors (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
@@ -238,17 +238,18 @@ export function insertSheepData() {
     testDataSheep.map((sheepData) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO sheep (tag_id, scrapie_id, name, dob, sex, sire, dam, purchase_date, weight_at_birth, breed_id, color_id, marking_id, date_last_bred) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             sheepData.tag_id,
             sheepData.scrapie_id,
             sheepData.name,
             sheepData.dob,
+            sheepData.dop,
+            sheepData.dod,
             sheepData.sex,
             sheepData.father,
             sheepData.mother,
-            sheepData.purchase_date,
             sheepData.weight_at_birth,
             sheepData.breed_id,
             sheepData.color_id,
@@ -279,10 +280,10 @@ export function fetchSheep() {
   children.name, 
   children.dob, 
   children.sex, 
-  children.purchase_date,
+  children.dop,
   children.weight_at_birth,
   children.date_last_bred,
-  children.date_deceased,
+  children.dod,
   children.picture,
   children.scrapie_id,
   children.breed_id,
@@ -411,17 +412,19 @@ export function addSheep(sheepData) {
     database.transaction((tx) => {
       try {
         tx.executeSql(
-          `INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, sex, sire, dam, breed_id, color_id, marking_id) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, dop, dod, sex, sire, dam, breed_id, color_id, marking_id) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             //"1222122",
             sheepData.picture,
             sheepData.tag_id,
-            sheepData.scrapieTagId,
+            sheepData.scrapie_id,
             // "1222122",
             sheepData.name,
             //"testvk1122vv",
             sheepData.dob,
+            sheepData.dop,
+            sheepData.dod,
             //"2020-12-12",
             sheepData.sex,
             //"m",
@@ -475,7 +478,6 @@ export function addBreed(val) {
 
 export function addColor(val) {
   return new Promise((resolve, reject) => {
-    console.log("!!!val", val);
     database.transaction((tx) => {
       tx.executeSql(
         `SELECT * FROM colors WHERE color_name = ?`,
@@ -600,6 +602,41 @@ export function deleteSheep(val) {
         },
         (t, error) => {
           console.log("db error deleting sheep");
+          console.log(error);
+          reject(error);
+        }
+      );
+    });
+  });
+}
+
+export function editSheep(sheepData, id) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `UPDATE sheep set tag_id = ?, scrapie_id = ?, name = ?, dob = ?, dop = ?, dod=?, sex = ?, sire = ?, dam = ?, weight_at_birth = ?, breed_id = ?, color_id = ?, marking_id = ?, date_last_bred = ? where sheep_id=?`,
+        [
+          sheepData.tag_id,
+          sheepData.scrapie_id,
+          sheepData.name,
+          sheepData.dob,
+          sheepData.dop,
+          sheepData.dod,
+          sheepData.sex,
+          sheepData.sire,
+          sheepData.dam,
+          sheepData.weight_at_birth,
+          sheepData.breed,
+          sheepData.color,
+          sheepData.marking,
+          sheepData.date_last_bred,
+          id,
+        ],
+        (t, success) => {
+          resolve(success);
+        },
+        (t, error) => {
+          console.log("db error updating sheep");
           console.log(error);
           reject(error);
         }

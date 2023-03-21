@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import Modal from "react-native-modal";
 import {
   addSheep,
+  editSheep,
   fetchBreeds,
   fetchColors,
   fetchFemales,
@@ -37,21 +38,18 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   const dispatch = useDispatch();
   const { sheep } = useSelector(sheepDataSelector);
   const sex = [
-    { id: "1", title: "Male", label: "m" },
-    { id: "2", title: "Female", label: "f" },
-    { id: "3", title: "Weather", label: "w" },
+    { id: "m", title: "Male" },
+    { id: "f", title: "Female" },
+    { id: "w", title: "Weather" },
   ];
   const { colors, markings, breeds } = useSelector(attributesDataSelector);
   //console.log(colors);
 
-  const { formData } = useSelector(uiSelector);
+  const { formData, formTitle } = useSelector(uiSelector);
   const [males, setMales] = useState([]);
   const [females, setFemales] = useState([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData1, setFormData1] = useState({});
-
-  console.log("!!!formData", formData);
 
   useEffect(() => {
     async function loadDataToApp() {
@@ -98,8 +96,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
 
   const { control, handleSubmit, trigger, setValue, reset, formState } =
     useForm({
-      //mode: "onBlur",
-      mode: "onTouched",
+      //mode: "onChange",
+      //mode: "onTouched",
       shouldUnregister: false,
       /*  defaultValues: {
         picture: null,
@@ -120,38 +118,77 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       defaultValues: formData,
     });
   const { isDirty, isValid, errors, defaultValues } = formState;
+
   useEffect(() => {
     reset(formData);
-  }, [reset]);
+  }, [reset, formData]);
+
+  useEffect(() => {
+    console.log("trigger validation");
+    trigger();
+  }, [trigger]);
+
   const onSubmit = (data) => {
     setLoading(true);
     const formattedData = {
       ...data,
-      sex: data.sex.label,
-      sire: data.sire.id,
-      dam: data.dam.id,
-      breed: data.breed.id,
-      color: data.color.id,
-      marking: data.marking.id,
+      sex: data.sex,
+      sire: data.sire,
+      dam: data.dam,
+      breed: data.breed,
+      color: data.color,
+      marking: data.marking,
     };
-
-    addSheep(formattedData)
-      .then(() => {
-        console.log("Sheep data added successfully");
-        dispatch(setShowSnackbar(true, "Sheep added successfully"));
-      })
-      .then(() => {
-        return fetchSheep();
-      })
-      .then((res) => {
-        dispatch(setSheep(res));
-        setLoading(false);
-        toggleModal();
-        reset();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    // console.log("formattedData", formattedData);
+    if (formData.id) {
+      editSheep(formattedData, formData.id)
+        .then(() => {
+          console.log("Sheep data edited successfully");
+        })
+        .then(() => {
+          return fetchSheep();
+        })
+        .then((res) => {
+          dispatch(setSheep(res));
+          setLoading(false);
+          toggleModal();
+          dispatch(
+            setShowSnackbar({
+              visible: true,
+              error: false,
+              message: `Sheep edited successfully`,
+            })
+          );
+          reset();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else {
+      addSheep(formattedData)
+        .then(() => {
+          console.log("Sheep data added successfully");
+          dispatch(
+            setShowSnackbar({
+              visible: true,
+              error: false,
+              message: `Sheep added successfully`,
+            })
+          );
+        })
+        .then(() => {
+          return fetchSheep();
+        })
+        .then((res) => {
+          dispatch(setSheep(res));
+          setLoading(false);
+          toggleModal();
+          reset();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
   };
   if (!dataLoaded) {
     return <ActivityIndicator />;
@@ -169,7 +206,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         keyboardShouldPersistTaps="handled"
         style={styles.formContainer}
       >
-        <Text style={styles.formTitle}>Add New Sheep</Text>
+        <Text style={styles.formTitle}>{formTitle}</Text>
 
         <Controller
           control={control}
@@ -197,11 +234,13 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             },
             //check for duplicates
             validate: (value) => {
-              const duplicate = sheep.find(
-                (sheep) => sheep.name.toLowerCase() == value.toLowerCase()
-              );
-              if (duplicate) {
-                return "Name already exists";
+              if (!formData.id) {
+                const duplicate = sheep.find(
+                  (sheep) => sheep.name.toLowerCase() == value.toLowerCase()
+                );
+                if (duplicate) {
+                  return "Name already exists";
+                }
               }
             },
           }}
@@ -232,11 +271,13 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             },
             //check for duplicates
             validate: (value) => {
-              const duplicate = sheep.find(
-                (sheep) => sheep.tag_id.toLowerCase() == value.toLowerCase()
-              );
-              if (duplicate) {
-                return "Tag Id must be unique";
+              if (!formData.id) {
+                const duplicate = sheep.find(
+                  (sheep) => sheep.tag_id.toLowerCase() == value.toLowerCase()
+                );
+                if (duplicate) {
+                  return "Tag Id must be unique";
+                }
               }
             },
           }}
@@ -266,18 +307,21 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               "Scrapie Tag Id should not consist of whitespaces",
             //check for duplicates
             validate: (value) => {
-              const duplicate = sheep.find(
-                (sheep) =>
-                  sheep.scrapie_id.toLowerCase() === value.toLowerCase()
-              );
-              if (duplicate) {
-                return "Scrapie Tag Id must be unique";
+              if (!formData.id) {
+                const duplicate = sheep.find((sheep) => {
+                  if (sheep.scrapie_id) {
+                    sheep.scrapie_id.toLowerCase() === value.toLowerCase();
+                  }
+                });
+                if (duplicate) {
+                  return "Scrapie Tag Id must be unique";
+                }
               }
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
-              error={errors.scrapieTagId ? true : false}
+              error={errors.scrapie_id ? true : false}
               label={"Scrapie Tag ID"}
               placeholder={"Scrapie Tag Id"}
               activeOutlineColor={"#68c25a"}
@@ -286,10 +330,10 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               value={value}
             />
           )}
-          name="scrapieTagId"
+          name="scrapie_id"
         />
-        {errors.scrapieTagId && (
-          <Text style={styles.errorText}>{errors.scrapieTagId.message}</Text>
+        {errors.scrapie_id && (
+          <Text style={styles.errorText}>{errors.scrapie_id.message}</Text>
         )}
         <Controller
           control={control}
@@ -366,7 +410,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <DateTextInput
               error={errors.dod ? true : false}
               label="Date of Death"
-              field="dop"
+              field="dod"
               onChangeText={onChange}
               value={value}
             />
@@ -382,7 +426,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
               error={errors.sire ? true : false}
-              data={males}
+              data={males.filter((sheep) => sheep.id !== formData.id)}
               label="Father"
               field="sire"
               onChange={(id) => id && setValue("sire", id)}
@@ -399,7 +443,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
               error={errors.dam ? true : false}
-              data={females}
+              data={females.filter((sheep) => sheep.id !== formData.id)}
               label={"Mother"}
               field="dam"
               onChange={(id) => id && setValue("dam", id)}
@@ -515,6 +559,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
+    paddingBottom: 10,
   },
   buttonContainer: {
     marginVertical: 40,

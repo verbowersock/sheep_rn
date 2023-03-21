@@ -1,14 +1,16 @@
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import PropTypes from "prop-types";
 import { IconButton, List, Searchbar } from "react-native-paper";
-import AddSheepBtn from "./AddSheepBtn";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import render from "react-native-web/dist/cjs/exports/render";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  filterSheep,
+  setSheep,
+  sheepDataSelector,
+} from "../store/slices/sheep";
 
 //import { SearchBarWrapper } from './SearchBar.styles';
 
-const SearchBar = (props) => {
+const SearchBar = ({ onQueryChange, onSearchTagChange }) => {
   const [selections, setSelections] = React.useState([
     { id: 1, label: "tag", selected: true },
     { id: 2, label: "name", selected: false },
@@ -19,7 +21,10 @@ const SearchBar = (props) => {
   const [dropdownVisible, setDropdownVisible] = React.useState(false);
   const [tagSelected, setTagSelected] = React.useState("");
 
-  const onChangeSearch = (query) => setSearchQuery(query);
+  const onChangeSearch = (query) => {
+    setSearchQuery(query);
+    onQueryChange(query);
+  };
 
   useEffect(() => {
     const selectedEl = selections.filter((el) => {
@@ -28,6 +33,17 @@ const SearchBar = (props) => {
       }
     });
     setTagSelected(selectedEl[0].label);
+    console.log(selectedEl[0].label);
+    if (selectedEl[0].label === "tag") {
+      onSearchTagChange("tag_id");
+      onChangeSearch("");
+    } else if (selectedEl[0].label === "breed") {
+      onSearchTagChange("breed_name");
+      onChangeSearch("");
+    } else {
+      onSearchTagChange(selectedEl[0].label);
+      onChangeSearch("");
+    }
   }, [selections]);
 
   const handleIconClick = () => {
@@ -71,14 +87,6 @@ const SearchBar = (props) => {
       )}
     </>
   );
-};
-
-SearchBar.propTypes = {
-  // bla: PropTypes.string,
-};
-
-SearchBar.defaultProps = {
-  // bla: 'test',
 };
 
 export default SearchBar;
