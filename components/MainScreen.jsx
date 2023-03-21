@@ -21,7 +21,12 @@ import { setSheep } from "../store/slices/sheep";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { Portal } from "react-native-paper";
 import ConfirmationSnackbar from "./ConfirmationSnackbar";
-import { setShowFormDialog, uiSelector } from "../store/slices/ui";
+import {
+  resetFormData,
+  setFormTitle,
+  setShowFormDialog,
+  uiSelector,
+} from "../store/slices/ui";
 
 export default function MainScreen() {
   const [dbInitialized, setDbInitialized] = useState(false);
@@ -29,6 +34,8 @@ export default function MainScreen() {
   const { isFormDialogVisible } = useSelector(uiSelector);
 
   const toggleModal = () => {
+    dispatch(resetFormData());
+    dispatch(setFormTitle("Add New Sheep"));
     dispatch(setShowFormDialog(!isFormDialogVisible));
   };
 

@@ -42,18 +42,28 @@ import {
 import ConfirmationDialog from "./ConfirmationDialog";
 import ConfirmationSnackbar from "./ConfirmationSnackbar";
 
-const Item = ({ item, onPress, value, onLongPress }) => (
-  <TouchableOpacity
-    style={styles.modalItemStyle}
-    onPress={onPress}
-    onLongPress={onLongPress}
-  >
-    <Text style={styles.modalItemTextStyle}>{item.title}</Text>
-    <View style={styles.modalIconStyle}>
-      {item.id === value && <Icon name="sheep" size={20} color="#68c25a" />}
-    </View>
-  </TouchableOpacity>
-);
+const Item = ({ item, onPress, value, onLongPress }) => {
+  return (
+    <TouchableOpacity
+      style={styles.modalItemStyle}
+      onPress={onPress}
+      onLongPress={onLongPress}
+    >
+      <Text
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={styles.modalItemTextStyle}
+      >
+        {item.title}
+      </Text>
+      <View style={styles.modalIconStyle}>
+        {value && item.id.toString() === value.toString() && (
+          <Icon name="sheep" size={20} color="#68c25a" />
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const MyDropdown = ({
   data,
@@ -75,7 +85,10 @@ const MyDropdown = ({
       ? breeds
       : data;
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(value);
+  const [selectedValue, setSelectedValue] = useState({
+    id: null,
+    title: null,
+  });
   const [query, setQuery] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [modalData, setModalData] = useState(data);
@@ -96,7 +109,6 @@ const MyDropdown = ({
     }
   };
 
-  console.log("selectedValue", selectedValue);
   const addNewValue = async (val, field) => {
     switch (field) {
       case "color":
@@ -297,12 +309,12 @@ const MyDropdown = ({
           showConfirmation(item);
         }}
         onPress={() => {
-          onChange(item);
           inputRef.current.blur();
           setQuery("");
           setNewInput(false);
           setSelectedValue(item);
           setModalOpen(false);
+          onChange(item.id);
         }}
       />
     );
@@ -315,6 +327,20 @@ const MyDropdown = ({
       setNewInput(true);
     }
   };
+
+  const findSelectedValue = (value) => {
+    const selected = attributeData.find(
+      (item) => item.id.toString() === value.toString()
+    );
+    console.log("!!!selected", selected);
+    setSelectedValue(selected);
+  };
+
+  useEffect(() => {
+    if (value) {
+      findSelectedValue(value);
+    }
+  }, [value]);
 
   return (
     <View style={styles.selectContainer}>

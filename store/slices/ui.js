@@ -10,26 +10,31 @@ export const initialState = {
   isSnackbarVisible: { visible: false, error: false, message: "" },
   isFormDialogVisible: false,
   formData: {
+    id: undefined,
     picture: null,
     name: "",
     tag_id: "",
-    scrapieTagId: "",
-    sex: {},
+    scrapie_id: "",
+    sex: null,
     dob: "",
     dop: "",
     dod: "",
-    sire: {},
-    dam: {},
-    breed: {},
-    color: {},
-    marking: {},
+    sire: null,
+    dam: null,
+    breed: null,
+    color: null,
+    marking: null,
   },
+  formTitle: "Add New Sheep",
 };
 
 const uiSlice = createSlice({
   name: "ui",
   initialState,
   reducers: {
+    setFormTitle: (state, { payload }) => {
+      state.formTitle = payload;
+    },
     setShowConfirmationDialog: (state, { payload }) => {
       state.isConfirmationDialogVisible = payload;
     },
@@ -45,8 +50,11 @@ const uiSlice = createSlice({
     },
     setFormData: (state, { payload }) => {
       const updatedData = { ...state.formData, ...payload };
-      // Return a new state object with the updated user object
+      console.log("!!!updatedData", updatedData);
       return { ...state, formData: updatedData };
+    },
+    resetFormData: (state) => {
+      state.formData = initialState.formData;
     },
   },
 });
@@ -57,6 +65,8 @@ export const {
   resetShowConfirmationDialog,
   setShowFormDialog,
   setFormData,
+  setFormTitle,
+  resetFormData,
 } = uiSlice.actions;
 export const uiSelector = (state) => state.ui;
 export default uiSlice.reducer;
