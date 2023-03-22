@@ -16,7 +16,7 @@ import {
 const ConfirmationDialog = ({ onConfirm }) => {
   const { isConfirmationDialogVisible } = useSelector(uiSelector);
   const { visible, id, title, field } = isConfirmationDialogVisible;
-  console.log(title);
+ // console.log(title);
   const dispatch = useDispatch();
 
   const hideDialog = () => {

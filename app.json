@@ -3,8 +3,11 @@
     "name": "sheep-rn",
     "slug": "sheep-rn",
     "version": "1.0.0",
-    "assetBundlePatterns": [
-      "**/*"
-    ]
+    "assetBundlePatterns": ["**/*"],
+    "splash": {
+      "image": "./assets/splash-screen.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0079C2"
+    }
   }
 }
