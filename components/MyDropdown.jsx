@@ -95,6 +95,13 @@ const MyDropdown = ({
   const [newValue, setNewValue] = useState("");
   const [newInput, setNewInput] = useState(false);
   const [newInputError, setNewInputError] = useState("");
+  const [deletable, setDeletable] = useState(false);
+
+  useEffect(() => {
+    ["marking", "color", "breed"].indexOf(field) !== -1
+      ? setDeletable(true)
+      : setDeletable(false);
+  }, [field]);
 
   const validateNewValue = (val) => {
     if (val.length > 0) {
@@ -306,7 +313,7 @@ const MyDropdown = ({
         item={item}
         value={selectedValue.id}
         onLongPress={() => {
-          showConfirmation(item);
+          deletable && showConfirmation(item);
         }}
         onPress={() => {
           inputRef.current.blur();
@@ -411,7 +418,7 @@ const MyDropdown = ({
               keyExtractor={(item) => item.id}
               extraData={selectedValue}
             />
-            {["marking", "color", "breed"].indexOf(field) !== -1 && (
+            {deletable && (
               <View>
                 {!newInput || modalData.length === 0 ? (
                   <Button
@@ -475,14 +482,12 @@ const MyDropdown = ({
             )}
           </KeyboardAvoidingView>
         </Pressable>
-        {["marking", "color", "breed"].indexOf(field) !== -1 && (
+        {deletable && (
           <ConfirmationDialog
             onConfirm={(id, field, title) => deleteValue(id, field, title)}
           />
         )}
-        {["marking", "color", "breed"].indexOf(field) !== -1 && (
-          <ConfirmationSnackbar />
-        )}
+        {deletable && <ConfirmationSnackbar />}
       </Modal>
     </View>
   );

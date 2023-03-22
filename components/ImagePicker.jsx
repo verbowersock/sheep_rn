@@ -92,7 +92,7 @@ const ImagePicker = ({ value, onChange }) => {
         const dirs = RNFetchBlob.fs.dirs;
         var folderPath = dirs.PictureDir + "/MyFlockImages/";
         var fullPath = folderPath + fileName;
-        console.log(fullPath);
+     //   console.log(fullPath);
         RNFetchBlob.fs.writeFile(fullPath, base64Data, "base64").then((res) => {
           console.log("file saved", res);
           RNFetchBlob.fs

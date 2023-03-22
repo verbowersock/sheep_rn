@@ -1,6 +1,8 @@
 import * as SQLite from "expo-sqlite";
 
-const database = SQLite.openDatabase("sheep.db");
+const database = SQLite.openDatabase("sheep.db", "1.0", "", 1, () => {
+  console.log("Database opened");
+});
 database.exec([{ sql: "PRAGMA foreign_keys = ON;", args: [] }], false, () =>
   console.log("Foreign keys turned on")
 );

@@ -18,19 +18,13 @@ import { ActivityIndicator, Button, Portal } from "react-native-paper";
 import MyDropdown from "./MyDropdown";
 import MyTextInput from "./MyTextInput";
 import { useDispatch, useSelector } from "react-redux";
+import { setSheep, sheepDataSelector } from "../store/slices/sheep";
 import {
-  addSheep as addSheepAction,
-  setSheep,
-  sheepDataSelector,
-} from "../store/slices/sheep";
-import {
-  attributeDataSelector,
   attributesDataSelector,
   setBreeds,
   setColors,
   setMarkings,
 } from "../store/slices/attributes";
-import ImagePicker from "./ImagePicker";
 import MyImagePicker from "./ImagePicker";
 import { setShowSnackbar, uiSelector } from "../store/slices/ui";
 
@@ -191,7 +185,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
     }
   };
   if (!dataLoaded) {
-    return <ActivityIndicator />;
+    return <ActivityIndicator color="green" />;
   }
 
   return (
