@@ -1,16 +1,12 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { IconButton, List, Searchbar } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  filterSheep,
-  setSheep,
-  sheepDataSelector,
-} from "../store/slices/sheep";
+import { View, StyleSheet } from "react-native";
+import { IconButton, List, Searchbar, useTheme } from "react-native-paper";
 
 //import { SearchBarWrapper } from './SearchBar.styles';
 
 const SearchBar = ({ onQueryChange, onSearchTagChange }) => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const [selections, setSelections] = React.useState([
     { id: 1, label: "tag", selected: true },
     { id: 2, label: "name", selected: false },
@@ -91,15 +87,16 @@ const SearchBar = ({ onQueryChange, onSearchTagChange }) => {
 
 export default SearchBar;
 
-const styles = StyleSheet.create({
-  optionListContainer: {
-    position: "absolute",
-    top: 50,
-    left: 10,
-    width: 140,
-    elevation: 3,
-    zIndex: 2,
-    backgroundColor: "white",
-    borderColor: "white",
-  },
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    optionListContainer: {
+      position: "absolute",
+      top: 50,
+      left: 10,
+      width: 140,
+      elevation: 3,
+      zIndex: 2,
+      backgroundColor: theme.colors.background,
+      borderColor: theme.colors.background,
+    },
+  });

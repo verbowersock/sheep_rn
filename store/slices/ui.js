@@ -12,13 +12,14 @@ export const initialState = {
   formData: {
     id: undefined,
     picture: null,
-    name: "",
+    name: null,
     tag_id: "",
-    scrapie_id: "",
+    scrapie_id: null,
     sex: null,
     dob: "",
     dop: "",
     dod: "",
+    dos: "",
     sire: null,
     dam: null,
     breed: null,
@@ -26,6 +27,7 @@ export const initialState = {
     marking: null,
   },
   formTitle: "Add New Sheep",
+  dbLocation: "",
 };
 
 const uiSlice = createSlice({

@@ -6,11 +6,10 @@ import {
   isValid,
 } from "date-fns";
 import React from "react";
-import { Image, StyleSheet, View, Text, ImageBackground } from "react-native";
-import { IconButton } from "react-native-paper";
+import { Image, StyleSheet, View, Text } from "react-native";
+import { IconButton, useTheme } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteSheep } from "../services/db";
-import LinearGradient from "react-native-linear-gradient";
 import {
   deleteSheep as deleteSheepRedux,
   sheepDataSelector,
@@ -34,9 +33,11 @@ const wether = require("../assets/images/wether.png");
 //import { HeaderWrapper } from './Header.styles';
 
 const Sheep = ({ item, index }) => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const dispatch = useDispatch();
   const { sheep } = useSelector(sheepDataSelector);
-  //console.log("item", item);
+  console.log("!!!item", item);
   //parse date of birth to string in format dd/mm/yyyy
   const date = (date) => {
     if (date) {
@@ -44,7 +45,7 @@ const Sheep = ({ item, index }) => {
       const d = parsedDate.toLocaleDateString();
       return d;
     } else {
-      return "N/A";
+      return "NA";
     }
   };
 
@@ -73,6 +74,7 @@ const Sheep = ({ item, index }) => {
       dob: item.dob,
       dop: item.dop,
       dod: item.dod,
+      dos: item.dos,
       tag_id: item.tag_id,
       scrapie_id: item.scrapie_id,
       id: item.sheep_id,
@@ -136,6 +138,7 @@ const Sheep = ({ item, index }) => {
         let units = ["years", "months"];
         if (parsedDob < today) {
           let duration = intervalToDuration({ start: parsedDob, end: today });
+          console.log("!!!duration", duration);
           if (
             duration.months === 0 &&
             duration.years === 0 &&
@@ -205,100 +208,110 @@ const Sheep = ({ item, index }) => {
         style={{
           flex: 1,
           flexDirection: "row",
-          width: 200,
+          width: "100%",
         }}
       >
-        <View style={{ flex: 1, flexDirection: "row" }}>
-          <View style={{ flexDirection: "column" }}>
-            <View style={styles.photoWrapper}>
-              <Image
-                source={item.picture ? { uri: item.picture } : placeholder}
-                resizeMode="contain"
-                style={{
-                  height: 150,
-                  width: 150,
-                }}
+        <View style={{ flexDirection: "column" }}>
+          <View style={styles.photoWrapper}>
+            <Image
+              source={item.picture ? { uri: item.picture } : placeholder}
+              resizeMode="cover"
+              style={{
+                height: 150,
+                width: 150,
+              }}
+            />
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                paddingTop: 20,
+              }}
+            >
+              <IconButton
+                icon="pencil"
+                color={theme.colors.secondary}
+                size={25}
+                onPress={() => onEditSheep(item)}
               />
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  paddingTop: 20,
-                }}
-              >
-                <IconButton
-                  icon="pencil"
-                  color="#c2875a"
-                  size={25}
-                  onPress={() => onEditSheep(item)}
-                />
-                <IconButton
-                  icon="delete"
-                  color="#9C27B0"
-                  size={25}
-                  onPress={() => onDeleteSheep(item)}
-                />
-              </View>
+              <IconButton
+                icon="delete"
+                color={theme.colors.accent}
+                size={25}
+                onPress={() => onDeleteSheep(item)}
+              />
             </View>
           </View>
-          <View style={styles.infoWrapper}>
-            <Text style={styles.info}>
-              <Text style={styles.label}>Tag ID: </Text>
-              <Text>{item.tag_id}</Text>
-            </Text>
+        </View>
+        <View style={styles.infoWrapper}>
+          <Text style={styles.info}>
+            <Text style={styles.label}>Tag ID: </Text>
+            <Text>{item.tag_id}</Text>
+          </Text>
 
-            <Text style={styles.info}>
-              <Text style={styles.label}>Scrapie Tag ID: </Text>
+          <Text style={styles.info}>
+            <Text style={styles.label}>Scrapie Tag ID: </Text>
 
-              <Text>{item.scrapie_id ? item.scrapie_id : "N/A"}</Text>
-            </Text>
+            <Text>{item.scrapie_id ? item.scrapie_id : "NA"}</Text>
+          </Text>
+          <Text style={styles.info}>
+            <Text style={styles.label}>DOB: </Text>
+            <Text>{date(item.dob)}</Text>
+          </Text>
+          <Text style={styles.info}>
+            <Text style={styles.label}>Sex: </Text>
+            <Text>{item.sex}</Text>
+          </Text>
+          {item.purchase_date && (
             <Text style={styles.info}>
-              <Text style={styles.label}>DOB: </Text>
-              <Text>{date(item.dob)}</Text>
+              <Text style={styles.label}>Purchase Date: </Text>
+              <Text>{date(item.purchase_date)}</Text>
             </Text>
+          )}
+          {item.date_deceased ? (
             <Text style={styles.info}>
-              <Text style={styles.label}>Sex: </Text>
-              <Text>{item.sex}</Text>
+              <Text style={styles.label}>Date Deceased: </Text>
+              <Text>{date(item.date_deceased)}</Text>
             </Text>
-            {item.purchase_date && (
-              <Text style={styles.info}>
-                <Text style={styles.label}>Purchase Date: </Text>
-                <Text>{date(item.purchase_date)}</Text>
-              </Text>
-            )}
-            {item.date_deceased ? (
-              <Text style={styles.info}>
-                <Text style={styles.label}>Date Deceased: </Text>
-                <Text>{date(item.date_deceased)}</Text>
-              </Text>
-            ) : (
-              <Text style={styles.info}>
-                <Text style={styles.label}>Age: </Text>
-                <Text>{age()}</Text>
-              </Text>
-            )}
+          ) : (
             <Text style={styles.info}>
-              <Text style={styles.label}>Breed: </Text>
-              <Text>{item.breed_name}</Text>
+              <Text style={styles.label}>Age: </Text>
+              <Text>{age()}</Text>
             </Text>
-            <Text style={styles.info}>
-              <Text style={styles.label}>Father: </Text>
-              <Text>{item.father_name ? item.father_name : "N/A"}</Text>
+          )}
+          <Text style={styles.info}>
+            <Text style={styles.label}>Breed: </Text>
+            <Text>{item.breed_name}</Text>
+          </Text>
+          <Text style={styles.info}>
+            <Text style={styles.label}>Father: </Text>
+            <Text>
+              {item.father_name
+                ? item.father_name
+                : item.father_tag_id
+                ? item.father_tag_id
+                : "NA"}
             </Text>
-            <Text style={styles.info}>
-              <Text style={styles.label}>Mother: </Text>
-              <Text>{item.mother_name ? item.mother_name : "N/A"}</Text>
+          </Text>
+          <Text style={styles.info}>
+            <Text style={styles.label}>Mother: </Text>
+            <Text>
+              {item.mother_name
+                ? item.mother_name
+                : item.mother_tag_id
+                ? item.mother_tag_id
+                : "NA"}
             </Text>
-            <Text style={styles.info}>
-              <Text style={styles.label}>Color: </Text>
-              <Text>{item.color_name ? item.color_name : "N/A"}</Text>
-            </Text>
-            <Text style={styles.info}>
-              <Text style={styles.label}>Marking: </Text>
-              <Text>{item.marking_name ? item.marking_name : "N/A"}</Text>
-            </Text>
-          </View>
+          </Text>
+          <Text style={styles.info}>
+            <Text style={styles.label}>Color: </Text>
+            <Text>{item.color_name ? item.color_name : "NA"}</Text>
+          </Text>
+          <Text style={styles.info}>
+            <Text style={styles.label}>Marking: </Text>
+            <Text>{item.marking_name ? item.marking_name : "NA"}</Text>
+          </Text>
         </View>
       </View>
       <ConfirmationDialog onConfirm={(id) => onDeleteConfirm(id)} />
@@ -308,77 +321,45 @@ const Sheep = ({ item, index }) => {
 
 export default Sheep;
 
-const styles = StyleSheet.create({
-  SheepWrapper: {
-    backgroundColor: "white",
-    borderRadius: 15,
-    elevation: 8,
-    justifyContent: "space-between",
-    paddingLeft: 16,
-    paddingRight: 14,
-    paddingTop: 16,
-    margin: 16,
-    flexDirection: "column",
-    paddingBottom: 16,
-  },
-  SheepWrapperLast: {
-    marginBottom: 96,
-  },
-  cardTitleWrapper: {
-    width: "100%",
-    marginBottom: 7,
-  },
-  cardTitle: {
-    fontSize: 17,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  label: {
-    fontWeight: "bold",
-  },
-  infoWrapper: {
-    width: "80%",
-  },
-  info: {
-    fontSize: 15,
-  },
-  photoWrapper: {
-    height: 150,
-    width: 150,
-    marginRight: 20,
-  },
-  linearGradient: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 5,
-    height: 200,
-    width: 350,
-  },
-  /*
-  card_background_male: {
-  background: linear-gradient(
-      to top left,
-      rgba(255, 255, 255, 0) 50%,
-      #5a76c2 50.1%
-    )
-    top left/40px 40px no-repeat !important"
-
-  }
-card_background_deceased: {
-  background: linear-gradient(
-      to top left,
-      rgba(255, 255, 255, 0) 50%,
-      #000 50.1%
-    )
-    top left/40px 40px no-repeat !important;
-},
-
-card_background_wether: {
-  background: linear-gradient(
-      to top left,
-      rgba(255, 255, 255, 0) 50%,
-      #68c25a 50.1%
-    )
-    top left/40px 40px no-repeat !important;
-}*/
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    SheepWrapper: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 15,
+      elevation: 8,
+      justifyContent: "space-between",
+      paddingLeft: 16,
+      paddingRight: 14,
+      paddingTop: 16,
+      margin: 16,
+      flexDirection: "column",
+      paddingBottom: 16,
+    },
+    SheepWrapperLast: {
+      marginBottom: 96,
+    },
+    cardTitleWrapper: {
+      width: "100%",
+      marginBottom: 7,
+    },
+    cardTitle: {
+      fontSize: 17,
+      fontWeight: "bold",
+      textAlign: "center",
+    },
+    label: {
+      fontWeight: "bold",
+    },
+    infoWrapper: {
+      flexShrink: 1,
+    },
+    info: {
+      fontSize: 15,
+      width: "100%",
+    },
+    photoWrapper: {
+      height: 150,
+      width: 150,
+      marginRight: 20,
+    },
+  });

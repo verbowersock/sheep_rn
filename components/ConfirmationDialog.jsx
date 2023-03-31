@@ -1,22 +1,16 @@
 import * as React from "react";
-import { Modal, View } from "react-native";
-import { Button, Paragraph, Dialog, Portal } from "react-native-paper";
+import { Modal } from "react-native";
+import { Button, Paragraph, Dialog, useTheme } from "react-native-paper";
 import { resetShowConfirmationDialog, uiSelector } from "../store/slices/ui";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import { deleteBreed, deleteColor, deleteMarking } from "../services/db";
-
-import {
-  deleteColor as deleteColorRedux,
-  deleteMarking as deleteMarkingRedux,
-  deleteBreed as deleteBreedRedux,
-} from "../store/slices/attributes";
-
 const ConfirmationDialog = ({ onConfirm }) => {
+  const theme = useTheme();
+
   const { isConfirmationDialogVisible } = useSelector(uiSelector);
   const { visible, id, title, field } = isConfirmationDialogVisible;
- // console.log(title);
+  // console.log(title);
   const dispatch = useDispatch();
 
   const hideDialog = () => {
@@ -46,13 +40,13 @@ const ConfirmationDialog = ({ onConfirm }) => {
             justifyContent: "space-between",
           }}
         >
-          <Button mode="text" color="#68c25a" onPress={hideDialog}>
+          <Button mode="text" color={theme.colors.primary} onPress={hideDialog}>
             Cancel
           </Button>
           <Button
             mode="contained"
             dark
-            color="#68c25a"
+            color={theme.colors.error}
             onPress={() => onConfirmDelete()}
           >
             Delete

@@ -14,7 +14,7 @@ import {
 } from "../services/db";
 import DateTextInput from "./DateTextInput";
 import { useForm, Controller } from "react-hook-form";
-import { ActivityIndicator, Button, Portal } from "react-native-paper";
+import { ActivityIndicator, Button, useTheme } from "react-native-paper";
 import MyDropdown from "./MyDropdown";
 import MyTextInput from "./MyTextInput";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,12 +29,14 @@ import MyImagePicker from "./ImagePicker";
 import { setShowSnackbar, uiSelector } from "../store/slices/ui";
 
 const AddForm = ({ isModalVisible, toggleModal }) => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const dispatch = useDispatch();
   const { sheep } = useSelector(sheepDataSelector);
   const sex = [
     { id: "m", title: "Male" },
     { id: "f", title: "Female" },
-    { id: "w", title: "Weather" },
+    { id: "w", title: "Wether" },
   ];
   const { colors, markings, breeds } = useSelector(attributesDataSelector);
   //console.log(colors);
@@ -54,18 +56,22 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           title: color_name,
           id: id.toString(),
         }));
+        //sort the array by title alphabetically
+        colors.sort((a, b) => (a.title > b.title ? 1 : -1));
         dispatch(setColors(colors));
         let markings = await fetchMarkings();
         markings = markings.map(({ marking_name, id }) => ({
           title: marking_name,
           id: id.toString(),
         }));
+        markings.sort((a, b) => (a.title > b.title ? 1 : -1));
         dispatch(setMarkings(markings));
         let breeds = await fetchBreeds();
         breeds = breeds.map(({ breed_name, id }) => ({
           title: breed_name,
           id: id.toString(),
         }));
+        breeds.sort((a, b) => (a.title > b.title ? 1 : -1));
         dispatch(setBreeds(breeds));
         const males = await fetchMales();
         setMales(
@@ -77,12 +83,12 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         const females = await fetchFemales();
         setFemales(
           females.map(({ sheep_id, name, tag_id }) => ({
-            title: tag_id ? `${tag_id} - ${name}` : tag_id,
+            title: `${tag_id} - ${name ? name : "no name"}`,
             id: sheep_id,
           }))
         );
       } catch (error) {
-        console.log("!error", error);
+        console.log("!!!error", error);
       }
     }
     loadDataToApp().then(() => setDataLoaded(true));
@@ -120,7 +126,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   useEffect(() => {
     console.log("trigger validation");
     trigger();
-  }, [trigger]);
+  }, [trigger, formData]);
 
   const onSubmit = (data) => {
     setLoading(true);
@@ -133,7 +139,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       color: data.color,
       marking: data.marking,
     };
-    // console.log("formattedData", formattedData);
+    console.log("!!!formattedData", formattedData);
     if (formData.id) {
       editSheep(formattedData, formData.id)
         .then(() => {
@@ -162,13 +168,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       addSheep(formattedData)
         .then(() => {
           console.log("Sheep data added successfully");
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: false,
-              message: `Sheep added successfully`,
-            })
-          );
         })
         .then(() => {
           return fetchSheep();
@@ -177,6 +176,13 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           dispatch(setSheep(res));
           setLoading(false);
           toggleModal();
+          dispatch(
+            setShowSnackbar({
+              visible: true,
+              error: false,
+              message: `Sheep added successfully`,
+            })
+          );
           reset();
         })
         .catch((error) => {
@@ -185,7 +191,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
     }
   };
   if (!dataLoaded) {
-    return <ActivityIndicator color="green" />;
+    return <ActivityIndicator color={theme.colors.secondary} />;
   }
 
   return (
@@ -228,9 +234,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             },
             //check for duplicates
             validate: (value) => {
-              if (!formData.id) {
+              if (!formData.id && value !== "" && value !== null) {
                 const duplicate = sheep.find(
-                  (sheep) => sheep.name.toLowerCase() == value.toLowerCase()
+                  (s) => s.name && s.name.toLowerCase() == value.toLowerCase()
                 );
                 if (duplicate) {
                   return "Name already exists";
@@ -267,7 +273,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             validate: (value) => {
               if (!formData.id) {
                 const duplicate = sheep.find(
-                  (sheep) => sheep.tag_id.toLowerCase() == value.toLowerCase()
+                  (sheep) =>
+                    sheep.tag_id &&
+                    sheep.tag_id.toLowerCase() == value.toLowerCase()
                 );
                 if (duplicate) {
                   return "Tag Id must be unique";
@@ -301,11 +309,10 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               "Scrapie Tag Id should not consist of whitespaces",
             //check for duplicates
             validate: (value) => {
-              if (!formData.id) {
+              if (!formData.id && value) {
                 const duplicate = sheep.find((sheep) => {
-                  if (sheep.scrapie_id) {
+                  sheep.scrapie_id &&
                     sheep.scrapie_id.toLowerCase() === value.toLowerCase();
-                  }
                 });
                 if (duplicate) {
                   return "Scrapie Tag Id must be unique";
@@ -318,7 +325,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               error={errors.scrapie_id ? true : false}
               label={"Scrapie Tag ID"}
               placeholder={"Scrapie Tag Id"}
-              activeOutlineColor={"#68c25a"}
+              activeOutlineColor={theme.colors.primary}
               onChangeText={onChange}
               onBlur={(target) => onBlur(target.value)}
               value={value}
@@ -402,6 +409,23 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
+              error={errors.dos ? true : false}
+              label="Date of Sale"
+              field="dos"
+              onChangeText={onChange}
+              value={value}
+            />
+          )}
+          name="dos"
+        />
+
+        <Controller
+          control={control}
+          rules={{
+            maxLength: 100,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <DateTextInput
               error={errors.dod ? true : false}
               label="Date of Death"
               field="dod"
@@ -451,7 +475,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           control={control}
           rules={{
             validate: (value) => {
-              if (JSON.stringify(value) === JSON.stringify({})) {
+              console.log("!!!value", value);
+              if (!value) {
                 return "Breed is required";
               }
             },
@@ -516,7 +541,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         <View style={styles.buttonContainer}>
           <Button
             mode="text"
-            color="#68c25a"
+            color={theme.colors.primary}
             style={{ width: "40%" }}
             onPress={() => {
               toggleModal();
@@ -527,7 +552,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           </Button>
           <Button
             loading={loading}
-            color="#68c25a"
+            color={theme.colors.primary}
             dark
             style={{ width: "40%" }}
             mode="contained"
@@ -542,31 +567,33 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  formContainer: {
-    flex: 1,
-    backgroundColor: "white",
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  formTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    paddingBottom: 10,
-  },
-  buttonContainer: {
-    marginVertical: 40,
-    display: "flex",
-    flexDirection: "row",
-    flex: 1,
-    width: "100%",
-    justifyContent: "space-around",
-  },
-  errorText: {
-    color: "#ba1a1a",
-    marginLeft: 10,
-  },
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    formContainer: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+    },
+    formTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      textAlign: "center",
+      marginTop: 20,
+      paddingBottom: 10,
+    },
+    buttonContainer: {
+      marginVertical: 40,
+      display: "flex",
+      flexDirection: "row",
+      flex: 1,
+      width: "100%",
+      justifyContent: "space-around",
+    },
+    errorText: {
+      color: theme.colors.error,
+      marginLeft: 10,
+    },
+  });
 
 export default AddForm;

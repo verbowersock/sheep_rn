@@ -1,22 +1,21 @@
 import React, { useState } from "react";
 
 import {
-  SafeAreaView,
   StyleSheet,
-  Text,
   View,
-  TouchableOpacity,
   Image,
   Platform,
   PermissionsAndroid,
 } from "react-native";
-import RNFS from "react-native-fs";
+
 import RNFetchBlob from "rn-fetch-blob";
 
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
-import { FAB, IconButton, Portal } from "react-native-paper";
+import { FAB, useTheme } from "react-native-paper";
 
 const ImagePicker = ({ value, onChange }) => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const [filePath, setFilePath] = useState(value);
 
   const [FABstate, setFABState] = React.useState({ open: false });
@@ -92,15 +91,15 @@ const ImagePicker = ({ value, onChange }) => {
         const dirs = RNFetchBlob.fs.dirs;
         var folderPath = dirs.PictureDir + "/MyFlockImages/";
         var fullPath = folderPath + fileName;
-     //   console.log(fullPath);
         RNFetchBlob.fs.writeFile(fullPath, base64Data, "base64").then((res) => {
-          console.log("file saved", res);
+          console.log("!!!file saved", res);
           RNFetchBlob.fs
             .stat(fullPath)
             .then((stats) => {
+              console.log("!!!stats", stats);
               setFilePath(`file:\/\/${stats.path}`);
               onChange(`file:\/\/${stats.path}`);
-              console.log(filePath);
+              console.log("!!!filepath", filePath);
             })
 
             .catch((err) => {
@@ -217,9 +216,9 @@ const ImagePicker = ({ value, onChange }) => {
 
       <FAB.Group
         open={open}
-        color={"white"}
-        backgroundColor={"#68c25a"}
-        fabStyle={{ backgroundColor: "#68c25a" }}
+        color={theme.colors.background}
+        backgroundColor={theme.colors.primary}
+        fabStyle={{ backgroundColor: theme.colors.primary }}
         style={{
           position: "absolute",
           bottom: 0,
@@ -266,35 +265,36 @@ const ImagePicker = ({ value, onChange }) => {
 
 export default ImagePicker;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#68c25a",
-    justifyContent: "center",
-  },
-  titleText: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    paddingVertical: 20,
-  },
-  textStyle: {
-    padding: 10,
-    color: "black",
-    textAlign: "center",
-  },
-  buttonStyle: {
-    alignItems: "center",
-    backgroundColor: "#DDDDDD",
-    padding: 5,
-    marginVertical: 10,
-    width: 250,
-  },
-  imageStyle: {
-    width: 200,
-    height: 200,
-    margin: 5,
-  },
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      justifyContent: "center",
+    },
+    titleText: {
+      fontSize: 22,
+      fontWeight: "bold",
+      textAlign: "center",
+      paddingVertical: 20,
+    },
+    textStyle: {
+      padding: 10,
+      color: theme.colors.text,
+      textAlign: "center",
+    },
+    buttonStyle: {
+      alignItems: "center",
+      backgroundColor: theme.colors.secondary,
+      padding: 5,
+      marginVertical: 10,
+      width: 250,
+    },
+    imageStyle: {
+      width: 200,
+      height: 200,
+      margin: 5,
+    },
+  });

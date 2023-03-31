@@ -3,12 +3,15 @@ import { StyleSheet, View, Text } from "react-native";
 import { FlatList } from "react-native";
 import Sheep from "./Sheep";
 import { ScrollView } from "react-native-gesture-handler";
+import { useTheme } from "react-native-paper";
 
 const renderSheep = ({ item, index }) => {
   return <Sheep item={item} index={index} />;
 };
 
 const SheepList = ({ sheep }) => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   // console.log(sheep);
   return (
     <ScrollView style={styles.SheepListWrapper}>
@@ -24,18 +27,19 @@ const SheepList = ({ sheep }) => {
 };
 export default SheepList;
 
-const styles = StyleSheet.create({
-  SheepListWrapper: {
-    flex: 1,
-  },
-  NothingFound: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 100,
-  },
-  NothingFoundText: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    SheepListWrapper: {
+      flex: 1,
+    },
+    NothingFound: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingTop: 100,
+    },
+    NothingFoundText: {
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+  });

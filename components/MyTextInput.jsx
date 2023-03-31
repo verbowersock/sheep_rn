@@ -1,24 +1,27 @@
-import { TextInput } from "react-native-paper";
+import { TextInput, useTheme } from "react-native-paper";
 import { StyleSheet } from "react-native";
 import { forwardRef } from "react";
 
 const MyTextInput = ({ ...rest }, ref) => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   return (
     <TextInput
       ref={ref}
       mode={"outlined"}
-      outlineColor={"#68c25a"}
+      outlineColor={theme.colors.primary}
       style={styles.sheepTextInput}
-      activeOutlineColor={"#68c25a"}
+      activeOutlineColor={theme.colors.primary}
       {...rest}
     />
   );
 };
 export default forwardRef(MyTextInput);
 
-const styles = StyleSheet.create({
-  sheepTextInput: {
-    marginTop: 10,
-    width: "100%",
-  },
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    sheepTextInput: {
+      marginTop: 10,
+      width: "100%",
+    },
+  });
