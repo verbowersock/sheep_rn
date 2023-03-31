@@ -3,12 +3,12 @@ import { StatusBar } from "expo-status-bar";
 
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import Header from "./Header";
+
 import { useDispatch, useSelector } from "react-redux";
 
 import MainContainer from "./MainContainer";
 
-import { Portal } from "react-native-paper";
+import { Portal, useTheme } from "react-native-paper";
 import ConfirmationSnackbar from "./ConfirmationSnackbar";
 import {
   resetFormData,
@@ -18,6 +18,8 @@ import {
 } from "../store/slices/ui";
 
 export default function MainScreen() {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const dispatch = useDispatch();
   const { isFormDialogVisible } = useSelector(uiSelector);
 
@@ -31,7 +33,6 @@ export default function MainScreen() {
     <Portal.Host>
       <View style={styles.container}>
         <StatusBar style="auto" />
-        <Header />
         <MainContainer
           isModalVisible={isFormDialogVisible}
           toggleModal={toggleModal}
@@ -42,9 +43,10 @@ export default function MainScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+  });

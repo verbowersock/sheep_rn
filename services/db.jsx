@@ -1,4 +1,6 @@
 import * as SQLite from "expo-sqlite";
+import * as FileSystem from "expo-file-system";
+import { Asset } from "expo-asset";
 
 const database = SQLite.openDatabase("sheep.db", "1.0", "", 1, () => {
   console.log("Database opened");
@@ -7,9 +9,40 @@ database.exec([{ sql: "PRAGMA foreign_keys = ON;", args: [] }], false, () =>
   console.log("Foreign keys turned on")
 );
 
-const testDataBreeds = ["katahdin", "shetland", "dorper", "icelandic", "mix"];
-const testDataColors = ["gray", "black", "white", "red", "brown"];
-const testDataMarkings = ["katmoget", "solid", "mirkface"];
+const testDataBreeds = [
+  "merino",
+  "rambouillet",
+  "suffolk",
+  "hampshire",
+  "katahdin",
+  "dorper",
+  "dorset",
+  "southdown",
+  "karakul",
+  "lincoln",
+  "icelandic",
+  "navajo churro",
+  "leicester longwool",
+  "shetland",
+  "romanov",
+  "east friesian",
+];
+const testDataColors = ["gray", "black", "white", "red", "brown", "cream"];
+const testDataMarkings = [
+  "bielset",
+  "solid",
+  "blaget",
+  "bleset",
+  "flecket",
+  "fronet",
+  "iset",
+  "katmoget",
+  "mirkface",
+  "smirslet",
+  "sokket",
+  "sponget",
+  "yuglet",
+];
 const testDataSheep = [
   {
     tag_id: "abc",
@@ -94,77 +127,65 @@ export const dropDbTablesAsync = async () => {
 };
 
 export function init() {
+  console.log("init db");
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
         `CREATE TABLE IF NOT EXISTS breeds 
-    (id  INTEGER PRIMARY KEY NOT NULL, breed_name VARCHAR(255) NOT NULL UNIQUE
-    )`,
-        [],
-
-        (_, success) => {
-          resolve(success);
-        },
-        (_, error) => {
-          console.log("db error creating table breeds");
-          console.log(error);
-          reject(error);
-        }
+        (id  INTEGER PRIMARY KEY NOT NULL, breed_name VARCHAR(255) NOT NULL UNIQUE
+        )`,
+        []
       );
+
       tx.executeSql(
         `CREATE TABLE IF NOT EXISTS colors 
-    (id  INTEGER PRIMARY KEY NOT NULL, color_name VARCHAR(255) NOT NULL UNIQUE
-    )`,
+        (id  INTEGER PRIMARY KEY NOT NULL, color_name VARCHAR(255) NOT NULL UNIQUE
+        )`,
         [],
-        (_, success) => {
-          resolve(success);
+        (tx, result) => {
+          console.log("colors table created successfully");
         },
-        (_, error) => {
-          console.log("db error creating table colors");
+        (tx, error) => {
+          console.log("error creating colors table");
           console.log(error);
           reject(error);
         }
       );
+
       tx.executeSql(
         `CREATE TABLE IF NOT EXISTS markings 
-    (id  INTEGER PRIMARY KEY NOT NULL, marking_name VARCHAR(255) NOT NULL UNIQUE
-    )`,
-        [],
-        (_, success) => {
-          resolve(success);
-        },
-        (_, error) => {
-          console.log("db error creating table markings");
-          console.log(error);
-          reject(error);
-        }
+        (id  INTEGER PRIMARY KEY NOT NULL, marking_name VARCHAR(255) NOT NULL UNIQUE
+        )`,
+        []
       );
+
       tx.executeSql(
         `CREATE TABLE IF NOT EXISTS sheep 
-               (sheep_id  INTEGER PRIMARY KEY NOT NULL, 
-                picture VARCHAR(255), 
-                tag_id VARCHAR(255) NOT NULL UNIQUE, 
-                scrapie_id VARCHAR(255) UNIQUE, 
-                name VARCHAR(255) UNIQUE, 
-                dob VARCHAR(50), 
-                sex VARCHAR(255) NOT NULL, 
-                sire BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-                dam BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-                dop VARCHAR(50), 
-                weight_at_birth INTEGER, 
-                dod VARCHAR(255), 
-                date_last_bred VARCHAR(255),
-                breed_id BIGINT NOT NULL REFERENCES breeds (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-                color_id BIGINT REFERENCES colors (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-                marking_id BIGINT REFERENCES markings (id) ON DELETE RESTRICT ON UPDATE CASCADE
-               )`,
+        (sheep_id  INTEGER PRIMARY KEY NOT NULL, 
+        picture VARCHAR(255), 
+        tag_id VARCHAR(255) NOT NULL UNIQUE, 
+        scrapie_id VARCHAR(255) UNIQUE, 
+        name VARCHAR(255) UNIQUE, 
+        dob VARCHAR(50), 
+        sex VARCHAR(255) NOT NULL, 
+        sire BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+        dam BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+        dop VARCHAR(50), 
+        dos VARCHAR(50),
+        weight_at_birth INTEGER, 
+        dod VARCHAR(255), 
+        date_last_bred VARCHAR(255),
+        breed_id BIGINT NOT NULL REFERENCES breeds (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+        color_id BIGINT REFERENCES colors (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+        marking_id BIGINT REFERENCES markings (id) ON DELETE RESTRICT ON UPDATE CASCADE
+        )`,
         [],
         (_, success) => {
           resolve(success);
         },
-        (_, error) => {
-          console.log("db error creating table sheep");
-          console.log("error", error);
+        (error) => {
+          console.log("db error starting transaction");
+          console.log(error);
           reject(error);
         },
         () => {
@@ -258,8 +279,8 @@ export function insertSheepData() {
     testDataSheep.map((sheepData) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             sheepData.tag_id,
             sheepData.scrapie_id,
@@ -267,6 +288,7 @@ export function insertSheepData() {
             sheepData.dob,
             sheepData.dop,
             sheepData.dod,
+            sheepData.dos,
             sheepData.sex,
             sheepData.father,
             sheepData.mother,
@@ -303,6 +325,7 @@ export function fetchSheep() {
   children.tag_id, 
   children.name, 
   children.dob, 
+  children.dos,
   children.sex, 
   children.dop,
   children.weight_at_birth,
@@ -316,10 +339,12 @@ export function fetchSheep() {
   breeds.breed_name,
   children.sire,
   children.dam,
-  COALESCE(colors.color_name, 'N/A') as color_name,
-  COALESCE(markings.marking_name, 'N/A') as marking_name,
+  COALESCE(colors.color_name, 'NA') as color_name,
+  COALESCE(markings.marking_name, 'NA') as marking_name,
   sires.name AS father_name,
-  dams.name AS mother_name
+  sires.tag_id AS father_tag_id,
+  dams.name AS mother_name,
+  dams.tag_id AS mother_tag_id
 FROM
   sheep children
   JOIN breeds ON children.breed_id = breeds.id
@@ -460,8 +485,8 @@ export function addSheep(sheepData) {
     database.transaction((tx) => {
       try {
         tx.executeSql(
-          `INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, dop, dod, sex, sire, dam, breed_id, color_id, marking_id) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, breed_id, color_id, marking_id) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             //"1222122",
             sheepData.picture,
@@ -473,6 +498,7 @@ export function addSheep(sheepData) {
             sheepData.dob,
             sheepData.dop,
             sheepData.dod,
+            sheepData.dos,
             //"2020-12-12",
             sheepData.sex,
             //"m",
@@ -695,7 +721,7 @@ export function editSheep(sheepData, id) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `UPDATE sheep set tag_id = ?, scrapie_id = ?, name = ?, dob = ?, dop = ?, dod=?, sex = ?, sire = ?, dam = ?, weight_at_birth = ?, breed_id = ?, color_id = ?, marking_id = ?, date_last_bred = ? where sheep_id=?`,
+        `UPDATE sheep set tag_id = ?, scrapie_id = ?, name = ?, dob = ?, dop = ?, dod=?, dos=?, sex = ?, sire = ?, dam = ?, weight_at_birth = ?, breed_id = ?, color_id = ?, marking_id = ?, date_last_bred = ?, picture=? where sheep_id=?`,
         [
           sheepData.tag_id,
           sheepData.scrapie_id,
@@ -703,6 +729,7 @@ export function editSheep(sheepData, id) {
           sheepData.dob,
           sheepData.dop,
           sheepData.dod,
+          sheepData.dos,
           sheepData.sex,
           sheepData.sire,
           sheepData.dam,
@@ -711,6 +738,7 @@ export function editSheep(sheepData, id) {
           sheepData.color,
           sheepData.marking,
           sheepData.date_last_bred,
+          sheepData.picture,
           id,
         ],
         (t, success) => {

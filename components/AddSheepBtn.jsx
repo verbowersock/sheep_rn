@@ -1,22 +1,28 @@
 import React from "react";
-import { View, Text } from "react-native";
-import PropTypes from "prop-types";
-import { FAB } from "react-native-paper";
+import { FAB, useTheme } from "react-native-paper";
 import { StyleSheet } from "react-native";
 
 const AddSheepBtn = ({ toggleModal }) => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   return (
-    <FAB icon="plus" style={styles.fab} onPress={toggleModal} color="white" />
+    <FAB
+      icon="plus"
+      style={styles.fab}
+      onPress={toggleModal}
+      color={theme.colors.background}
+    />
   );
 };
 
-const styles = StyleSheet.create({
-  fab: {
-    position: "absolute",
-    backgroundColor: "#c2875a",
-    bottom: 20,
-    alignSelf: "center",
-  },
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    fab: {
+      position: "absolute",
+      backgroundColor: theme.colors.secondary,
+      bottom: 20,
+      alignSelf: "center",
+    },
+  });
 
 export default AddSheepBtn;

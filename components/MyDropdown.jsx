@@ -1,15 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  Keyboard,
-  TouchableWithoutFeedback,
-  TouchableHighlight,
-  ScrollView,
-  Pressable,
-  KeyboardAvoidingView,
-} from "react-native";
-import { TextInput, Button, IconButton, Portal } from "react-native-paper";
+import { View, Text, Pressable, KeyboardAvoidingView } from "react-native";
+import { TextInput, Button, IconButton, useTheme } from "react-native-paper";
 import { StyleSheet } from "react-native";
 import Modal from "react-native-modal";
 import { FlatList, TouchableOpacity } from "react-native";
@@ -43,6 +34,8 @@ import ConfirmationDialog from "./ConfirmationDialog";
 import ConfirmationSnackbar from "./ConfirmationSnackbar";
 
 const Item = ({ item, onPress, value, onLongPress }) => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   return (
     <TouchableOpacity
       style={styles.modalItemStyle}
@@ -58,7 +51,7 @@ const Item = ({ item, onPress, value, onLongPress }) => {
       </Text>
       <View style={styles.modalIconStyle}>
         {value && item.id.toString() === value.toString() && (
-          <Icon name="sheep" size={20} color="#68c25a" />
+          <Icon name="sheep" size={20} color={theme.colors.primary} />
         )}
       </View>
     </TouchableOpacity>
@@ -74,6 +67,8 @@ const MyDropdown = ({
   searchable = true,
   field,
 }) => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const dispatch = useDispatch();
   const { colors, markings, breeds } = useSelector(attributesDataSelector);
   const attributeData =
@@ -387,8 +382,8 @@ const MyDropdown = ({
               <TextInput
                 ref={searchRef}
                 mode="outlined"
-                outlineColor="#68c25a"
-                activeOutlineColor="#68c25a"
+                outlineColor={theme.colors.primary}
+                activeOutlineColor={theme.colors.primary}
                 style={styles.modalSearch}
                 value={query}
                 onFocus={() => {
@@ -402,7 +397,7 @@ const MyDropdown = ({
                 right={
                   <TextInput.Icon
                     name="close"
-                    color="#68c25a"
+                    color={theme.colors.primary}
                     style={{ textAlign: "center" }}
                     onPress={() => {
                       setQuery("");
@@ -422,9 +417,9 @@ const MyDropdown = ({
               <View>
                 {!newInput || modalData.length === 0 ? (
                   <Button
-                    color="#68c25a"
+                    color={theme.colors.primary}
                     dark
-                    style={{ width: "40%", marginTop: 15 }}
+                    style={{ width: "60%", marginTop: 15 }}
                     mode="contained"
                     onPress={() => {
                       handleNewValuePress();
@@ -448,8 +443,8 @@ const MyDropdown = ({
                     >
                       <TextInput
                         mode="outlined"
-                        outlineColor="#68c25a"
-                        activeOutlineColor="#68c25a"
+                        outlineColor={theme.colors.primary}
+                        activeOutlineColor={theme.colors.primary}
                         style={{
                           height: 40,
                           width: "80%",
@@ -458,7 +453,7 @@ const MyDropdown = ({
                         right={
                           <TextInput.Icon
                             name="close"
-                            color="#68c25a"
+                            color={theme.colors.primary}
                             style={{ marginTop: 10 }}
                             onPress={() => {
                               setNewValue("");
@@ -469,13 +464,15 @@ const MyDropdown = ({
                       ></TextInput>
                       <IconButton
                         icon="check"
-                        color="#68c25a"
+                        color={theme.colors.primary}
                         dark
                         style={{ marginLeft: 15 }}
                         onPress={() => validateNewValue(newValue)}
                       />
                     </View>
-                    <Text style={{ color: "#c25a5a" }}>{newInputError}</Text>
+                    <Text style={{ color: theme.colors.primary }}>
+                      {newInputError}
+                    </Text>
                   </View>
                 )}
               </View>
@@ -493,46 +490,47 @@ const MyDropdown = ({
   );
 };
 
-const styles = StyleSheet.create({
-  sheepTextInput: {
-    width: "100%",
-  },
-  selectContainer: {
-    width: "100%",
-    display: "flex",
-    alignContent: "center",
-    justifyContent: "center",
-  },
-  modalItemStyle: {
-    padding: 10,
-    display: "flex",
-    flexDirection: "row",
-    height: 50,
-  },
-  modalItemTextStyle: {
-    fontSize: 20,
-  },
-  modalIconStyle: {
-    width: 30,
-    marginLeft: 10,
-    justifyContent: "center",
-    alignContent: "center",
-    height: 30,
-  },
-  modal: {
-    backgroundColor: "white",
-    padding: 20,
-    margin: 20,
-    borderRadius: 14,
-    // minHeight: 200,
-    flexGrow: 0,
-  },
-  modalSearch: {
-    height: 40,
-  },
-  placeholderStyles: {
-    color: "grey",
-  },
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    sheepTextInput: {
+      width: "100%",
+    },
+    selectContainer: {
+      width: "100%",
+      display: "flex",
+      alignContent: "center",
+      justifyContent: "center",
+    },
+    modalItemStyle: {
+      padding: 10,
+      display: "flex",
+      flexDirection: "row",
+      height: 50,
+    },
+    modalItemTextStyle: {
+      fontSize: 20,
+    },
+    modalIconStyle: {
+      width: 30,
+      marginLeft: 10,
+      justifyContent: "center",
+      alignContent: "center",
+      height: 30,
+    },
+    modal: {
+      backgroundColor: theme.colors.background,
+      padding: 20,
+      margin: 20,
+      borderRadius: 14,
+      maxHeight: 400,
+      flexGrow: 0,
+    },
+    modalSearch: {
+      height: 40,
+    },
+    placeholderStyles: {
+      color: theme.colors.disabled,
+    },
+  });
 
 export default MyDropdown;

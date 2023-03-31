@@ -1,10 +1,12 @@
 import * as React from "react";
-import { View, StyleSheet } from "react-native";
-import { Button, Snackbar } from "react-native-paper";
+import { StyleSheet } from "react-native";
+import { useTheme, Snackbar } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { setShowSnackbar, uiSelector } from "../store/slices/ui";
 
 const ConfirmationSnackbar = () => {
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const { isSnackbarVisible } = useSelector(uiSelector);
   const { visible, message, error } = isSnackbarVisible;
   const dispatch = useDispatch();
@@ -17,7 +19,7 @@ const ConfirmationSnackbar = () => {
       onDismiss={onDismissSnackBar}
       action={{
         label: "Dismiss",
-        color: "white",
+        color: theme.colors.background,
         onPress: () => {
           onDismissSnackBar;
         },
@@ -28,17 +30,18 @@ const ConfirmationSnackbar = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  confirmationMessage: {
-    flex: 1,
-    justifyContent: "space-between",
-    backgroundColor: "#c2875a",
-  },
-  errorMessage: {
-    flex: 1,
-    justifyContent: "space-between",
-    backgroundColor: "#c25a5a",
-  },
-});
+const makeStyles = (theme) =>
+  StyleSheet.create({
+    confirmationMessage: {
+      flex: 1,
+      justifyContent: "space-between",
+      backgroundColor: theme.colors.secondary,
+    },
+    errorMessage: {
+      flex: 1,
+      justifyContent: "space-between",
+      backgroundColor: theme.colors.error,
+    },
+  });
 
 export default ConfirmationSnackbar;
