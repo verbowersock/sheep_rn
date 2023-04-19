@@ -12,7 +12,6 @@ const renderSheep = ({ item, index }) => {
 const SheepList = ({ sheep }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
-  // console.log(sheep);
   return (
     <ScrollView style={styles.SheepListWrapper}>
       {sheep.length !== 0 ? (

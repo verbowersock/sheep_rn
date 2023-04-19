@@ -109,7 +109,7 @@ const makeStyles = (theme) =>
       flex: 1,
     },
     checkboxContainer: {
-      width: "70%",
+      width: "50%",
       alignSelf: "flex-end",
     },
   });

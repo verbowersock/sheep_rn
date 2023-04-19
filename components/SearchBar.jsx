@@ -29,7 +29,6 @@ const SearchBar = ({ onQueryChange, onSearchTagChange }) => {
       }
     });
     setTagSelected(selectedEl[0].label);
-    console.log(selectedEl[0].label);
     if (selectedEl[0].label === "tag") {
       onSearchTagChange("tag_id");
       onChangeSearch("");

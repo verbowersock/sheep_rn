@@ -31,14 +31,12 @@ const Drawer = createDrawerNavigator();
 
 export default function App() {
   const theme = useTheme();
-  console.log(theme);
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
   useEffect(() => {
     async function initDb() {
       try {
         await SplashScreen.preventAutoHideAsync();
-        console.log("loading data");
         try {
           //  await dropDbTablesAsync();
           await init();
@@ -51,12 +49,10 @@ export default function App() {
         }
         await fetchSheep().then((res) => {
           dispatch(setSheep(res));
-        });
+        }).then(()=> SplashScreen.hideAsync())
       } catch (e) {
         console.warn(e);
-      } finally {
-        await SplashScreen.hideAsync();
-      }
+      } 
     }
     initDb();
   }, []);

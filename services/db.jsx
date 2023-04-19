@@ -514,7 +514,6 @@ export function addSheep(sheepData) {
             //1,
           ],
           (t, success) => {
-            console.log("sucess");
             resolve(success);
           },
           (t, error) => {
@@ -567,7 +566,6 @@ export function addColor(val) {
         (t, results) => {
           if (results.rows.length > 0) {
             // Color already exists, resolve with the existing color's ID
-            console.log(`value ${val} already exists`);
             resolve(results.rows.item(0).id);
           } else {
             // Color does not exist, insert it and resolve with the new color's ID
@@ -578,7 +576,6 @@ export function addColor(val) {
                 resolve(success.insertId);
               },
               (t, error) => {
-                console.log("db error inserting color");
                 console.log(error);
                 reject(error);
               }
@@ -631,11 +628,9 @@ export function deleteMarking(val) {
         [val],
         (t, success) => {
           console.log("val", val);
-          console.log("success", success);
           resolve(success);
         },
         (t, error) => {
-          console.log("db error deleting marking");
           console.log(error);
           reject(error);
         },

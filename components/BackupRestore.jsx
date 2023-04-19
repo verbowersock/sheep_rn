@@ -42,7 +42,6 @@ const BackupRestore = () => {
             filePath,
             "/data/user/0/com.sheeprn/files/SQLite/sheep.db"
           );
-          console.log("Success Restore Database");
           setLoading(false);
           await fetchSheep().then((res) => {
             dispatch(setSheep(res));
@@ -66,7 +65,6 @@ const BackupRestore = () => {
           console.log(e);
         }
       } else {
-        console.log("Storage permission denied");
         dispatch(
           setShowSnackbar({
             visible: true,
@@ -110,7 +108,6 @@ const BackupRestore = () => {
             "/data/user/0/com.sheeprn/files/SQLite/sheep.db",
             destPath
           );
-          console.log("Success Backup Database");
           setLoading(false);
           dispatch(
             setShowSnackbar({
@@ -131,7 +128,6 @@ const BackupRestore = () => {
           console.log(e);
         }
       } else {
-        console.log("Storage permission denied");
         dispatch(
           setShowSnackbar({
             visible: true,
