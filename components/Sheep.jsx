@@ -37,7 +37,6 @@ const Sheep = ({ item, index }) => {
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
   const { sheep } = useSelector(sheepDataSelector);
-  console.log("!!!item", item);
   //parse date of birth to string in format dd/mm/yyyy
   const date = (date) => {
     if (date) {
@@ -50,7 +49,6 @@ const Sheep = ({ item, index }) => {
   };
 
   const onDeleteSheep = (item) => {
-    // console.log(item);
     dispatch(
       setShowConfirmationDialog({
         visible: true,
@@ -91,10 +89,8 @@ const Sheep = ({ item, index }) => {
   };
 
   const onDeleteConfirm = (id) => {
-    // console.log("delete sheep", id);
     deleteSheep(id)
       .then((res) => {
-        //  console.log(res);
         dispatch(deleteSheepRedux(id));
         dispatch(resetShowConfirmationDialog());
         dispatch(
@@ -134,15 +130,13 @@ const Sheep = ({ item, index }) => {
     const today = new Date();
     if (item.dob) {
       const parsedDob = parse(item.dob, "MM/dd/yyyy", new Date());
-      if (isValid(parsedDob)) {
+      if (isValid(parsedDob)&&!item.dod) {
         let units = ["years", "months"];
         if (parsedDob < today) {
           let duration = intervalToDuration({ start: parsedDob, end: today });
-          console.log("!!!duration", duration);
           if (
             duration.months === 0 &&
-            duration.years === 0 &&
-            duration.days === 0
+            duration.years === 0
           ) {
             units.push("weeks");
             if (!duration.weeks) {
@@ -158,7 +152,7 @@ const Sheep = ({ item, index }) => {
           sheepAge = "Invalid Date";
         }
       } else {
-        sheepAge = "Invalid Date";
+        sheepAge = "N/A";
       }
     } else {
       sheepAge = "No birthdate provided";
@@ -167,7 +161,6 @@ const Sheep = ({ item, index }) => {
   };
 
   const getCornerImage = () => {
-    //console.log(item.dod);
     if (item.dod !== null && item.dod !== undefined && item.dod !== "") {
       return dead;
     } else {

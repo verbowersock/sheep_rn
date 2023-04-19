@@ -39,7 +39,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
     { id: "w", title: "Wether" },
   ];
   const { colors, markings, breeds } = useSelector(attributesDataSelector);
-  //console.log(colors);
 
   const { formData, formTitle } = useSelector(uiSelector);
   const [males, setMales] = useState([]);
@@ -51,7 +50,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
     async function loadDataToApp() {
       try {
         let colors = await fetchColors();
-        // console.log(colors);
         colors = colors.map(({ color_name, id }) => ({
           title: color_name,
           id: id.toString(),
@@ -124,7 +122,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   }, [reset, formData]);
 
   useEffect(() => {
-    console.log("trigger validation");
     trigger();
   }, [trigger, formData]);
 
@@ -139,11 +136,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       color: data.color,
       marking: data.marking,
     };
-    console.log("!!!formattedData", formattedData);
     if (formData.id) {
       editSheep(formattedData, formData.id)
         .then(() => {
-          console.log("Sheep data edited successfully");
         })
         .then(() => {
           return fetchSheep();
@@ -166,9 +161,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         });
     } else {
       addSheep(formattedData)
-        .then(() => {
-          console.log("Sheep data added successfully");
-        })
         .then(() => {
           return fetchSheep();
         })
@@ -214,7 +206,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <MyImagePicker
               value={value}
               onChange={(value) => {
-                //  console.log(value);
                 setValue(value && setValue("picture", value));
               }}
             />
@@ -475,7 +466,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           control={control}
           rules={{
             validate: (value) => {
-              console.log("!!!value", value);
               if (!value) {
                 return "Breed is required";
               }

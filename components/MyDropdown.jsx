@@ -334,7 +334,6 @@ const MyDropdown = ({
     const selected = attributeData.find(
       (item) => item.id.toString() === value.toString()
     );
-    console.log("!!!selected", selected);
     setSelectedValue(selected);
   };
 

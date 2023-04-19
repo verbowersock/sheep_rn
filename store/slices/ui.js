@@ -52,7 +52,6 @@ const uiSlice = createSlice({
     },
     setFormData: (state, { payload }) => {
       const updatedData = { ...state.formData, ...payload };
-      console.log("!!!updatedData", updatedData);
       return { ...state, formData: updatedData };
     },
     resetFormData: (state) => {

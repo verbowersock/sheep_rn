@@ -92,14 +92,11 @@ const ImagePicker = ({ value, onChange }) => {
         var folderPath = dirs.PictureDir + "/MyFlockImages/";
         var fullPath = folderPath + fileName;
         RNFetchBlob.fs.writeFile(fullPath, base64Data, "base64").then((res) => {
-          console.log("!!!file saved", res);
           RNFetchBlob.fs
             .stat(fullPath)
             .then((stats) => {
-              console.log("!!!stats", stats);
               setFilePath(`file:\/\/${stats.path}`);
               onChange(`file:\/\/${stats.path}`);
-              console.log("!!!filepath", filePath);
             })
 
             .catch((err) => {
@@ -137,7 +134,6 @@ const ImagePicker = ({ value, onChange }) => {
           alert(response.errorMessage);
           return;
         }
-        console.log(response);
         /*   RNFS.exists(RNFS.CachesDirectoryPath)
           .then((success) => {
             console.log(RNFS.CachesDirectoryPath);
@@ -179,8 +175,6 @@ const ImagePicker = ({ value, onChange }) => {
       includeBase64: true,
     };
     launchImageLibrary(options, (response) => {
-      console.log("Response = ", response);
-
       if (response.didCancel) {
         alert("User cancelled camera picker");
         return;
