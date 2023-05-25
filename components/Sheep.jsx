@@ -1,13 +1,13 @@
+import { parse, set } from "date-fns";
+import React, { useEffect, useState } from "react";
 import {
-  formatDuration,
-  intervalToDuration,
-  parse,
-  parseISO,
-  isValid,
-} from "date-fns";
-import React from "react";
-import { Image, StyleSheet, View, Text } from "react-native";
-import { IconButton, useTheme } from "react-native-paper";
+  Image,
+  StyleSheet,
+  View,
+  Text,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { Button, IconButton, Title, useTheme } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteSheep } from "../services/db";
 import {
@@ -16,27 +16,51 @@ import {
 } from "../store/slices/sheep";
 import {
   resetShowConfirmationDialog,
+  setActiveCardId,
+  setCardMenuOpen,
   setFormData,
   setFormTitle,
   setShowConfirmationDialog,
   setShowFormDialog,
   setShowSnackbar,
+  setSmallFormTitle,
+  uiSelector,
 } from "../store/slices/ui";
 import ConfirmationDialog from "./ConfirmationDialog";
-import ConfirmationSnackbar from "./ConfirmationSnackbar";
+import { useNavigation } from "@react-navigation/native";
+import { age } from "./utils/Age";
+import IconMenu from "./IconMenu";
+import Icon from "react-native-vector-icons/FontAwesome5";
+import ButtonWithIcon from "./ButtonWithIcon";
 
 const placeholder = require("../assets/images/placeholder.jpg");
 const dead = require("../assets/images/dead.png");
 const male = require("../assets/images/male.png");
 const female = require("../assets/images/female.png");
 const wether = require("../assets/images/wether.png");
-//import { HeaderWrapper } from './Header.styles';
+const MEDICAL = "medical";
+const BREEDING = "breeding";
+const REMOVE = "remove";
+const initialMenuState = {
+  MEDICAL: false,
+  BREEDING: false,
+  REMOVE: false,
+};
 
 const Sheep = ({ item, index }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
+  const { activeCardId } = useSelector(uiSelector);
+  const [menuVisible, setMenuVisible] = useState(initialMenuState);
   const { sheep } = useSelector(sheepDataSelector);
+
+  useEffect(() => {
+    if (activeCardId !== item.sheep_id) {
+      setMenuVisible(initialMenuState);
+    }
+  }, [activeCardId]);
+
   //parse date of birth to string in format dd/mm/yyyy
   const date = (date) => {
     if (date) {
@@ -48,11 +72,27 @@ const Sheep = ({ item, index }) => {
     }
   };
 
+  const toggleMenuVisible = (menu) => {
+    if (activeCardId !== item.sheep_id) {
+      dispatch(setActiveCardId(item.sheep_id));
+    }
+    //set menu visible if it equals the menu passed in, the rest are false
+    setMenuVisible({
+      MEDICAL: menu === MEDICAL ? !menuVisible.MEDICAL : false,
+      BREEDING: menu === BREEDING ? !menuVisible.BREEDING : false,
+      REMOVE: menu === REMOVE ? !menuVisible.REMOVE : false,
+    });
+  };
+
   const onDeleteSheep = (item) => {
+    //stop event bubbling up to the card
+
     dispatch(
       setShowConfirmationDialog({
         visible: true,
         id: item.sheep_id,
+        name: item.name,
+        tag_id: item.tag_id,
         title: null,
         field: "sheep",
       })
@@ -77,6 +117,7 @@ const Sheep = ({ item, index }) => {
       scrapie_id: item.scrapie_id,
       id: item.sheep_id,
       sex: item.sex,
+      weight_at_birth: item.weight_at_birth,
       //    sex:
 
       //   { id: "1", title: "Male", label: "m" },
@@ -125,41 +166,6 @@ const Sheep = ({ item, index }) => {
 
   //calculate age
 
-  const age = () => {
-    let sheepAge;
-    const today = new Date();
-    if (item.dob) {
-      const parsedDob = parse(item.dob, "MM/dd/yyyy", new Date());
-      if (isValid(parsedDob)&&!item.dod) {
-        let units = ["years", "months"];
-        if (parsedDob < today) {
-          let duration = intervalToDuration({ start: parsedDob, end: today });
-          if (
-            duration.months === 0 &&
-            duration.years === 0
-          ) {
-            units.push("weeks");
-            if (!duration.weeks) {
-              duration.weeks = (duration.days / 7) | 0;
-              duration.days = duration.days - duration.weeks * 7;
-            }
-            if (duration.weeks === 0) {
-              units.push("days");
-            }
-          }
-          return formatDuration(duration, { format: units, delimiter: ", " });
-        } else {
-          sheepAge = "Invalid Date";
-        }
-      } else {
-        sheepAge = "N/A";
-      }
-    } else {
-      sheepAge = "No birthdate provided";
-    }
-    return sheepAge;
-  };
-
   const getCornerImage = () => {
     if (item.dod !== null && item.dod !== undefined && item.dod !== "") {
       return dead;
@@ -174,6 +180,12 @@ const Sheep = ({ item, index }) => {
     }
   };
 
+  const navigation = useNavigation();
+
+  const handleCardPress = () => {
+    navigation.navigate("Details", item);
+  };
+
   return (
     <View
       style={
@@ -182,6 +194,50 @@ const Sheep = ({ item, index }) => {
           : styles.SheepWrapper
       }
     >
+      <View
+        style={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          zIndex: 100,
+        }}
+      >
+        <IconButton
+          icon="delete"
+          iconColor={
+            menuVisible.REMOVE ? theme.colors.onPrimary : theme.colors.accent
+          }
+          mode={menuVisible.REMOVE ? "contained" : "text"}
+          containerColor={
+            menuVisible.REMOVE ? theme.colors.accent : theme.colors.onPrimary
+          }
+          size={25}
+          onPress={() => toggleMenuVisible(REMOVE)}
+          // onPress={(event) => onDeleteSheep(item, event)}
+        />
+        {menuVisible.REMOVE && (
+          <View style={styles.iconMenuContainerRemove}>
+            <ButtonWithIcon
+              contentStyle={{ flexDirection: "row-reverse" }}
+              name="skull"
+              label="Death"
+              onPress={() => console.log("press")}
+            />
+            <ButtonWithIcon
+              contentStyle={{ flexDirection: "row-reverse" }}
+              name="dollar-sign"
+              label="Sale"
+              onPress={() => console.log("press")}
+            />
+            <ButtonWithIcon
+              contentStyle={{ flexDirection: "row-reverse" }}
+              name="trash-alt"
+              label="Remove"
+              onPress={() => onDeleteSheep(item)}
+            />
+          </View>
+        )}
+      </View>
       <Image
         source={getCornerImage()}
         style={{
@@ -192,121 +248,205 @@ const Sheep = ({ item, index }) => {
           left: 0,
         }}
       />
-      <View style={styles.cardTitleWrapper}>
-        <Text style={styles.cardTitle}>
-          {item.name ? item.name : item.tag_id}
-        </Text>
-      </View>
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          width: "100%",
-        }}
-      >
-        <View style={{ flexDirection: "column" }}>
-          <View style={styles.photoWrapper}>
-            <Image
-              source={item.picture ? { uri: item.picture } : placeholder}
-              resizeMode="cover"
-              style={{
-                height: 150,
-                width: 150,
-              }}
-            />
+
+      <View>
+        <View style={styles.cardTitleWrapper}>
+          <Text style={styles.cardTitle}>
+            {item.name ? item.name : item.tag_id}
+          </Text>
+        </View>
+        <TouchableWithoutFeedback onPress={handleCardPress}>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              width: "100%",
+            }}
+          >
             <View
               style={{
-                flex: 1,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                paddingTop: 20,
+                width: 170,
+                flexDirection: "column",
               }}
             >
-              <IconButton
-                icon="pencil"
-                color={theme.colors.secondary}
-                size={25}
-                onPress={() => onEditSheep(item)}
-              />
-              <IconButton
-                icon="delete"
-                color={theme.colors.accent}
-                size={25}
-                onPress={() => onDeleteSheep(item)}
-              />
+              <View style={styles.photoWrapper}>
+                <Image
+                  source={item.picture ? { uri: item.picture } : placeholder}
+                  resizeMode="cover"
+                  style={{
+                    height: 150,
+                    width: 150,
+                  }}
+                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    overflow: "visible",
+                    paddingTop: 10,
+
+                    width: 100,
+                  }}
+                >
+                  <IconButton
+                    icon="pencil"
+                    iconColor={theme.colors.secondary}
+                    size={25}
+                    onPress={() => onEditSheep(item)}
+                  />
+
+                  {!item.dod && (
+                    <View>
+                      <IconButton
+                        icon="medical-bag"
+                        iconColor={
+                          menuVisible.MEDICAL
+                            ? theme.colors.onPrimary
+                            : theme.colors.secondary
+                        }
+                        mode={menuVisible.MEDICAL ? "contained" : "text"}
+                        containerColor={
+                          menuVisible.MEDICAL
+                            ? theme.colors.primary
+                            : theme.colors.onPrimary
+                        }
+                        size={25}
+                        onPress={() => toggleMenuVisible(MEDICAL)}
+                      />
+                      {menuVisible.MEDICAL && (
+                        <View style={styles.iconMenuContainerMeds}>
+                          <ButtonWithIcon
+                            name="prescription-bottle-alt"
+                            label="Meds"
+                            onPress={() => {
+                              toggleModal("test title");
+                            }}
+                          />
+                          <ButtonWithIcon
+                            name="syringe"
+                            label="Vaccines"
+                            onPress={() => console.log("press")}
+                          />
+                          <ButtonWithIcon
+                            name="weight"
+                            label="Weight"
+                            onPress={() => console.log("press")}
+                          />
+                        </View>
+                      )}
+                    </View>
+                  )}
+                  {!item.dod && item.sex === "f" && (
+                    <View>
+                      <IconButton
+                        icon="calendar-heart"
+                        size={25}
+                        iconColor={
+                          menuVisible.BREEDING
+                            ? theme.colors.onPrimary
+                            : theme.colors.secondary
+                        }
+                        mode={menuVisible.BREEDING ? "contained" : "text"}
+                        containerColor={
+                          menuVisible.BREEDING
+                            ? theme.colors.primary
+                            : theme.colors.onPrimary
+                        }
+                        onPress={() => toggleMenuVisible(BREEDING)}
+                      />
+                      {menuVisible.BREEDING && (
+                        <View style={styles.iconMenuContainerBreeding}>
+                          <ButtonWithIcon
+                            contentStyle={{ flexDirection: "row-reverse" }}
+                            name="venus-mars"
+                            label="Breeding Date"
+                            onPress={() => console.log("press")}
+                          />
+                          <ButtonWithIcon
+                            contentStyle={{ flexDirection: "row-reverse" }}
+                            name="plus-circle"
+                            label="New Lamb"
+                            onPress={() => console.log("press")}
+                          />
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
+            <View style={styles.infoWrapper}>
+              <Text style={styles.info}>
+                <Text style={styles.label}>Tag ID: </Text>
+                <Text>{item.tag_id}</Text>
+              </Text>
+
+              <Text style={styles.info}>
+                <Text style={styles.label}>Scrapie Tag ID: </Text>
+
+                <Text>{item.scrapie_id ? item.scrapie_id : "NA"}</Text>
+              </Text>
+              <Text style={styles.info}>
+                <Text style={styles.label}>DOB: </Text>
+                <Text>{date(item.dob)}</Text>
+              </Text>
+              <Text style={styles.info}>
+                <Text style={styles.label}>Sex: </Text>
+                <Text>{item.sex}</Text>
+              </Text>
+              {item.purchase_date && (
+                <Text style={styles.info}>
+                  <Text style={styles.label}>Purchase Date: </Text>
+                  <Text>{date(item.purchase_date)}</Text>
+                </Text>
+              )}
+              {item.date_deceased ? (
+                <Text style={styles.info}>
+                  <Text style={styles.label}>Date Deceased: </Text>
+                  <Text>{date(item.date_deceased)}</Text>
+                </Text>
+              ) : (
+                <Text style={styles.info}>
+                  <Text style={styles.label}>Age: </Text>
+                  <Text>{age(item)}</Text>
+                </Text>
+              )}
+              <Text style={styles.info}>
+                <Text style={styles.label}>Breed: </Text>
+                <Text>{item.breed_name}</Text>
+              </Text>
+              <Text style={styles.info}>
+                <Text style={styles.label}>Father: </Text>
+                <Text>
+                  {item.father_name
+                    ? item.father_name
+                    : item.father_tag_id
+                    ? item.father_tag_id
+                    : "NA"}
+                </Text>
+              </Text>
+              <Text style={styles.info}>
+                <Text style={styles.label}>Mother: </Text>
+                <Text>
+                  {item.mother_name
+                    ? item.mother_name
+                    : item.mother_tag_id
+                    ? item.mother_tag_id
+                    : "NA"}
+                </Text>
+              </Text>
+              <Text style={styles.info}>
+                <Text style={styles.label}>Color: </Text>
+                <Text>{item.color_name ? item.color_name : "NA"}</Text>
+              </Text>
+              <Text style={styles.info}>
+                <Text style={styles.label}>Marking: </Text>
+                <Text>{item.marking_name ? item.marking_name : "NA"}</Text>
+              </Text>
             </View>
           </View>
-        </View>
-        <View style={styles.infoWrapper}>
-          <Text style={styles.info}>
-            <Text style={styles.label}>Tag ID: </Text>
-            <Text>{item.tag_id}</Text>
-          </Text>
-
-          <Text style={styles.info}>
-            <Text style={styles.label}>Scrapie Tag ID: </Text>
-
-            <Text>{item.scrapie_id ? item.scrapie_id : "NA"}</Text>
-          </Text>
-          <Text style={styles.info}>
-            <Text style={styles.label}>DOB: </Text>
-            <Text>{date(item.dob)}</Text>
-          </Text>
-          <Text style={styles.info}>
-            <Text style={styles.label}>Sex: </Text>
-            <Text>{item.sex}</Text>
-          </Text>
-          {item.purchase_date && (
-            <Text style={styles.info}>
-              <Text style={styles.label}>Purchase Date: </Text>
-              <Text>{date(item.purchase_date)}</Text>
-            </Text>
-          )}
-          {item.date_deceased ? (
-            <Text style={styles.info}>
-              <Text style={styles.label}>Date Deceased: </Text>
-              <Text>{date(item.date_deceased)}</Text>
-            </Text>
-          ) : (
-            <Text style={styles.info}>
-              <Text style={styles.label}>Age: </Text>
-              <Text>{age()}</Text>
-            </Text>
-          )}
-          <Text style={styles.info}>
-            <Text style={styles.label}>Breed: </Text>
-            <Text>{item.breed_name}</Text>
-          </Text>
-          <Text style={styles.info}>
-            <Text style={styles.label}>Father: </Text>
-            <Text>
-              {item.father_name
-                ? item.father_name
-                : item.father_tag_id
-                ? item.father_tag_id
-                : "NA"}
-            </Text>
-          </Text>
-          <Text style={styles.info}>
-            <Text style={styles.label}>Mother: </Text>
-            <Text>
-              {item.mother_name
-                ? item.mother_name
-                : item.mother_tag_id
-                ? item.mother_tag_id
-                : "NA"}
-            </Text>
-          </Text>
-          <Text style={styles.info}>
-            <Text style={styles.label}>Color: </Text>
-            <Text>{item.color_name ? item.color_name : "NA"}</Text>
-          </Text>
-          <Text style={styles.info}>
-            <Text style={styles.label}>Marking: </Text>
-            <Text>{item.marking_name ? item.marking_name : "NA"}</Text>
-          </Text>
-        </View>
+        </TouchableWithoutFeedback>
       </View>
+
       <ConfirmationDialog onConfirm={(id) => onDeleteConfirm(id)} />
     </View>
   );
@@ -354,5 +494,30 @@ const makeStyles = (theme) =>
       height: 150,
       width: 150,
       marginRight: 20,
+    },
+    iconMenuContainerMeds: {
+      flexDirection: "column",
+      position: "absolute",
+      width: 150,
+      bottom: 50,
+      left: 0,
+      flexDirection: "column",
+      alignItems: "flex-start",
+    },
+    iconMenuContainerBreeding: {
+      position: "absolute",
+      flexDirection: "column",
+      alignItems: "flex-end",
+      width: 120,
+      bottom: 50,
+      left: -70,
+    },
+    iconMenuContainerRemove: {
+      position: "absolute",
+      flexDirection: "column",
+      alignItems: "flex-end",
+      width: 120,
+      top: 50,
+      right: 10,
     },
   });

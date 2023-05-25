@@ -11,22 +11,22 @@ import {
   fetchMales,
   fetchMarkings,
   fetchSheep,
-} from "../services/db";
+} from "../../services/db";
 import DateTextInput from "./DateTextInput";
 import { useForm, Controller } from "react-hook-form";
-import { ActivityIndicator, Button, useTheme } from "react-native-paper";
+import { ActivityIndicator, Button, TextInput, useTheme } from "react-native-paper";
 import MyDropdown from "./MyDropdown";
 import MyTextInput from "./MyTextInput";
 import { useDispatch, useSelector } from "react-redux";
-import { setSheep, sheepDataSelector } from "../store/slices/sheep";
+import { setSheep, sheepDataSelector } from "../../store/slices/sheep";
 import {
   attributesDataSelector,
   setBreeds,
   setColors,
   setMarkings,
-} from "../store/slices/attributes";
+} from "../../store/slices/attributes";
 import MyImagePicker from "./ImagePicker";
-import { setShowSnackbar, uiSelector } from "../store/slices/ui";
+import { setShowSnackbar, uiSelector } from "../../store/slices/ui";
 
 const AddForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
@@ -116,6 +116,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       defaultValues: formData,
     });
   const { isDirty, isValid, errors, defaultValues } = formState;
+  console.log("formData", formData)
 
   useEffect(() => {
     reset(formData);
@@ -135,7 +136,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       breed: data.breed,
       color: data.color,
       marking: data.marking,
+      weight_at_birth: data.weight_at_birth
     };
+    console.log("formattedData", formattedData)
     if (formData.id) {
       editSheep(formattedData, formData.id)
         .then(() => {
@@ -144,6 +147,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           return fetchSheep();
         })
         .then((res) => {
+          console.log("!!!res", res)
           dispatch(setSheep(res));
           setLoading(false);
           toggleModal();
@@ -375,6 +379,24 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         {errors.dob && (
           <Text style={styles.errorText}>Date of birth is required.</Text>
         )}
+
+<Controller
+          control={control}
+          rules={{
+            maxLength: 100,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <MyTextInput
+              error={errors.weight_at_birth ? true : false}
+              label="Weight At Birth"
+              field="weight_at_birth"
+              onChangeText={onChange}
+              value={value&&value.toString()}
+              right={<TextInput.Affix text="lb" />}
+            />
+          )}
+          name="weight_at_birth"
+        />
 
         <Controller
           control={control}

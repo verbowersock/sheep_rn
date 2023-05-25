@@ -22,6 +22,7 @@ const makeStyles = (theme) =>
       backgroundColor: theme.colors.secondary,
       bottom: 20,
       alignSelf: "center",
+      borderRadius: 50,
     },
   });
 

@@ -6,6 +6,8 @@ export const initialState = {
     id: "",
     title: "",
     field: "",
+    name: "",
+    tag_id: "",
   },
   isSnackbarVisible: { visible: false, error: false, message: "" },
   isFormDialogVisible: false,
@@ -25,9 +27,13 @@ export const initialState = {
     breed: null,
     color: null,
     marking: null,
+    //weight_at_birth: null,
   },
   formTitle: "Add New Sheep",
+  smallFormTitle: "",
+  smallFormData: {},
   dbLocation: "",
+  activeCardId: null,
 };
 
 const uiSlice = createSlice({
@@ -36,6 +42,16 @@ const uiSlice = createSlice({
   reducers: {
     setFormTitle: (state, { payload }) => {
       state.formTitle = payload;
+    },
+    setSmallFormTitle: (state, { payload }) => {
+      state.smallFormTitle = payload;
+    },
+    setSmallFormData: (state, { payload }) => {
+      const updatedData = { ...state.smallFormData, ...payload };
+      return { ...state, smallFormData: updatedData };
+    },
+    resetSmallFormData: (state) => {
+      state.smallFormData = initialState.smallFormData;
     },
     setShowConfirmationDialog: (state, { payload }) => {
       state.isConfirmationDialogVisible = payload;
@@ -57,6 +73,9 @@ const uiSlice = createSlice({
     resetFormData: (state) => {
       state.formData = initialState.formData;
     },
+    setActiveCardId: (state, { payload }) => {
+      state.activeCardId = payload;
+    },
   },
 });
 
@@ -68,6 +87,10 @@ export const {
   setFormData,
   setFormTitle,
   resetFormData,
+  setActiveCardId,
+  setSmallFormData,
+  setSmallFormTitle,
+  resetSmallFormData,
 } = uiSlice.actions;
 export const uiSelector = (state) => state.ui;
 export default uiSlice.reducer;

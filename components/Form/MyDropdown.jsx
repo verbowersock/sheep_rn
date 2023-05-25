@@ -13,7 +13,7 @@ import {
   deleteBreed,
   deleteColor,
   deleteMarking,
-} from "../services/db";
+} from "../../services/db";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addColor as addColorRedux,
@@ -23,15 +23,15 @@ import {
   deleteMarking as deleteMarkingRedux,
   deleteBreed as deleteBreedRedux,
   attributesDataSelector,
-} from "../store/slices/attributes";
+} from "../../store/slices/attributes";
 
 import {
   resetShowConfirmationDialog,
   setShowConfirmationDialog,
   setShowSnackbar,
-} from "../store/slices/ui";
-import ConfirmationDialog from "./ConfirmationDialog";
-import ConfirmationSnackbar from "./ConfirmationSnackbar";
+} from "../../store/slices/ui";
+import ConfirmationDialog from "../ConfirmationDialog";
+import ConfirmationSnackbar from "../ConfirmationSnackbar";
 
 const Item = ({ item, onPress, value, onLongPress }) => {
   const theme = useTheme();
