@@ -11,13 +11,11 @@ const sheepSlice = createSlice({
     setSheep: (state, { payload }) => {
       state.sheep = [...payload];
     },
-
     addSheep: (state, { payload }) => {
       state.sheep = [...state.sheep, payload];
     },
     deleteSheep: (state, { payload }) => {
       const newList = state.sheep.filter((sheep) => sheep.sheep_id !== payload);
-
       return {
         ...state,
         sheep: newList,
@@ -28,6 +26,7 @@ const sheepSlice = createSlice({
         sheep.id === payload.id ? payload : sheep
       );
     },
+
   },
 });
 

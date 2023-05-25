@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import SearchBar from "./SearchBar";
 import AddSheepBtn from "./AddSheepBtn";
 import SheepList from "./Sheeplist";
-import AddForm from "./AddForm";
+import AddForm from "./Form/AddForm";
 import { useSelector } from "react-redux";
 import { sheepDataSelector } from "../store/slices/sheep";
 import { Checkbox, useTheme } from "react-native-paper";
@@ -51,11 +51,15 @@ const MainContainer = ({ toggleModal, isModalVisible }) => {
   useEffect(() => {
     if (searchQuery !== "") {
       setCheckboxDisabled(true);
-      setFilteredSheep(
-        sheep.filter((el) =>
-          el[searchTag].toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
+      const foundSheep = sheep.filter((el) => {
+        if (el[searchTag]) {
+          console.log(el[searchTag]);
+          return el[searchTag]
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
+        }
+      });
+      setFilteredSheep(foundSheep);
     } else {
       setCheckboxDisabled(false);
       setFilteredSheep(sheep);

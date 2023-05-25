@@ -200,7 +200,7 @@ const ImagePicker = ({ value, onChange }) => {
     <View style={styles.container}>
       {filePath === null ? (
         <Image
-          source={require("../assets/images/placeholder.jpg")}
+          source={require("../../assets/images/placeholder.jpg")}
           style={styles.imageStyle}
           resizeMode="contain"
         />

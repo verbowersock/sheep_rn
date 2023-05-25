@@ -1,4 +1,4 @@
-import 'react-native-reanimated'
+import "react-native-reanimated";
 import { registerRootComponent } from "expo";
 import App from "./App";
 import { Provider } from "react-redux";
@@ -10,12 +10,13 @@ import GlobalError from "./components/GlobalError";
 
 const theme = {
   ...DefaultTheme,
-  roundness: 2,
+
   colors: {
     ...DefaultTheme.colors,
     primary: "#68c25a",
     secondary: "#c2875a",
     accent: "#9C27B0",
+    accent2: "#5a68c2",
     background: "#ffffff",
     text: "#000000",
     disabled: "#bdb8b5",

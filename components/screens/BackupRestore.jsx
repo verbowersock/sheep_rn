@@ -10,11 +10,11 @@ import DocPicker from "react-native-document-picker";
 import RNFS from "react-native-fs";
 import { format } from "date-fns";
 import { useDispatch } from "react-redux";
-import ConfirmationSnackbar from "./ConfirmationSnackbar";
-import { setShowSnackbar } from "../store/slices/ui";
+import ConfirmationSnackbar from "../ConfirmationSnackbar";
+import { setShowSnackbar } from "../../store/slices/ui";
 import { useState } from "react";
-import { fetchSheep } from "../services/db";
-import { setSheep } from "../store/slices/sheep";
+import { fetchSheep } from "../../services/db";
+import { setSheep } from "../../store/slices/sheep";
 
 const BackupRestore = () => {
   const theme = useTheme();

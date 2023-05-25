@@ -1,8 +1,14 @@
 import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import { IconButton, List, Searchbar, useTheme } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 //import { SearchBarWrapper } from './SearchBar.styles';
+
+const CustomSearchIcon = (color) => (
+  <MaterialCommunityIcons name="chevron-down-circle" size={30} color={color}/>
+);
+
 
 const SearchBar = ({ onQueryChange, onSearchTagChange }) => {
   const theme = useTheme();
@@ -57,11 +63,15 @@ const SearchBar = ({ onQueryChange, onSearchTagChange }) => {
   return (
     <>
       <Searchbar
-        icon={() => (
-          <IconButton icon="chevron-down-circle" size={40} color="#c2875a" />
-        )}
+     // mode="view"
+      elevation={1}
+        icon={()=>CustomSearchIcon (theme.colors.secondary)}
+        iconColor={theme.colors.secondary}
         placeholder={`search by ${tagSelected}`}
         onChangeText={onChangeSearch}
+        style={{backgroundColor: theme.colors.background, height: 45, border: 0, borderRadius: 0}}
+        inputStyle={{height: 35, alignSelf: 'center'}}
+        placeholderTextColor={theme.colors.secondary}
         value={searchQuery}
         onIconPress={() => {
           handleIconClick();

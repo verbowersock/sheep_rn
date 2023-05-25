@@ -6,16 +6,16 @@ import { StyleSheet, View } from "react-native";
 
 import { useDispatch, useSelector } from "react-redux";
 
-import MainContainer from "./MainContainer";
+import MainContainer from "../MainContainer";
 
 import { Portal, useTheme } from "react-native-paper";
-import ConfirmationSnackbar from "./ConfirmationSnackbar";
+import ConfirmationSnackbar from "../ConfirmationSnackbar";
 import {
   resetFormData,
   setFormTitle,
   setShowFormDialog,
   uiSelector,
-} from "../store/slices/ui";
+} from "../../store/slices/ui";
 
 export default function MainScreen() {
   const theme = useTheme();

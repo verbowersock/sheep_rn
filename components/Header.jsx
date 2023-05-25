@@ -10,10 +10,11 @@ const Header = () => {
   const styles = makeStyles(theme);
   const navigation = useNavigation();
   return (
-    <Appbar.Header dark style={styles.HeaderWrapper} elevated>
-      <Appbar.Content title="MyFlock" />
+    <Appbar.Header elevated style={styles.HeaderWrapper} >
+      <Appbar.Content title="MyFlock" titleStyle={{color: 'white'}}/>
       <Appbar.Action
         icon="menu"
+        color="white"
         onPress={() => {
           navigation.toggleDrawer();
         }}

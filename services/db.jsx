@@ -485,7 +485,7 @@ export function addSheep(sheepData) {
     database.transaction((tx) => {
       try {
         tx.executeSql(
-          `INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, breed_id, color_id, marking_id) 
+          `INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, weight_at_birth, dop, dod, dos, sex, sire, dam, breed_id, color_id, marking_id) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             //"1222122",
@@ -496,6 +496,7 @@ export function addSheep(sheepData) {
             sheepData.name,
             //"testvk1122vv",
             sheepData.dob,
+            sheepData.weight_at_birth,
             sheepData.dop,
             sheepData.dod,
             sheepData.dos,
@@ -715,6 +716,7 @@ export function deleteSheep(val) {
 export function editSheep(sheepData, id) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
+      console.log("sheepData", sheepData)
       tx.executeSql(
         `UPDATE sheep set tag_id = ?, scrapie_id = ?, name = ?, dob = ?, dop = ?, dod=?, dos=?, sex = ?, sire = ?, dam = ?, weight_at_birth = ?, breed_id = ?, color_id = ?, marking_id = ?, date_last_bred = ?, picture=? where sheep_id=?`,
         [
@@ -737,6 +739,7 @@ export function editSheep(sheepData, id) {
           id,
         ],
         (t, success) => {
+          console.log("success", success)
           resolve(success);
         },
         (t, error) => {
@@ -748,6 +751,26 @@ export function editSheep(sheepData, id) {
         // After the query has completed (successfully or not), call database.close()
         //  database.close();
         // }
+      );
+    });
+  });
+}
+
+export function findChildren (id) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `SELECT * FROM sheep WHERE sire = ? OR dam = ?`,
+        [id, id],
+        (t, results) => {
+          console.log("!!!!!!!", results)
+          resolve(results.rows._array);
+        },
+        (t, error) => {
+          console.log("db error finding children");
+          console.log(error);
+          reject(error);
+        }
       );
     });
   });
