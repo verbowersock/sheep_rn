@@ -4,11 +4,20 @@ import SearchBar from "./SearchBar";
 import AddSheepBtn from "./AddSheepBtn";
 import SheepList from "./Sheeplist";
 import AddForm from "./Form/AddForm";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { sheepDataSelector } from "../store/slices/sheep";
 import { Checkbox, useTheme } from "react-native-paper";
+import {
+  resetFormData,
+  resetSecondaryFormData,
+  setFormTitle,
+  setShowFormDialog,
+  setShowSecondaryFormDialog,
+  uiSelector,
+} from "../store/slices/ui";
+import SecondaryForm from "./Form/SecondaryForm";
 
-const MainContainer = ({ toggleModal, isModalVisible }) => {
+const MainContainer = () => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const { sheep } = useSelector(sheepDataSelector);
@@ -20,6 +29,20 @@ const MainContainer = ({ toggleModal, isModalVisible }) => {
   const [soldChecked, setSoldChecked] = useState(false);
 
   const [checkboxDisabled, setCheckboxDisabled] = useState(false);
+
+  const dispatch = useDispatch();
+  const { isMainFormDialogVisible } = useSelector(uiSelector);
+  const { isSecondaryFormDialogVisible } = useSelector(uiSelector);
+
+  const toggleMainModal = () => {
+    dispatch(resetFormData());
+    dispatch(setFormTitle("Add New Sheep"));
+    dispatch(setShowFormDialog(!isMainFormDialogVisible));
+  };
+
+  const toggleSecondaryModal = () => {
+    dispatch(setShowSecondaryFormDialog(!isSecondaryFormDialogVisible));
+  };
 
   useEffect(() => {
     if (sheep) {
@@ -99,9 +122,18 @@ const MainContainer = ({ toggleModal, isModalVisible }) => {
         />
       </View>
       {filteredSheep && <SheepList sheep={filteredSheep} />}
-      <AddSheepBtn toggleModal={toggleModal} />
-      {isModalVisible && (
-        <AddForm toggleModal={toggleModal} isModalVisible={isModalVisible} />
+      <AddSheepBtn toggleModal={toggleMainModal} />
+      {isMainFormDialogVisible && (
+        <AddForm
+          toggleModal={toggleMainModal}
+          isModalVisible={isMainFormDialogVisible}
+        />
+      )}
+      {isSecondaryFormDialogVisible && (
+        <SecondaryForm
+          toggleModal={toggleSecondaryModal}
+          isModalVisible={isSecondaryFormDialogVisible}
+        />
       )}
     </View>
   );
