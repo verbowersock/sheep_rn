@@ -9,31 +9,83 @@ import {
   View,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import {
-  IconButton,
-  SegmentedButtons,
-  useTheme,
-} from "react-native-paper";
+import { IconButton, SegmentedButtons, useTheme } from "react-native-paper";
 import { age } from "../utils/Age";
-import { findChildren } from "../../services/db";
+import {
+  fetchSheepMeds,
+  fetchSheepVax,
+  fetchSheepWeight,
+  findChildren,
+} from "../../services/db";
 import { format, max, parse } from "date-fns";
+import { useDispatch, useSelector } from "react-redux";
+import { setContextMenuOpen, uiSelector } from "../../store/slices/ui";
+import { toggleSecondaryFormModal } from "../utils/SharedFunctions";
+import { forms } from "../../Constants";
 
-const ListItem = ({ item, selectedValue }) => {
-  console.log(item);
+const ListItem = ({
+  index,
+  item,
+  selectedValue,
+  showContextMenu,
+  onItemPress,
+  isContextMenuOpen,
+  theme,
+  onPlusPress,
+}) => {
+  //find key in isContextMenuOpen that matches index
+
+  //const isOpen = isContextMenuOpen[index]
   return (
     <View
       style={{
-        width: selectedValue!=='misc'?"50%":'100%',
+        width:
+          selectedValue === "misc" || selectedValue === "health"
+            ? "100%"
+            : "50%",
         paddingBottom: 14,
         paddingLeft: 20,
         paddingRight: 20,
       }}
     >
+      {showContextMenu ? (
+        <View>
+          <TouchableOpacity onPress={onItemPress}>
+            <Item item={item}></Item>
+          </TouchableOpacity>
+          {isContextMenuOpen[index] === true && (
+            <View style={{ flexDirection: "row" }}>
+              <View>
+                <IconButton
+                  iconColor={theme.colors.primary}
+                  icon="clipboard-list-outline"
+                ></IconButton>
+              </View>
+              <View>
+                <IconButton
+                  onPress={onPlusPress}
+                  iconColor={theme.colors.primary}
+                  icon="plus-circle-outline"
+                ></IconButton>
+              </View>
+            </View>
+          )}
+        </View>
+      ) : (
+        <Item item={item}></Item>
+      )}
+    </View>
+  );
+};
+
+const Item = ({ item, selectedValue, showContextMenu }) => {
+  return (
+    <>
       <Text style={{ fontSize: 17, fontWeight: "bold" }}>{item.title} </Text>
       <ScrollView style={{ maxHeight: "90%" }}>
         <Text style={{ fontSize: 17 }}>{item.description}</Text>
       </ScrollView>
-    </View>
+    </>
   );
 };
 
@@ -63,74 +115,197 @@ const Details = ({ route }) => {
     date_last_bred,
   } = route.params;
 
-
-
   const [children, setChildren] = useState([]);
+  const [sheepMeds, setSheepMeds] = useState([]);
+  const [sheepVax, setSheepVax] = useState([]);
+  const [sheepWeights, setSheepWeights] = useState([]);
+  const [lastMedication, setLastMedication] = useState({});
+  const [lastVaccination, setLastVaccination] = useState({});
 
-  useEffect ( ()=>{
-//fetch children
-async function getChildren() {
-    const children = await findChildren(sheep_id);
-    setChildren(children);
-}
-getChildren();
-console.log("!!!", children)
-  },[])
+  useEffect(() => {
+    //fetch children
+    async function getChildren() {
+      const children = await findChildren(sheep_id);
+      setChildren(children);
+    }
+    async function getMedications() {
+      const medications = await fetchSheepMeds(sheep_id);
+      setSheepMeds(medications);
+    }
+    async function getVaccinations() {
+      const vaccinations = await fetchSheepVax(sheep_id);
+      setSheepVax(vaccinations);
+    }
+    async function getWeights() {
+      const weights = await fetchSheepWeight(sheep_id);
+      setSheepWeights(weights);
+    }
+    getWeights();
+    getVaccinations();
+    getMedications();
+    getChildren();
+  }, []);
 
-const showChildren = () => {
+  useEffect(() => {
+    console.log("in use effect", sheepMeds);
+    if (sheepMeds.length > 0) {
+      getLastMedication();
+    }
+  }, [sheepMeds]);
 
-  if (children.length > 0) {
+  useEffect(() => {
+    if (sheepVax.length > 0) {
+      getLastVax();
+    }
+  }, [sheepVax]);
+
+  const showChildren = () => {
+    if (children.length > 0) {
+      return (
+        <View style={{ width: "100%", paddingBottom: 14, paddingRight: 20 }}>
+          <ScrollView style={{ maxHeight: "90%" }}>
+            {children.map((child) => {
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("Details", child);
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 17, textDecorationLine: "underline" }}
+                  >
+                    {child.name}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      );
+    }
+  };
+
+  const getAverageChilrenQty = () => {
+    //round number to the nearest decimal
+
     return (
-      <View style={{ width: "100%", paddingBottom: 14, paddingRight: 20 }}>
-        <ScrollView style={{ maxHeight: "90%" }}>
-          {children.map((child) => {
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate("Details", child);
-                }}
-              >
-                <Text style={{ fontSize: 17, textDecorationLine: 'underline' }}>{child.name}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
+      Math.round(
+        (children.length / new Set(children.map((child) => child.dob)).size) *
+          10
+      ) / 10
     );
-  }
-}
+  };
 
-const getAverageChilrenQty = () => {
-  //round number to the nearest decimal
+  const getMostRecentNumberOfChildren = () => {
+    const mostRecentBirthdate = max(
+      children.map((child) => parse(child.dob, "MM/dd/yyyy", new Date()))
+    );
+    const mostRecentBirthdateString = format(mostRecentBirthdate, "MM/dd/yyyy");
+    // Get the puppies in the most recent litter
+    const mostRecentLambs = children.filter(
+      (child) => child.dob === mostRecentBirthdateString
+    );
 
- return Math.round((children.length / new Set(children.map(child => child.dob)).size) * 10) / 10;
-}
+    // Get the number of puppies in the most recent litter
+    return `${mostRecentLambs.length} on ${mostRecentBirthdateString}`;
+  };
 
-const getMostRecentNumberOfChildren = () => {
-  const mostRecentBirthdate = max(children.map(child => parse(child.dob, 'MM/dd/yyyy', new Date())));
-  console.log(children)
-  const mostRecentBirthdateString = format(mostRecentBirthdate, 'MM/dd/yyyy');
-  console.log("!!!", mostRecentBirthdateString);
-// Get the puppies in the most recent litter
-const mostRecentLambs = children.filter(child => child.dob === mostRecentBirthdateString);
+  const getAverageChildWeight = () => {
+    //round number to the nearest decimal
+    //get the average child weight at birth excluding the null values
+    return (
+      Math.round(
+        (children.reduce((acc, child) => acc + child.weight_at_birth, 0) /
+          children.filter((child) => child.weight_at_birth).length) *
+          10
+      ) / 10
+    );
+  };
 
-// Get the number of puppies in the most recent litter
-return `${mostRecentLambs.length} on ${mostRecentBirthdateString}`;
-}
-
-const getAverageChildWeight = () => {
-  //round number to the nearest decimal
-  //get the average child weight at birth excluding the null values
-  return Math.round(children.reduce((acc, child) => acc + child.weight_at_birth, 0) / children.filter(child => child.weight_at_birth).length * 10) / 10;   
-}
-
-const timeToLambing = () => {
-  //add 165 days to the last breeding date
-  const lambingDate = new Date(date_last_bred(date_last_bred.getDate() + 165));
-  console.log("!!!", lambingDate);
-}
+  const timeToLambing = () => {
+    //add 165 days to the last breeding date
+    const lambingDate = new Date(
+      date_last_bred(date_last_bred.getDate() + 165)
+    );
+  };
 
 
+useEffect(() => {
+  console.log("last medication:", lastMedication);
+}, [lastMedication]);
+
+
+  const lastWeight = () => {
+    const mostRecentDate = max(
+      sheepWeights.map((weight) => parse(weight.date, "MM/dd/yyyy", new Date()))
+    );
+
+    const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
+
+    const mostRecentWeight = sheepWeights.filter(
+      (weight) => weight.date === mostRecentDateString
+    );
+
+    //if there are multiple weights on the same date, return one with the highest id
+    if (mostRecentWeight.length > 1) {
+      return `${
+        mostRecentWeight[mostRecentWeight.length - 1].weight
+      }lbs on ${mostRecentDateString}`;
+    }
+    return `${mostRecentWeight[0].weight}lbs on ${mostRecentDateString}`;
+  };
+
+  const getLastMedication = () => {
+    console.log("getting last medication from", sheepMeds)
+    const mostRecentDate = max(
+      sheepMeds.map((med) =>
+        parse(med.administer_date, "MM/dd/yyyy", new Date())
+      )
+    );
+  
+    const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
+    const mostRecentMed = sheepMeds.filter(
+      (med) => med.administer_date === mostRecentDateString
+    );
+  
+    if (mostRecentMed.length > 1) {
+      const mostRecentMedWithHighestId = mostRecentMed.reduce((prev, current) => {
+        return prev.id > current.id ? prev : current;
+      });
+      setLastMedication(
+        `${mostRecentMedWithHighestId.medication_name} on ${mostRecentDateString}`
+      );
+    } else if (mostRecentMed.length === 1) {
+      setLastMedication(
+        `${mostRecentMed[0].medication_name} on ${mostRecentDateString}`
+      );
+    } else {
+      setLastMedication("");
+    }
+  };
+  const getLastVax = () => {
+    const mostRecentDate = max(
+      sheepVax.map((vax) =>
+        parse(vax.administer_date, "MM/dd/yyyy", new Date())
+      )
+    );
+    const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
+    const mostRecentVax = sheepVax.filter(
+      (vax) => vax.administer_date === mostRecentDateString
+    );
+
+    //  if there are multiple vax on the same date, return one with the highest id
+    if (mostRecentVax.length > 1) {
+      setLastVaccination(
+        `${
+          mostRecentVax[mostRecentVax.length - 1].vaccination_name
+        } on ${mostRecentDateString}`
+      );
+    }
+    setLastVaccination(
+      `${mostRecentVax[0].vaccination_name} on ${mostRecentDateString}`
+    );
+  };
 
   const basic = [
     name && { title: "Name:", description: name },
@@ -140,8 +315,8 @@ const timeToLambing = () => {
     color_name !== "NA" && { title: "Color:", description: color_name },
     marking_name !== "NA" && { title: "Marking:", description: marking_name },
     { title: "Date of Birth:", description: dob },
-    {title: "Sex", description: sex},
-    !dod &&{title: "Age", description: age(route.params)},
+    { title: "Sex", description: sex },
+    !dod && { title: "Age", description: age(route.params) },
     dod && { title: "Date of Death:", description: dod },
     dop && { title: "Date of Purchase:", description: dop },
     dos && { title: "Date of Sale:", description: dos },
@@ -153,24 +328,43 @@ const timeToLambing = () => {
     mother_name && { title: "Mother:", description: mother_name },
     mother_tag_id && { title: "Mother Tag Id:", description: mother_tag_id },
 
-    sex==='f'&&{ title: "Date last bred:", description: date_last_bred },
-    sex==='f'&&{ title: "Time until lambing:", description: "2 months 5 days" },
-    sex==='f'&&children.length>0 && { title: "Average lamb qty:", description: getAverageChilrenQty() },
-    sex==='f'&&children.length>0 && { title: "Average lamb weight", description: getAverageChildWeight() },
-    sex==='f'&&children.length>0 && { title: "Last lamb qty:", description: getMostRecentNumberOfChildren() },
-    children.length>0 && { title: "Children:", description: showChildren() },
+    sex === "f" && { title: "Date last bred:", description: date_last_bred },
+    sex === "f" && {
+      title: "Time until lambing:",
+      description: "2 months 5 days",
+    },
+    sex === "f" &&
+      children.length > 0 && {
+        title: "Average lamb qty:",
+        description: getAverageChilrenQty(),
+      },
+    sex === "f" &&
+      children.length > 0 && {
+        title: "Average lamb weight",
+        description: getAverageChildWeight(),
+      },
+    sex === "f" &&
+      children.length > 0 && {
+        title: "Last lamb qty:",
+        description: getMostRecentNumberOfChildren(),
+      },
+    children.length > 0 && { title: "Children:", description: showChildren() },
   ].filter(Boolean);
 
   const health = [
-    { title: "Last Deworming:", description: "Ivermectin 25g on 04/05/2022" },
-    { title: "Last Vaccination:", description: "UltraBac on 04/05/2022" },
-    dod && { title: "Date of Death:", description: dod },
-    dod && { title: "Cause of Death:", description: "Poleo" },
-    weight_at_birth&&{ title: "Weight at Birth:", description: weight_at_birth },
-    {
-      title: "Last Weight:",
-      description: "100kg on 04/05/2022 at 2 years 5 months",
+    sheepMeds.length > 0 && {
+      title: "Last Medication:",
+      description: lastMedication,
     },
+    sheepVax.length > 0 && {
+      title: "Last Vaccination:",
+      description: lastVaccination,
+    },
+    sheepWeights.length > 0 && {
+      title: "Last Weight:",
+      description: lastWeight(),
+    },
+    dod && { title: "Date of Death:", description: dod },
   ].filter(Boolean);
 
   const misc = [
@@ -203,15 +397,40 @@ const timeToLambing = () => {
 
   const [selectedValue, setSelectedValue] = useState("basic");
   const [data, setData] = useState(basic);
+  const dispatch = useDispatch();
+  const { contextMenuOpen } = useSelector(uiSelector);
+  const openContextMenu = (index) => {
+    dispatch(setContextMenuOpen(index));
+  };
+
+  const handlePlusPress = async () => {
+    toggleSecondaryFormModal(
+      forms.MEDS,
+      sheep_id,
+      false,
+      dispatch,
+      async () => {
+        const newMeds = await fetchSheepMeds(sheep_id);
+        setSheepMeds(newMeds);
+      }
+    );
+  };
+
+  const handleListPress = () => {
+    toggleSecondaryFormModal(forms.MEDS, sheep_id, true, dispatch);
+  };
+
+
+  useEffect(() => {
+    console.log("lastMedication changed, forcing re-render");
+  }, [lastMedication]);
 
   useEffect(() => {
     switch (selectedValue) {
       case "basic":
-        console.log("basic");
         setData(basic);
         break;
       case "breeding":
-        console.log("breeding");
         setData(breeding);
         break;
       case "health":
@@ -264,23 +483,31 @@ const timeToLambing = () => {
         style={{
           flex: 0.6,
           paddingVertical: 20,
-
           justifyContent: "space-between",
         }}
       >
-        <View style={selectedValue!=='misc'? {flexDirection: "row", flexWrap: "wrap"}:{flexDirection: 'column'}} >
+        <View
+          style={
+            selectedValue !== "misc" && selectedValue !== "health"
+              ? { flexDirection: "row", flexWrap: "wrap" }
+              : { flexDirection: "column" }
+          }
+        >
+          <Text>{lastMedication}</Text>
           {data.map((item, index) => (
-            <ListItem key={index} item={item} selectedValue={selectedValue}/>
+            <ListItem
+              key={index}
+              index={index}
+              theme={theme}
+              item={item}
+              selectedValue={selectedValue}
+              showContextMenu={selectedValue === "health"}
+              onItemPress={() => openContextMenu(index)}
+              isContextMenuOpen={contextMenuOpen}
+              onPlusPress={handlePlusPress}
+              onListPress={handleListPress}
+            />
           ))}
-        </View>
-        <View style={{ position: "absolute", bottom: 20, left: 20 }}>
-          <IconButton
-            icon="pencil"
-            iconColor={theme.colors.background}
-            size={30}
-            containerColor={theme.colors.secondary}
-            onPress={() => console.log("Pressed")}
-          />
         </View>
       </View>
     </View>

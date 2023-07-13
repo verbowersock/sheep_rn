@@ -1,4 +1,4 @@
-import { parse, set } from "date-fns";
+import { format, parse, set } from "date-fns";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -20,8 +20,11 @@ import {
   setCardMenuOpen,
   setFormData,
   setFormTitle,
+  setSecondaryFormData,
+  setSecondaryFormTitle,
   setShowConfirmationDialog,
   setShowFormDialog,
+  setShowSecondaryFormDialog,
   setShowSnackbar,
   setSmallFormTitle,
   uiSelector,
@@ -32,6 +35,8 @@ import { age } from "./utils/Age";
 import IconMenu from "./IconMenu";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import ButtonWithIcon from "./ButtonWithIcon";
+import { forms } from "../Constants";
+import { toggleSecondaryFormModal } from "./utils/SharedFunctions";
 
 const placeholder = require("../assets/images/placeholder.jpg");
 const dead = require("../assets/images/dead.png");
@@ -54,6 +59,7 @@ const Sheep = ({ item, index }) => {
   const { activeCardId } = useSelector(uiSelector);
   const [menuVisible, setMenuVisible] = useState(initialMenuState);
   const { sheep } = useSelector(sheepDataSelector);
+  const { isSecondaryFormDialogVisible } = useSelector(uiSelector);
 
   useEffect(() => {
     if (activeCardId !== item.sheep_id) {
@@ -118,11 +124,6 @@ const Sheep = ({ item, index }) => {
       id: item.sheep_id,
       sex: item.sex,
       weight_at_birth: item.weight_at_birth,
-      //    sex:
-
-      //   { id: "1", title: "Male", label: "m" },
-      // { id: "2", title: "Female", label: "f" },
-      // {/ id: "3", title: "Weather", label: "w" },
     };
 
     dispatch(setFormData(formattedData));
@@ -318,18 +319,22 @@ const Sheep = ({ item, index }) => {
                             name="prescription-bottle-alt"
                             label="Meds"
                             onPress={() => {
-                              toggleModal("test title");
+                              toggleSecondaryFormModal(forms.MEDS, item.sheep_id, isSecondaryFormDialogVisible, dispatch);
                             }}
                           />
                           <ButtonWithIcon
                             name="syringe"
                             label="Vaccines"
-                            onPress={() => console.log("press")}
+                            onPress={() => {
+                              toggleSecondaryFormModal(forms.VAX, item.sheep_id, isSecondaryFormDialogVisible, dispatch);
+                            }}
                           />
                           <ButtonWithIcon
                             name="weight"
                             label="Weight"
-                            onPress={() => console.log("press")}
+                            onPress={() => {
+                              toggleSecondaryFormModal(forms.WEIGHT, item.sheep_id, isSecondaryFormDialogVisible, dispatch);
+                            }}
                           />
                         </View>
                       )}
@@ -351,7 +356,7 @@ const Sheep = ({ item, index }) => {
                             ? theme.colors.primary
                             : theme.colors.onPrimary
                         }
-                        onPress={() => toggleMenuVisible(BREEDING)}
+                        onPress={() => toggleMenuVisible(forms.BREEDING)}
                       />
                       {menuVisible.BREEDING && (
                         <View style={styles.iconMenuContainerBreeding}>

@@ -5,7 +5,9 @@ const middleware = [
   ...getDefaultMiddleware({ thunk: true, serializableCheck: false }),
 ];
 
-export default configureStore({
+const store = configureStore({
   reducer: RootReducer,
   middleware,
 });
+
+export default store;

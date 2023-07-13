@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { StyleSheet } from "react-native";
 import Modal from "react-native-modal";
@@ -92,31 +92,16 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
     loadDataToApp().then(() => setDataLoaded(true));
   }, []);
 
-  const { control, handleSubmit, trigger, setValue, reset, formState } =
+  const { control, handleSubmit, trigger, setValue, reset, formState} =
     useForm({
-      //mode: "onChange",
-      //mode: "onTouched",
       shouldUnregister: false,
-      /*  defaultValues: {
-        picture: null,
-        name: "",
-        tag_id: "",
-        scrapieTagId: "",
-        sex: {},
-        dob: "",
-        dop: "",
-        dod: "",
-        sire: {},
-        dam: {},
-        breed: {},
-        color: {},
-        marking: {},
-      },
-    });*/
       defaultValues: formData,
+      mode: 'onChange'
     });
-  const { isDirty, isValid, errors, defaultValues } = formState;
-  console.log("formData", formData)
+
+ 
+  const {isValid, defaultValues} = formState;
+  const errors = useMemo(() => formState.errors, [formState]);
 
   useEffect(() => {
     reset(formData);
@@ -138,7 +123,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       marking: data.marking,
       weight_at_birth: data.weight_at_birth
     };
-    console.log("formattedData", formattedData)
+
     if (formData.id) {
       editSheep(formattedData, formData.id)
         .then(() => {
@@ -147,7 +132,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           return fetchSheep();
         })
         .then((res) => {
-          console.log("!!!res", res)
           dispatch(setSheep(res));
           setLoading(false);
           toggleModal();

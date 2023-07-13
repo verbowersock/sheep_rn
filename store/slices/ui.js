@@ -10,7 +10,8 @@ export const initialState = {
     tag_id: "",
   },
   isSnackbarVisible: { visible: false, error: false, message: "" },
-  isFormDialogVisible: false,
+  isMainFormDialogVisible: false,
+  isSecondaryFormDialogVisible: false,
   formData: {
     id: undefined,
     picture: null,
@@ -30,10 +31,13 @@ export const initialState = {
     //weight_at_birth: null,
   },
   formTitle: "Add New Sheep",
-  smallFormTitle: "",
-  smallFormData: {},
+  secondaryFormData: {},
+  secondaryFormType: "",
   dbLocation: "",
   activeCardId: null,
+  meds: [],
+  vaccines: [],
+  contextMenuOpen: {0:false, 1:false, 2: false},
 };
 
 const uiSlice = createSlice({
@@ -43,15 +47,15 @@ const uiSlice = createSlice({
     setFormTitle: (state, { payload }) => {
       state.formTitle = payload;
     },
-    setSmallFormTitle: (state, { payload }) => {
-      state.smallFormTitle = payload;
+    setSecondaryFormData: (state, { payload }) => {
+      const updatedData = { ...state.secondaryFormData, ...payload };      
+      return { ...state, secondaryFormData: updatedData };
     },
-    setSmallFormData: (state, { payload }) => {
-      const updatedData = { ...state.smallFormData, ...payload };
-      return { ...state, smallFormData: updatedData };
+    setShowSecondaryFormDialog: (state, { payload }) => {
+      state.isSecondaryFormDialogVisible = payload;
     },
-    resetSmallFormData: (state) => {
-      state.smallFormData = initialState.smallFormData;
+    resetSecondaryFormData: (state) => {
+      state.secondaryFormData = initialState.secondaryFormData;
     },
     setShowConfirmationDialog: (state, { payload }) => {
       state.isConfirmationDialogVisible = payload;
@@ -64,7 +68,7 @@ const uiSlice = createSlice({
         initialState.isConfirmationDialogVisible;
     },
     setShowFormDialog: (state, { payload }) => {
-      state.isFormDialogVisible = payload;
+      state.isMainFormDialogVisible = payload;
     },
     setFormData: (state, { payload }) => {
       const updatedData = { ...state.formData, ...payload };
@@ -76,8 +80,27 @@ const uiSlice = createSlice({
     setActiveCardId: (state, { payload }) => {
       state.activeCardId = payload;
     },
+    setVaccines: (state, { payload }) => {
+      state.vaccines = payload;
+    },
+    setMeds: (state, { payload }) => {
+      state.meds = payload;
+    },
+    setContextMenuOpen: (state, { payload }) => {
+      const newContextMenuOpen = Object.keys(state.contextMenuOpen).reduce(
+        (acc, key) => {
+          return {
+            ...acc,
+            [`${key}`]: key.toString() === payload.toString() ? !state.contextMenuOpen[key] : false,
+          };
+        },
+        {}
+      );
+      state.contextMenuOpen = newContextMenuOpen;
+    },
   },
 });
+
 
 export const {
   setShowConfirmationDialog,
@@ -88,9 +111,12 @@ export const {
   setFormTitle,
   resetFormData,
   setActiveCardId,
-  setSmallFormData,
-  setSmallFormTitle,
-  resetSmallFormData,
+  setSecondaryFormData,
+  resetSecondaryFormData,
+  setShowSecondaryFormDialog,
+  setVaccines,
+  setMeds,
+setContextMenuOpen,
 } = uiSlice.actions;
 export const uiSelector = (state) => state.ui;
 export default uiSlice.reducer;
