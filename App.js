@@ -14,7 +14,9 @@ import {
   insertBreedData,
   insertColorData,
   insertMarkingData,
+  insertMedData,
   insertSheepData,
+  insertVaxData,
 } from "./services/db";
 import { setSheep } from "./store/slices/sheep";
 
@@ -48,7 +50,9 @@ export default function App() {
         await insertBreedData();
         await insertColorData();
         await insertMarkingData();
-        //  await insertSheepData();
+        await insertSheepData();
+        await insertMedData();
+        await insertVaxData();
       } catch (e) {
         console.log("!e", e);
       }

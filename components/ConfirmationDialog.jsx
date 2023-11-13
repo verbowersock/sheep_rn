@@ -16,10 +16,12 @@ const ConfirmationDialog = ({ onConfirm }) => {
   const dispatch = useDispatch();
 
   const hideDialog = () => {
+    console.log("hide dialog");
     dispatch(resetShowConfirmationDialog());
   };
 
   const onConfirmDelete = () => {
+    console.log("confirm delete")
     onConfirm(id, field, title);
   };
 
@@ -29,9 +31,9 @@ const ConfirmationDialog = ({ onConfirm }) => {
         <Dialog.Title>Delete</Dialog.Title>
         <Dialog.Content>
           <Paragraph>
-            {field !== "sheep"
-              ? `Are you sure you want to delete ${field} ${title}?`
-              : `Are you sure you want to delete ${name? name: tag_id}?`}
+            {field === "sheep"?
+            `Are you sure you want to delete ${name? name: tag_id}?`
+              : `Are you sure you want to delete ${field} ${title}?`}
           </Paragraph>
         </Dialog.Content>
         <Dialog.Actions

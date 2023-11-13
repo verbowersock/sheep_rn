@@ -76,7 +76,6 @@ const MainContainer = () => {
       setCheckboxDisabled(true);
       const foundSheep = sheep.filter((el) => {
         if (el[searchTag]) {
-          console.log(el[searchTag]);
           return el[searchTag]
             .toLowerCase()
             .includes(searchQuery.toLowerCase());
