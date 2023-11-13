@@ -319,21 +319,39 @@ const Sheep = ({ item, index }) => {
                             name="prescription-bottle-alt"
                             label="Meds"
                             onPress={() => {
-                              toggleSecondaryFormModal(forms.MEDS, item.sheep_id, isSecondaryFormDialogVisible, dispatch);
+                              toggleMenuVisible(MEDICAL);
+                              toggleSecondaryFormModal(
+                                forms.MEDS,
+                                item.sheep_id,
+                                isSecondaryFormDialogVisible,
+                                dispatch
+                              );
                             }}
                           />
                           <ButtonWithIcon
                             name="syringe"
                             label="Vaccines"
                             onPress={() => {
-                              toggleSecondaryFormModal(forms.VAX, item.sheep_id, isSecondaryFormDialogVisible, dispatch);
+                              toggleMenuVisible(MEDICAL);
+                              toggleSecondaryFormModal(
+                                forms.VAX,
+                                item.sheep_id,
+                                isSecondaryFormDialogVisible,
+                                dispatch
+                              );
                             }}
                           />
                           <ButtonWithIcon
                             name="weight"
                             label="Weight"
                             onPress={() => {
-                              toggleSecondaryFormModal(forms.WEIGHT, item.sheep_id, isSecondaryFormDialogVisible, dispatch);
+                              toggleMenuVisible(MEDICAL);
+                              toggleSecondaryFormModal(
+                                forms.WEIGHT,
+                                item.sheep_id,
+                                isSecondaryFormDialogVisible,
+                                dispatch
+                              );
                             }}
                           />
                         </View>

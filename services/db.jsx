@@ -1,8 +1,7 @@
 import * as SQLite from "expo-sqlite";
+import sheep from "../store/slices/sheep";
 
-export const database = SQLite.openDatabase("sheep.db", "1.0", "", 1, () => {
-  console.log("Database opened");
-});
+export const database = SQLite.openDatabase("sheep.db", "1.0", "", 1, () => {});
 database.exec([{ sql: "PRAGMA foreign_keys = ON;", args: [] }], false, () =>
   console.log("Foreign keys turned on")
 );
@@ -45,7 +44,7 @@ const testDataSheep = [
   {
     tag_id: "abc",
     scrapie_id: "abc1245",
-    name: "Bree1",
+    name: "Test1",
     dob: "02/09/2022",
     sex: "f",
     purchase_date: "03/09/2022",
@@ -56,13 +55,91 @@ const testDataSheep = [
   {
     tag_id: "def",
     scrapie_id: "def1245",
-    name: "Buffy1",
+    name: "Test2",
     dob: "02/10/2022",
     sex: "m",
     breed_id: 2,
     color_id: 3,
     marking_id: 2,
     mother: 1,
+  },
+];
+
+const testDataMeds = [
+  {
+    id: 1,
+    sheep_id: 1,
+    entry: 3,
+    date: "03/22/2022",
+  },
+  {
+    id: 2,
+    sheep_id: 1,
+    entry: 2,
+    date: "04/22/2022",
+  },
+  {
+    id: 3,
+    sheep_id: 1,
+    entry: 1,
+    date: "05/22/2022",
+  },
+  {
+    id: 4,
+    sheep_id: 2,
+    entry: 3,
+    date: "03/22/2022",
+  },
+  {
+    id: 5,
+    sheep_id: 2,
+    entry: 2,
+    date: "04/22/2022",
+  },
+  {
+    id: 6,
+    sheep_id: 2,
+    entry: 1,
+    date: "05/22/2022",
+  },
+];
+
+const testDataVax = [
+  {
+    id: 1,
+    sheep_id: 1,
+    entry: 3,
+    date: "03/25/2022",
+  },
+  {
+    id: 2,
+    sheep_id: 1,
+    entry: 2,
+    date: "04/25/2022",
+  },
+  {
+    id: 3,
+    sheep_id: 1,
+    entry: 1,
+    date: "05/25/2022",
+  },
+  {
+    id: 4,
+    sheep_id: 2,
+    entry: 3,
+    date: "03/25/2022",
+  },
+  {
+    id: 5,
+    sheep_id: 2,
+    entry: 2,
+    date: "04/25/2022",
+  },
+  {
+    id: 6,
+    sheep_id: 2,
+    entry: 1,
+    date: "05/25/2022",
   },
 ];
 
@@ -301,6 +378,58 @@ export function insertSheepData() {
           },
           (t, error) => {
             console.log("db error insert sheep");
+            console.log(error);
+            reject(error);
+          },
+          () => {
+            // After the query has completed (successfully or not), call database.close()
+            database.close();
+          }
+        );
+      });
+    });
+  });
+}
+
+export function insertMedData() {
+  return new Promise((resolve, reject) => {
+    testDataMeds.map((medData) => {
+      database.transaction((tx) => {
+        tx.executeSql(
+          `INSERT INTO sheep_meds (sheep_id, entry_id, date)
+            VALUES (?, ?, ?)`,
+          [medData.sheep_id, medData.entry, medData.date],
+          (t, success) => {
+            resolve(success);
+          },
+          (t, error) => {
+            console.log("db error insert meds");
+            console.log(error);
+            reject(error);
+          },
+          () => {
+            // After the query has completed (successfully or not), call database.close()
+            database.close();
+          }
+        );
+      });
+    });
+  });
+}
+
+export function insertVaxData() {
+  return new Promise((resolve, reject) => {
+    testDataVax.map((vaxData) => {
+      database.transaction((tx) => {
+        tx.executeSql(
+          `INSERT INTO sheep_vax (sheep_id, entry_id, date)
+            VALUES (?, ?, ?)`,
+          [vaxData.sheep_id, vaxData.entry, vaxData.date],
+          (t, success) => {
+            resolve(success);
+          },
+          (t, error) => {
+            console.log("db error insert vax");
             console.log(error);
             reject(error);
           },
@@ -816,10 +945,10 @@ export function addMedication(data) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO sheep_meds (sheep_id, med_id, administer_date) VALUES (?, ?, ?)`,
+        `INSERT INTO sheep_meds (sheep_id, entry_id, date) VALUES (?, ?, ?)`,
         [data.sheep_id, data.value, data.date],
         (t, success) => {
-          console.log("success", success)
+          console.log("success", success);
           resolve(success.insertId);
         },
         (t, error) => {
@@ -839,7 +968,7 @@ export function addVaccination(data) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO sheep_vax (sheep_id, vax_id, administer_date) VALUES (?, ?, ?)`,
+        `INSERT INTO sheep_vax (sheep_id, entry_id, date) VALUES (?, ?, ?)`,
         [data.sheep_id, data.value, data.date],
         (t, success) => {
           resolve(success.insertId);
@@ -861,7 +990,7 @@ export function addSheepWeight(data) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO sheep_weights (sheep_id, weight, date) VALUES (?, ?, ?)`,
+        `INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)`,
         [data.sheep_id, data.value, data.date],
         (t, success) => {
           resolve(success.insertId);
@@ -883,11 +1012,11 @@ export function fetchSheepMeds(id) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `SELECT sheep_meds.id, sheep_meds.sheep_id, sheep_meds.med_id, sheep_meds.administer_date, medications.medication_name 
-        FROM sheep_meds INNER JOIN medications ON sheep_meds.med_id = medications.id WHERE sheep_meds.sheep_id = ?`,
+        `SELECT sheep_meds.sheep_id, sheep_meds.entry_id, sheep_meds.id, sheep_meds.date, medications.entry 
+        FROM sheep_meds INNER JOIN medications ON sheep_meds.entry_id = medications.id WHERE sheep_meds.sheep_id = ?`,
         [id],
         (t, results) => {
-     
+          console.log("sheepmeds from db", results.rows._array);
           resolve(results.rows._array);
         },
         (t, error) => {
@@ -904,10 +1033,9 @@ export function fetchSheepVax(id) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `SELECT sheep_vax.sheep_id, sheep_vax.vax_id, sheep_vax.administer_date, vaccines.vaccination_name FROM sheep_vax INNER JOIN vaccines ON sheep_vax.vax_id = vaccines.id WHERE sheep_vax.sheep_id = ?`,
+        `SELECT sheep_vax.sheep_id, sheep_vax.entry_id, sheep_vax.id, sheep_vax.date, vaccines.entry FROM sheep_vax INNER JOIN vaccines ON sheep_vax.entry_id = vaccines.id WHERE sheep_vax.sheep_id = ?`,
         [id],
         (t, results) => {
-          console.log("!!!", results.rows._array)
           resolve(results.rows._array);
         },
         (t, error) => {
@@ -916,26 +1044,93 @@ export function fetchSheepVax(id) {
           reject(error);
         }
       );
-    }); 
+    });
   });
 }
 
-
 export function fetchSheepWeight(id) {
   return new Promise((resolve, reject) => {
-      database.transaction((tx) => {
-        tx.executeSql(
-          `SELECT * FROM sheep_weights WHERE sheep_id = ?`,  
-          [id],
-          (t, results) => {
-            resolve(results.rows._array);
-          },
-          (t, error) => {
-            console.log("db error getting sheep weight");
-            console.log(error);
-            reject(error);
-          }
-        );
-      });
+    database.transaction((tx) => {
+      tx.executeSql(
+        `SELECT * FROM sheep_weights WHERE sheep_id = ?`,
+        [id],
+        (t, results) => {
+          resolve(results.rows._array);
+        },
+        (t, error) => {
+          console.log("db error getting sheep weight");
+          console.log(error);
+          reject(error);
+        }
+      );
     });
+  });
+}
+
+export function removeSheepMed(id) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM sheep_meds WHERE id = ?`,
+        [id],
+        (t, success) => {
+          console.log("deleted successfully");
+          resolve(success);
+        },
+        (t, error) => {
+          console.log("db error deleting sheep med");
+          console.log(error);
+          reject(error);
+        },
+        () => {
+          database.close();
+        }
+      );
+    });
+  });
+}
+
+export function removeSheepVax(id) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM sheep_vax WHERE id = ?`,
+        [id],
+        (t, success) => {
+          resolve(success);
+        },
+        (t, error) => {
+          console.log("db error deleting sheep vax");
+          console.log(error);
+          reject(error);
+        },
+        () => {
+          database.close();
+        }
+      );
+    });
+  });
+}
+
+export function removeSheepWeight(id) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM sheep_weights WHERE id = ?`,
+        [id],
+        (t, success) => {
+          console.log("deleted successfully");
+          resolve(success);
+        },
+        (t, error) => {
+          console.log("db error deleting sheep weight");
+          console.log(error);
+          reject(error);
+        },
+        () => {
+          database.close();
+        }
+      );
+    });
+  });
 }

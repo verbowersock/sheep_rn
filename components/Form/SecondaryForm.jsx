@@ -10,6 +10,9 @@ import {
   fetchAllMedications,
   fetchAllVaccines,
   fetchSheep,
+  fetchSheepMeds,
+  fetchSheepVax,
+  fetchSheepWeight,
 } from "../../services/db";
 import DateTextInput from "./DateTextInput";
 import { useForm, Controller } from "react-hook-form";
@@ -31,6 +34,14 @@ import {
 } from "../../store/slices/ui";
 import { forms } from "../../Constants";
 import { onChange } from "react-native-reanimated";
+import {
+  setSheepMeds,
+  setSheepVax,
+  setSheepWeights,
+  updateSheepMeds,
+  updateSheepVax,
+  updateSheepWeight,
+} from "../../store/slices/sheep";
 
 const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
@@ -38,9 +49,9 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const dispatch = useDispatch();
   const { meds, vaccines } = useSelector(uiSelector);
   const [dataLoaded, setDataLoaded] = useState(false);
-  const {MEDS,VAX, WEIGHT} = forms;
+  const { MEDS, VAX, WEIGHT } = forms;
   const { secondaryFormData } = useSelector(uiSelector);
-  const {title, type, errorText} = secondaryFormData.type;
+  const { title, type, errorText } = secondaryFormData.type;
 
   const [loading, setLoading] = useState(false);
 
@@ -49,8 +60,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
       try {
         if (type === MEDS.type) {
           let meds = await fetchAllMedications();
-          meds = meds.map(({ medication_name, id }) => ({
-            title: medication_name,
+          meds = meds.map(({ entry, id }) => ({
+            title: entry,
             id: id.toString(),
           }));
 
@@ -59,8 +70,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           dispatch(setMeds(meds));
         } else if (type === VAX.type) {
           let vaccines = await fetchAllVaccines();
-          vaccines = vaccines.map(({ vaccination_name, id }) => ({
-            title: vaccination_name,
+          vaccines = vaccines.map(({ entry, id }) => ({
+            title: entry,
             id: id.toString(),
           }));
           vaccines.sort((a, b) => (a.title > b.title ? 1 : -1));
@@ -72,8 +83,6 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
     }
     loadDataToForm().then(() => setDataLoaded(true));
   }, []);
-
-
 
   const { control, handleSubmit, trigger, setValue, reset, formState } =
     useForm({
@@ -93,34 +102,83 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   }, [trigger, secondaryFormData]);
 
   const onSubmit = (data) => {
-    console.log(data)
     setLoading(true);
-    let promise;
     if (type === MEDS.type) {
-      promise = addMedication(data);
+      addMedication(data)
+        .then(() => {
+          return fetchSheepMeds(data.sheep_id);
+        })
+        .then((meds) => {
+          console.log("meds", meds);
+          return dispatch(setSheepMeds(meds));
+        })
+        .then(() => {
+          setLoading(false);
+          toggleModal();
+          dispatch(
+            setShowSnackbar({
+              visible: true,
+              error: false,
+              message: `Sheep records updated successfully`,
+            })
+          );
+          reset();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     } else if (type === VAX.type) {
-      promise = addVaccination(data);
-    } else if (type===WEIGHT.type) {
-      promise = addSheepWeight(data);
+      addVaccination(data)
+        .then(() => {
+          return fetchSheepVax(data.sheep_id);
+        })
+        .then((vax) => {
+          console.log("vax", vax);
+          return dispatch(setSheepVax(vax));
+        })
+        .then(() => {
+          setLoading(false);
+          toggleModal();
+          dispatch(
+            setShowSnackbar({
+              visible: true,
+              error: false,
+              message: `Sheep records updated successfully`,
+            })
+          );
+          reset();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      //   promise = addVaccination(data);
+    } else if (type === WEIGHT.type) {
+      // promise = addSheepWeight(data);
+      addSheepWeight(data)
+        .then(() => {
+          return fetchSheepWeight(data.sheep_id);
+        })
+        .then((weight) => {
+          console.log("weight", weight);
+          return dispatch(setSheepWeights(weight));
+        })
+        .then(() => {
+          setLoading(false);
+          toggleModal();
+          dispatch(
+            setShowSnackbar({
+              visible: true,
+              error: false,
+              message: `Sheep records updated successfully`,
+            })
+          );
+          reset();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
-    promise
-      .then(() => {
-        setLoading(false);
-        toggleModal();
-        dispatch(
-          setShowSnackbar({
-            visible: true,
-            error: false,
-            message: `Sheep records updated successfully`,
-          })
-        );
-        reset();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
   };
-
 
   if (!dataLoaded) {
     return <ActivityIndicator color={theme.colors.secondary} />;
@@ -139,15 +197,11 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           control={control}
           //validate that the date is in format MM/DD/YYYY, and that it is not empty
           rules={{
-         
             pattern: {
               value: /^\d{2}\/\d{2}\/\d{4}$/,
               message: "Date must be in format MM/DD/YYYY",
             },
           }}
-
-
-
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
               error={errors.date ? true : false}
@@ -161,15 +215,15 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           )}
           name="date"
         />
-             {errors.date && (
+        {errors.date && (
           <Text style={styles.errorText}>{errors.date.message}</Text>
         )}
-           {type === MEDS.type && (
+        {type === MEDS.type && (
           <View style={styles.inputContainer}>
             <Controller
               control={control}
               rules={{
-                required: errorText,
+                required: "Medication name is required",
                 maxLength: 100,
               }}
               render={({ field: { onChange, onBlur, value } }) => (
@@ -178,7 +232,10 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                   data={meds}
                   label="Medication"
                   field="value"
-                  onChange={(id) => {id && setValue("value", id); trigger() }}
+                  onChange={(id) => {
+                    id && setValue("value", id);
+                    trigger();
+                  }}
                   value={value}
                 />
               )}
@@ -191,7 +248,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
             <Controller
               control={control}
               rules={{
-                required:  "Vaccination name is required",
+                required: "Vaccination name is required",
                 maxLength: 100,
               }}
               render={({ field: { onChange, onBlur, value } }) => (
@@ -200,7 +257,10 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                   data={vaccines}
                   label="Vaccine"
                   field="value"
-                  onChange={(id) => {id && setValue("value", id); trigger() }}
+                  onChange={(id) => {
+                    id && setValue("value", id);
+                    trigger();
+                  }}
                   value={value}
                 />
               )}
@@ -260,8 +320,6 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
 const makeStyles = (theme) =>
   StyleSheet.create({
     formContainer: {
-      borderColor: "red",
-      borderWidth: 1,
       alignItems: "center",
       backgroundColor: "white",
       marginVertical: 10,

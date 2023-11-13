@@ -1,8 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import {
-  FlatList,
   Image,
+  Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,85 +18,43 @@ import {
   fetchSheepWeight,
   findChildren,
 } from "../../services/db";
-import { format, max, parse } from "date-fns";
+import { format, max, parse, set } from "date-fns";
 import { useDispatch, useSelector } from "react-redux";
-import { setContextMenuOpen, uiSelector } from "../../store/slices/ui";
+import {
+  resetFormData,
+  setContextMenuOpen,
+  setFormData,
+  setFormTitle,
+  setShowFormDialog,
+  uiSelector,
+} from "../../store/slices/ui";
 import { toggleSecondaryFormModal } from "../utils/SharedFunctions";
 import { forms } from "../../Constants";
-
-const ListItem = ({
-  index,
-  item,
-  selectedValue,
-  showContextMenu,
-  onItemPress,
-  isContextMenuOpen,
-  theme,
-  onPlusPress,
-}) => {
-  //find key in isContextMenuOpen that matches index
-
-  //const isOpen = isContextMenuOpen[index]
-  return (
-    <View
-      style={{
-        width:
-          selectedValue === "misc" || selectedValue === "health"
-            ? "100%"
-            : "50%",
-        paddingBottom: 14,
-        paddingLeft: 20,
-        paddingRight: 20,
-      }}
-    >
-      {showContextMenu ? (
-        <View>
-          <TouchableOpacity onPress={onItemPress}>
-            <Item item={item}></Item>
-          </TouchableOpacity>
-          {isContextMenuOpen[index] === true && (
-            <View style={{ flexDirection: "row" }}>
-              <View>
-                <IconButton
-                  iconColor={theme.colors.primary}
-                  icon="clipboard-list-outline"
-                ></IconButton>
-              </View>
-              <View>
-                <IconButton
-                  onPress={onPlusPress}
-                  iconColor={theme.colors.primary}
-                  icon="plus-circle-outline"
-                ></IconButton>
-              </View>
-            </View>
-          )}
-        </View>
-      ) : (
-        <Item item={item}></Item>
-      )}
-    </View>
-  );
-};
-
-const Item = ({ item, selectedValue, showContextMenu }) => {
-  return (
-    <>
-      <Text style={{ fontSize: 17, fontWeight: "bold" }}>{item.title} </Text>
-      <ScrollView style={{ maxHeight: "90%" }}>
-        <Text style={{ fontSize: 17 }}>{item.description}</Text>
-      </ScrollView>
-    </>
-  );
-};
+import ListItem from "../ListItem";
+import DataList from "../DataList";
+import sheep, {
+  setSheepChildren,
+  setSheepMeds,
+  setSheepVax,
+  setSheepWeights,
+  sheepDataSelector,
+} from "../../store/slices/sheep";
+import AddSheepBtn from "../AddSheepBtn";
 
 const Details = ({ route }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const navigation = useNavigation();
+  const { sheep_id } = route.params;
+
+  const { sheep, sheepMeds, sheepVax, sheepWeights, sheepChildren } =
+    useSelector(sheepDataSelector);
   const {
-    sheep_id,
+    breed_id,
     breed_name,
+    color_id,
+    sire,
+    dam,
     color_name,
     dob,
     dod,
@@ -103,6 +62,7 @@ const Details = ({ route }) => {
     dos,
     father_name,
     father_tag_id,
+    marking_id,
     marking_name,
     mother_name,
     mother_tag_id,
@@ -113,60 +73,86 @@ const Details = ({ route }) => {
     tag_id,
     weight_at_birth,
     date_last_bred,
-  } = route.params;
+  } = sheep[0];
 
-  const [children, setChildren] = useState([]);
-  const [sheepMeds, setSheepMeds] = useState([]);
-  const [sheepVax, setSheepVax] = useState([]);
-  const [sheepWeights, setSheepWeights] = useState([]);
   const [lastMedication, setLastMedication] = useState({});
   const [lastVaccination, setLastVaccination] = useState({});
+  const [lastWeight, setLastWeight] = useState({});
+  const [dataUpdates, setDataUpdates] = useState([]);
+  const [listData, setListData] = useState([]);
+  const [listHeader, setListHeader] = useState("");
+  const [listModalvisible, setListModalVisible] = useState(false);
+
+  const { contextMenuOpen } = useSelector(uiSelector);
+  const dispatch = useDispatch();
+
+  const sortData = (data) => {
+    data.sort(
+      (a, b) =>
+        parse(a.date, "MM/dd/yyyy", new Date()) -
+        parse(b.date, "MM/dd/yyyy", new Date())
+    );
+    console.log("data", data);
+    return data;
+  };
 
   useEffect(() => {
+    console.log("sheep", sheep);
     //fetch children
     async function getChildren() {
       const children = await findChildren(sheep_id);
-      setChildren(children);
+      dispatch(setSheepChildren(children));
     }
     async function getMedications() {
       const medications = await fetchSheepMeds(sheep_id);
-      setSheepMeds(medications);
+
+      const sortedData = sortData(medications);
+      console.log("medications", medications);
+      dispatch(setSheepMeds(sortedData));
     }
     async function getVaccinations() {
       const vaccinations = await fetchSheepVax(sheep_id);
-      setSheepVax(vaccinations);
+      console.log("vaccinations", vaccinations);
+      const sortedData = sortData(vaccinations);
+      dispatch(setSheepVax(sortedData));
     }
     async function getWeights() {
       const weights = await fetchSheepWeight(sheep_id);
-      setSheepWeights(weights);
+      const sortedData = sortData(weights);
+      dispatch(setSheepWeights(sortedData));
     }
     getWeights();
     getVaccinations();
     getMedications();
     getChildren();
-  }, []);
+  }, [sheep_id]);
 
   useEffect(() => {
-    console.log("in use effect", sheepMeds);
     if (sheepMeds.length > 0) {
-      getLastMedication();
+      console.log("sheepMeds", sheepMeds);
+      const lastMed = getMostRecentEntry(sheepMeds);
+      setLastMedication(lastMed);
+      console.log("lastMed", lastMed);
     }
-  }, [sheepMeds]);
-
-  useEffect(() => {
     if (sheepVax.length > 0) {
-      getLastVax();
+      const lastVax = getMostRecentEntry(sheepVax);
+      setLastVaccination(lastVax);
     }
-  }, [sheepVax]);
+    if (sheepWeights.length > 0) {
+      const lastWeight = getMostRecentEntry(sheepWeights);
+      setLastWeight(lastWeight);
+    }
+  }, [sheepWeights, sheepMeds, sheepVax]);
 
   const showChildren = () => {
-    if (children.length > 0) {
+    if (sheepChildren.length > 0) {
       return (
         <View style={{ width: "100%", paddingBottom: 14, paddingRight: 20 }}>
           <ScrollView style={{ maxHeight: "90%" }}>
-            {children.map((child) => {
+            {sheepChildren.map((child, index) => {
               return (
                 <TouchableOpacity
+                  key={index}
                   onPress={() => {
                     navigation.navigate("Details", child);
                   }}
@@ -190,7 +176,8 @@ const Details = ({ route }) => {
 
     return (
       Math.round(
-        (children.length / new Set(children.map((child) => child.dob)).size) *
+        (sheepChildren.length /
+          new Set(sheepChildren.map((child) => child.dob)).size) *
           10
       ) / 10
     );
@@ -198,28 +185,35 @@ const Details = ({ route }) => {
 
   const getMostRecentNumberOfChildren = () => {
     const mostRecentBirthdate = max(
-      children.map((child) => parse(child.dob, "MM/dd/yyyy", new Date()))
+      sheepChildren.map((child) => parse(child.dob, "MM/dd/yyyy", new Date()))
     );
     const mostRecentBirthdateString = format(mostRecentBirthdate, "MM/dd/yyyy");
     // Get the puppies in the most recent litter
-    const mostRecentLambs = children.filter(
+    const mostRecentLambs = sheepChildren.filter(
       (child) => child.dob === mostRecentBirthdateString
     );
 
-    // Get the number of puppies in the most recent litter
+    // Get the number of lambs in the most recent litter
     return `${mostRecentLambs.length} on ${mostRecentBirthdateString}`;
   };
 
   const getAverageChildWeight = () => {
-    //round number to the nearest decimal
-    //get the average child weight at birth excluding the null values
-    return (
-      Math.round(
-        (children.reduce((acc, child) => acc + child.weight_at_birth, 0) /
-          children.filter((child) => child.weight_at_birth).length) *
-          10
-      ) / 10
+    // Get the children with non-null weight_at_birth values
+    const childrenWithWeight = sheepChildren.filter(
+      (child) => child.weight_at_birth !== null
     );
+
+    // Calculate the average child weight at birth
+    if (childrenWithWeight.length === 0) return "NA";
+
+    const averageWeight =
+      childrenWithWeight.reduce(
+        (acc, child) => acc + child.weight_at_birth,
+        0
+      ) / childrenWithWeight.length;
+
+    // Round the result to the nearest decimal
+    return `${Math.round(averageWeight * 10) / 10} lb`;
   };
 
   const timeToLambing = () => {
@@ -229,49 +223,106 @@ const Details = ({ route }) => {
     );
   };
 
+  const getMostRecentEntry = (data) => {
+    console.log("dataformostrecententry", data);
+    const mostRecentDate = max(
+      data.map((item) => parse(item.date, "MM/dd/yyyy", new Date()))
+    );
+    console.log("mostRecentDate", mostRecentDate);
+    const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
+    const mostRecentEntry = data.filter(
+      (item) => item.date === mostRecentDateString
+    );
+    console.log("mostRecentEntry", mostRecentEntry);
+    setDataUpdates([...dataUpdates, "lastMedication"]);
+    if (mostRecentEntry.length > 1) {
+      const mostRecentEntryWithHighestId = mostRecentEntry.reduce(
+        (prev, current) => {
+          return prev.id > current.id ? prev : current;
+        }
+      );
+      return {
+        entry: mostRecentEntryWithHighestId.entry,
+        date: mostRecentDateString,
+      };
+    } else if (mostRecentEntry.length === 1) {
+      return { entry: mostRecentEntry[0].entry, date: mostRecentDateString };
+    } else {
+      return "";
+    }
+  };
 
-useEffect(() => {
-  console.log("last medication:", lastMedication);
-}, [lastMedication]);
+  const onEditSheep = (item) => {
+    dispatch(setFormTitle("Edit Sheep"));
 
+    const formattedData = {
+      breed: breed_id,
+      color: color_id,
+      marking: marking_id,
+      sire: sire,
+      dam: dam,
+      name: name,
+      dob: dob,
+      dop: dop,
+      dod: dod,
+      dos: dos,
+      tag_id: tag_id,
+      scrapie_id: scrapie_id,
+      id: sheep_id,
+      sex: sex,
+      weight_at_birth: weight_at_birth,
+    };
+    dispatch(setFormData(formattedData));
+    dispatch(setShowFormDialog(true));
+    setDataUpdates([...dataUpdates, "sheep"]);
+  };
 
-  const lastWeight = () => {
+  /* DELETE
+  const getLastWeight = () => {
     const mostRecentDate = max(
       sheepWeights.map((weight) => parse(weight.date, "MM/dd/yyyy", new Date()))
     );
-
     const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
-
     const mostRecentWeight = sheepWeights.filter(
       (weight) => weight.date === mostRecentDateString
     );
-
-    //if there are multiple weights on the same date, return one with the highest id
     if (mostRecentWeight.length > 1) {
-      return `${
-        mostRecentWeight[mostRecentWeight.length - 1].weight
-      }lbs on ${mostRecentDateString}`;
+      const mostRecentWeightWithHighestId = mostRecentWeight.reduce(
+        (prev, current) => {
+          return prev.id > current.id ? prev : current;
+        }
+      );
+      setLastWeight(
+        `${mostRecentWeightWithHighestId.weight}lbs on ${mostRecentDateString}`
+      );
+    } else if (mostRecentWeight.length === 1) {
+      setLastWeight(`${mostRecentWeight[0].weight} on ${mostRecentDateString}`);
+    } else {
+      setLastWeight("");
     }
-    return `${mostRecentWeight[0].weight}lbs on ${mostRecentDateString}`;
+    setDataUpdates([...dataUpdates, "lastWeight"]);
   };
 
   const getLastMedication = () => {
-    console.log("getting last medication from", sheepMeds)
+    //  console.log("sheepMeds", sheepMeds);
     const mostRecentDate = max(
-      sheepMeds.map((med) =>
-        parse(med.administer_date, "MM/dd/yyyy", new Date())
-      )
+      sheepMeds.map((med) => {
+        const parsedDate = parse(med.date, "MM/dd/yyyy", new Date());
+        return parsedDate;
+      })
     );
-  
+    // console.log("mostRecentDate", mostRecentDate);
     const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
     const mostRecentMed = sheepMeds.filter(
-      (med) => med.administer_date === mostRecentDateString
+      (med) => med.date === mostRecentDateString
     );
-  
+
     if (mostRecentMed.length > 1) {
-      const mostRecentMedWithHighestId = mostRecentMed.reduce((prev, current) => {
-        return prev.id > current.id ? prev : current;
-      });
+      const mostRecentMedWithHighestId = mostRecentMed.reduce(
+        (prev, current) => {
+          return prev.id > current.id ? prev : current;
+        }
+      );
       setLastMedication(
         `${mostRecentMedWithHighestId.medication_name} on ${mostRecentDateString}`
       );
@@ -282,6 +333,7 @@ useEffect(() => {
     } else {
       setLastMedication("");
     }
+    setDataUpdates([...dataUpdates, "lastMedication"]);
   };
   const getLastVax = () => {
     const mostRecentDate = max(
@@ -296,27 +348,40 @@ useEffect(() => {
 
     //  if there are multiple vax on the same date, return one with the highest id
     if (mostRecentVax.length > 1) {
-      setLastVaccination(
-        `${
-          mostRecentVax[mostRecentVax.length - 1].vaccination_name
-        } on ${mostRecentDateString}`
+      const mostRecentVaxWithHighestId = mostRecentVax.reduce(
+        (prev, current) => {
+          return prev.id > current.id ? prev : current;
+        }
       );
+      setLastVaccination(
+        `${mostRecentVaxWithHighestId.vaccination_name} on ${mostRecentDateString}`
+      );
+    } else if (mostRecentVax.length === 1) {
+      setLastVaccination(
+        `${mostRecentVax[0].vaccination_name} on ${mostRecentDateString}`
+      );
+    } else {
+      setLastVaccination("");
     }
-    setLastVaccination(
-      `${mostRecentVax[0].vaccination_name} on ${mostRecentDateString}`
-    );
+    setDataUpdates([...dataUpdates, "lastVaccination"]);
   };
-
+*/
   const basic = [
     name && { title: "Name:", description: name },
     { title: "Tag Id:", description: tag_id },
     scrapie_id && { title: "Scrapie Id:", description: scrapie_id },
     { title: "Breed:", description: breed_name },
-    color_name !== "NA" && { title: "Color:", description: color_name },
-    marking_name !== "NA" && { title: "Marking:", description: marking_name },
+    color_name !== "NA" && {
+      title: "Color:",
+      description: color_name,
+    },
+    marking_name !== "NA" && {
+      title: "Marking:",
+      description: marking_name,
+    },
     { title: "Date of Birth:", description: dob },
     { title: "Sex", description: sex },
-    !dod && { title: "Age", description: age(route.params) },
+    !dod && { title: "Age", description: age(sheep[0]) },
     dod && { title: "Date of Death:", description: dod },
     dop && { title: "Date of Purchase:", description: dop },
     dos && { title: "Date of Sale:", description: dos },
@@ -324,47 +389,64 @@ useEffect(() => {
 
   const breeding = [
     father_name && { title: "Father:", description: father_name },
-    father_tag_id && { title: "Father Tag Id:", description: father_tag_id },
-    mother_name && { title: "Mother:", description: mother_name },
-    mother_tag_id && { title: "Mother Tag Id:", description: mother_tag_id },
-
-    sex === "f" && { title: "Date last bred:", description: date_last_bred },
-    sex === "f" && {
-      title: "Time until lambing:",
-      description: "2 months 5 days",
+    father_tag_id && {
+      title: "Father Tag Id:",
+      description: father_tag_id,
     },
+    mother_name && { title: "Mother:", description: mother_name },
+    mother_tag_id && {
+      title: "Mother Tag Id:",
+      description: mother_tag_id,
+    },
+
     sex === "f" &&
-      children.length > 0 && {
+      date_last_bred && {
+        title: "Date last bred:",
+        description: date_last_bred,
+      },
+    sex === "f" &&
+      date_last_bred && {
+        title: "Time until lambing:",
+        description: "2 months 5 days",
+      },
+    sex === "f" &&
+      sheepChildren.length > 0 && {
         title: "Average lamb qty:",
         description: getAverageChilrenQty(),
       },
     sex === "f" &&
-      children.length > 0 && {
+      sheepChildren.length > 0 && {
         title: "Average lamb weight",
         description: getAverageChildWeight(),
       },
     sex === "f" &&
-      children.length > 0 && {
+      sheepChildren.length > 0 && {
         title: "Last lamb qty:",
         description: getMostRecentNumberOfChildren(),
       },
-    children.length > 0 && { title: "Children:", description: showChildren() },
+    sheepChildren.length > 0 && {
+      title: "Children:",
+      description: showChildren(),
+    },
   ].filter(Boolean);
 
   const health = [
     sheepMeds.length > 0 && {
+      type: forms.MEDS,
       title: "Last Medication:",
-      description: lastMedication,
+      description: `${lastMedication.entry} on ${lastMedication.date}`,
     },
     sheepVax.length > 0 && {
+      type: forms.VAX,
       title: "Last Vaccination:",
-      description: lastVaccination,
+      description: `${lastVaccination.entry} on ${lastVaccination.date}`,
     },
     sheepWeights.length > 0 && {
+      type: forms.WEIGHT,
       title: "Last Weight:",
-      description: lastWeight(),
+      description: `${lastWeight.entry}lbs on ${lastWeight.date}`,
     },
-    dod && { title: "Date of Death:", description: dod },
+    dod && { title: "Date of Death:", description: dod, type: forms.DEATH },
   ].filter(Boolean);
 
   const misc = [
@@ -385,9 +467,6 @@ useEffect(() => {
   }, [navigation, route]);
   const placeholder = require("../../assets/images/placeholder.jpg");
 
-  const onItemPress = () => {
-    console.log("item pressed");
-  };
   const buttons = [
     { value: "basic", label: "Overview", color: theme.colors.primary },
     { value: "breeding", label: "Breeding", color: theme.colors.secondary },
@@ -397,38 +476,54 @@ useEffect(() => {
 
   const [selectedValue, setSelectedValue] = useState("basic");
   const [data, setData] = useState(basic);
-  const dispatch = useDispatch();
-  const { contextMenuOpen } = useSelector(uiSelector);
+
   const openContextMenu = (index) => {
     dispatch(setContextMenuOpen(index));
   };
 
-  const handlePlusPress = async () => {
-    toggleSecondaryFormModal(
-      forms.MEDS,
-      sheep_id,
-      false,
-      dispatch,
-      async () => {
-        const newMeds = await fetchSheepMeds(sheep_id);
-        setSheepMeds(newMeds);
-      }
-    );
+  const updateState = async (type) => {
+    let updatedItems;
+    switch (type) {
+      case forms.MEDS:
+        updatedItems = await fetchSheepMeds(sheep_id);
+        setSheepMeds(updatedItems);
+        break;
+      case forms.VAX:
+        updatedItems = await fetchSheepVax(sheep_id);
+        const sortedData = sortData(updatedItems);
+        setSheepVax(updatedItems);
+        break;
+      case forms.WEIGHT:
+        updatedItems = await fetchSheepWeight(sheep_id);
+        setSheepWeights(updatedItems);
+        break;
+      default:
+        break;
+    }
   };
 
-  const handleListPress = () => {
-    toggleSecondaryFormModal(forms.MEDS, sheep_id, true, dispatch);
+  const handlePlusPress = async (type) => {
+    toggleSecondaryFormModal(type, sheep_id, false, dispatch, async () => {
+      updateState(type);
+    });
   };
 
+  const handleListPress = (type) => {
+    setListHeader(type.listHeader);
+    setListModalVisible(true);
+  };
 
-  useEffect(() => {
-    console.log("lastMedication changed, forcing re-render");
-  }, [lastMedication]);
+  const handleModalClose = () => {
+    setListData([]);
+    setListHeader("");
+    setListModalVisible(false);
+  };
 
   useEffect(() => {
     switch (selectedValue) {
       case "basic":
         setData(basic);
+        console.log("updating data", basic);
         break;
       case "breeding":
         setData(breeding);
@@ -442,7 +537,12 @@ useEffect(() => {
       default:
         setData(basic);
     }
-  }, [selectedValue]);
+    // Check if dataUpdates array is not empty
+    if (dataUpdates.length > 0) {
+      // Clear the dataUpdates array
+      setDataUpdates([]);
+    }
+  }, [selectedValue, dataUpdates, sheep]);
 
   return (
     <View style={styles.container}>
@@ -470,7 +570,6 @@ useEffect(() => {
               selectedValue === button.value ? "white" : `${button.color}98`,
             borderColor: `${button.color}80`,
             borderWidth: 1,
-            //    elevation: 1,
             borderTopLeftRadius: 8,
             borderTopRightRadius: 8,
             borderBottomLeftRadius: 0,
@@ -493,23 +592,31 @@ useEffect(() => {
               : { flexDirection: "column" }
           }
         >
-          <Text>{lastMedication}</Text>
           {data.map((item, index) => (
             <ListItem
               key={index}
               index={index}
-              theme={theme}
               item={item}
               selectedValue={selectedValue}
               showContextMenu={selectedValue === "health"}
               onItemPress={() => openContextMenu(index)}
               isContextMenuOpen={contextMenuOpen}
-              onPlusPress={handlePlusPress}
-              onListPress={handleListPress}
+              onPlusPress={() => handlePlusPress(item.type)}
+              onListPress={() => handleListPress(item.type)}
             />
           ))}
+          {selectedValue === "basic" && (
+            <AddSheepBtn icon="pencil" toggleModal={onEditSheep} />
+          )}
         </View>
       </View>
+      <Modal visible={listModalvisible} transparent>
+        <Pressable onPress={handleModalClose} style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <DataList header={listHeader} onDismiss={handleModalClose} />
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 };
@@ -539,6 +646,21 @@ const makeStyles = (theme) =>
     description: {
       fontSize: 16,
       textAlign: "center",
+    },
+    modalContainer: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.3)",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 10,
+    },
+    modalContent: {
+      backgroundColor: "white",
+      borderRadius: 10,
+      padding: 20,
+      justifyContent: "center",
+      alignItems: "center",
+      width: "100%",
     },
   });
 

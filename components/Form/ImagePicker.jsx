@@ -188,7 +188,6 @@ const ImagePicker = ({ value, onChange }) => {
         alert(response.errorMessage);
         return;
       }
-      console.log(response);
       writeFileToStorage(
         response.assets[0].base64,
         response.assets[0].fileName

@@ -107,7 +107,7 @@ const migrationScript = (transaction) => {
   transaction.executeSql(
     ` 
       CREATE TABLE IF NOT EXISTS medications 
-      (id  INTEGER PRIMARY KEY NOT NULL, medication_name VARCHAR(255) NOT NULL UNIQUE
+      (id  INTEGER PRIMARY KEY NOT NULL, entry VARCHAR(255) NOT NULL UNIQUE
       );
       `,
     [],
@@ -120,7 +120,7 @@ const migrationScript = (transaction) => {
           if (count === 0) {
             medicationData.forEach((item) => {
               transaction.executeSql(
-                "INSERT INTO medications (medication_name) VALUES (?)",
+                "INSERT INTO medications (entry) VALUES (?)",
                 [item]
               );
             });
@@ -143,8 +143,8 @@ const migrationScript = (transaction) => {
       CREATE TABLE IF NOT EXISTS sheep_meds (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-        med_id BIGINT REFERENCES medications (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-        administer_date VARCHAR(50) NOT NULL
+        entry_id BIGINT REFERENCES medications (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        date VARCHAR(50) NOT NULL
       );
       `,
     [],
@@ -158,7 +158,7 @@ const migrationScript = (transaction) => {
   transaction.executeSql(
     ` 
     CREATE TABLE IF NOT EXISTS vaccines 
-    (id  INTEGER PRIMARY KEY NOT NULL, vaccination_name VARCHAR(255) NOT NULL UNIQUE
+    (id  INTEGER PRIMARY KEY NOT NULL, entry VARCHAR(255) NOT NULL UNIQUE
     );
       `,
     [],
@@ -171,7 +171,7 @@ const migrationScript = (transaction) => {
           if (count === 0) {
             vaccineData.forEach((item) => {
               transaction.executeSql(
-                "INSERT INTO vaccines (vaccination_name) VALUES (?)",
+                "INSERT INTO vaccines (entry) VALUES (?)",
                 [item]
               );
             });
@@ -193,12 +193,14 @@ const migrationScript = (transaction) => {
     CREATE TABLE IF NOT EXISTS sheep_vax (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-      vax_id BIGINT REFERENCES vaccines (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-      administer_date VARCHAR(50) NOT NULL
+      entry_id BIGINT REFERENCES vaccines (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+      date VARCHAR(50) NOT NULL
     );
       `,
     [],
-    () => {console.log("sheep_vax table created")},
+    () => {
+      console.log("sheep_vax table created");
+    },
     (transaction, error) => {
       console.error("Error creating sheep_vax table:", error);
       return false; // Rollback the transaction
@@ -210,7 +212,7 @@ const migrationScript = (transaction) => {
     CREATE TABLE IF NOT EXISTS sheep_weights (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-      weight BIGINT,
+      entry BIGINT,
       date VARCHAR(50) NOT NULL
     );
       `,
