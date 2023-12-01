@@ -13,7 +13,7 @@ export const initialState = {
   isMainFormDialogVisible: false,
   isSecondaryFormDialogVisible: false,
   formData: {
-    id: undefined,
+    sheep_id: undefined,
     picture: null,
     name: null,
     tag_id: "",
@@ -25,9 +25,9 @@ export const initialState = {
     dos: "",
     sire: null,
     dam: null,
-    breed: null,
-    color: null,
-    marking: null,
+    breed_id: null,
+    color_id: null,
+    marking_id: null,
     //weight_at_birth: null,
   },
   formTitle: "Add New Sheep",
@@ -37,7 +37,7 @@ export const initialState = {
   activeCardId: null,
   meds: [],
   vaccines: [],
-  contextMenuOpen: {0:false, 1:false, 2: false},
+  contextMenuOpen: { 0: false, 1: false, 2: false },
 };
 
 const uiSlice = createSlice({
@@ -48,7 +48,8 @@ const uiSlice = createSlice({
       state.formTitle = payload;
     },
     setSecondaryFormData: (state, { payload }) => {
-      const updatedData = { ...state.secondaryFormData, ...payload };      
+      console.log("secondary form data payload", payload);
+      const updatedData = { ...state.secondaryFormData, ...payload };
       return { ...state, secondaryFormData: updatedData };
     },
     setShowSecondaryFormDialog: (state, { payload }) => {
@@ -91,7 +92,10 @@ const uiSlice = createSlice({
         (acc, key) => {
           return {
             ...acc,
-            [`${key}`]: key.toString() === payload.toString() ? !state.contextMenuOpen[key] : false,
+            [`${key}`]:
+              key.toString() === payload.toString()
+                ? !state.contextMenuOpen[key]
+                : false,
           };
         },
         {}
@@ -100,7 +104,6 @@ const uiSlice = createSlice({
     },
   },
 });
-
 
 export const {
   setShowConfirmationDialog,
@@ -116,7 +119,7 @@ export const {
   setShowSecondaryFormDialog,
   setVaccines,
   setMeds,
-setContextMenuOpen,
+  setContextMenuOpen,
 } = uiSlice.actions;
 export const uiSelector = (state) => state.ui;
 export default uiSlice.reducer;

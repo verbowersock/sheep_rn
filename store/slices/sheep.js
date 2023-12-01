@@ -26,8 +26,9 @@ const sheepSlice = createSlice({
       };
     },
     updateSheep: (state, { payload }) => {
+      //    console.log("payload", payload);
       state.sheep = state.sheep.map((sheep) =>
-        sheep.id === payload.id ? payload : sheep
+        sheep.sheep_id === payload.sheep_id ? { ...sheep, ...payload } : sheep
       );
     },
     setSheepChildren: (state, { payload }) => {
@@ -48,7 +49,6 @@ const sheepSlice = createSlice({
     },
     updateSheepMeds: (state, { payload }) => {
       //add a medicine if it doesn't exist in the list otherwise remove it
-      console.log("payload", payload);
       state.sheepMeds = state.sheepMeds.filter((med) => med.id !== payload);
     },
     updateSheepVax: (state, { payload }) => {
@@ -72,6 +72,7 @@ export const {
   setSheepMeds,
   setSheepVax,
   setSheepWeights,
+  updateSheep,
   updateSheepMeds,
   updateSheepVax,
   updateSheepWeight,

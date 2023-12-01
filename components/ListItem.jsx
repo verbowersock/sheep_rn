@@ -10,9 +10,8 @@ const ListItem = ({
   showContextMenu,
   onItemPress,
   onPlusPress,
-  onListPress
+  onListPress,
 }) => {
-
   const { contextMenuOpen } = useSelector(uiSelector);
   const theme = useTheme();
   return (
@@ -22,9 +21,10 @@ const ListItem = ({
           selectedValue === "misc" || selectedValue === "health"
             ? "100%"
             : "50%",
-        paddingBottom: 14,
+        paddingBottom: 6,
         paddingLeft: 20,
         paddingRight: 20,
+        maxHeight: 200,
       }}
     >
       {showContextMenu ? (
@@ -36,7 +36,7 @@ const ListItem = ({
             <View style={{ flexDirection: "row" }}>
               <View>
                 <IconButton
-                onPress={onListPress}
+                  onPress={onListPress}
                   iconColor={theme.colors.primary}
                   icon="clipboard-list-outline"
                 ></IconButton>
@@ -58,7 +58,7 @@ const ListItem = ({
   );
 };
 
-const Item = ({ item}) => {
+const Item = ({ item }) => {
   return (
     <>
       <Text style={{ fontSize: 17, fontWeight: "bold" }}>{item.title} </Text>

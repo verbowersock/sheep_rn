@@ -2,13 +2,13 @@ import React from "react";
 import { FAB, useTheme } from "react-native-paper";
 import { StyleSheet } from "react-native";
 
-const AddSheepBtn = ({ toggleModal, icon = "plus" }) => {
+const AddSheepBtn = ({ toggleModal, icon = "plus", style }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   return (
     <FAB
       icon={icon}
-      style={styles.fab}
+      style={[styles.fab, style]}
       onPress={toggleModal}
       color={theme.colors.background}
     />

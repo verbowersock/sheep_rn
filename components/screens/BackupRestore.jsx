@@ -13,7 +13,7 @@ import { useDispatch } from "react-redux";
 import ConfirmationSnackbar from "../ConfirmationSnackbar";
 import { setShowSnackbar } from "../../store/slices/ui";
 import { useState } from "react";
-import { fetchSheep } from "../../services/db";
+import { fetchAllSheep } from "../../services/db";
 import { setSheep } from "../../store/slices/sheep";
 
 const BackupRestore = () => {
@@ -43,7 +43,7 @@ const BackupRestore = () => {
             "/data/user/0/com.sheeprn/files/SQLite/sheep.db"
           );
           setLoading(false);
-          await fetchSheep().then((res) => {
+          await fetchAllSheep().then((res) => {
             dispatch(setSheep(res));
           });
           dispatch(

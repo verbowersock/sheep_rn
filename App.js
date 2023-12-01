@@ -8,15 +8,19 @@ import { useDispatch } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
 
 import {
+  addBasicData,
+  addMedicalData,
   dropDbTablesAsync,
-  fetchSheep,
+  fetchAllSheep,
   init,
   insertBreedData,
   insertColorData,
   insertMarkingData,
   insertMedData,
+  insertMedList,
   insertSheepData,
   insertVaxData,
+  insertVaxList,
 } from "./services/db";
 import { setSheep } from "./store/slices/sheep";
 
@@ -37,7 +41,7 @@ export default function App() {
     try {
       await SplashScreen.preventAutoHideAsync();
       //const currentSchemaVersion = await getCurrentSchemaVersion();
-      const currentSchemaVersion = 0;
+      const currentSchemaVersion = 2;
       const expectedSchemaVersion = 2; // The version your app expects
 
       if (currentSchemaVersion !== expectedSchemaVersion) {
@@ -45,18 +49,19 @@ export default function App() {
         await updateSchemaVersion(expectedSchemaVersion);
       }
       try {
-        //  await dropDbTablesAsync();
         await init();
         await insertBreedData();
         await insertColorData();
         await insertMarkingData();
         await insertSheepData();
+        await insertMedList();
+        await insertVaxList();
         await insertMedData();
         await insertVaxData();
       } catch (e) {
         console.log("!e", e);
       }
-      await fetchSheep()
+      await fetchAllSheep()
         .then((res) => {
           dispatch(setSheep(res));
         })

@@ -97,6 +97,7 @@ const ImagePicker = ({ value, onChange }) => {
             .then((stats) => {
               setFilePath(`file:\/\/${stats.path}`);
               onChange(`file:\/\/${stats.path}`);
+              alert("Image saved to " + fullPath);
             })
 
             .catch((err) => {
