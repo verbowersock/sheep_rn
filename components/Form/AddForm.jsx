@@ -563,9 +563,10 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         />
         <View style={styles.buttonContainer}>
           <Button
-            mode="text"
-            color={theme.colors.primary}
-            style={{ width: "40%" }}
+            mode="outlined"
+            outlineColor={theme.colors.primary}
+            textColor={theme.colors.primary}
+            style={{ width: "40%", borderColor: theme.colors.primary }}
             onPress={() => {
               toggleModal();
               reset(defaultValues);
@@ -575,7 +576,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           </Button>
           <Button
             loading={loading}
-            color={theme.colors.primary}
+            buttonColor={theme.colors.primary}
             dark
             style={{ width: "40%" }}
             mode="contained"
