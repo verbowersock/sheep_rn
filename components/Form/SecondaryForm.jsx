@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, KeyboardAvoidingView } from "react-native";
 import { StyleSheet } from "react-native";
 import Modal from "react-native-modal";
 import {
@@ -9,10 +9,12 @@ import {
   editSheep,
   fetchAllMedications,
   fetchAllVaccines,
-  fetchSheep,
+  fetchAllSheep,
   fetchSheepMeds,
   fetchSheepVax,
   fetchSheepWeight,
+  updateDateLastBred,
+  fetchSheep,
 } from "../../services/db";
 import DateTextInput from "./DateTextInput";
 import { useForm, Controller } from "react-hook-form";
@@ -35,9 +37,11 @@ import {
 import { forms } from "../../Constants";
 import { onChange } from "react-native-reanimated";
 import {
+  setSheep,
   setSheepMeds,
   setSheepVax,
   setSheepWeights,
+  updateSheep,
   updateSheepMeds,
   updateSheepVax,
   updateSheepWeight,
@@ -49,9 +53,10 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const dispatch = useDispatch();
   const { meds, vaccines } = useSelector(uiSelector);
   const [dataLoaded, setDataLoaded] = useState(false);
-  const { MEDS, VAX, WEIGHT } = forms;
+  const { MEDS, VAX, WEIGHT, BREEDING, DEATH, SALE, MISC } = forms;
   const { secondaryFormData } = useSelector(uiSelector);
   const { title, type, errorText } = secondaryFormData.type;
+  const { defaultData } = secondaryFormData;
 
   const [loading, setLoading] = useState(false);
 
@@ -103,80 +108,186 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
 
   const onSubmit = (data) => {
     setLoading(true);
-    if (type === MEDS.type) {
-      addMedication(data)
-        .then(() => {
-          return fetchSheepMeds(data.sheep_id);
-        })
-        .then((meds) => {
-          console.log("meds", meds);
-          return dispatch(setSheepMeds(meds));
-        })
-        .then(() => {
-          setLoading(false);
-          toggleModal();
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: false,
-              message: `Sheep records updated successfully`,
-            })
-          );
-          reset();
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    } else if (type === VAX.type) {
-      addVaccination(data)
-        .then(() => {
-          return fetchSheepVax(data.sheep_id);
-        })
-        .then((vax) => {
-          console.log("vax", vax);
-          return dispatch(setSheepVax(vax));
-        })
-        .then(() => {
-          setLoading(false);
-          toggleModal();
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: false,
-              message: `Sheep records updated successfully`,
-            })
-          );
-          reset();
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    switch (type) {
+      case MEDS.type:
+        addMedication(data)
+          .then(() => {
+            return fetchSheepMeds(data.sheep_id);
+          })
+          .then((meds) => {
+            return dispatch(setSheepMeds(meds));
+          })
+          .then(() => {
+            setLoading(false);
+            toggleModal();
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: false,
+                message: `Sheep records updated successfully`,
+              })
+            );
+            reset();
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        break;
+      case VAX.type:
+        addVaccination(data)
+          .then(() => {
+            return fetchSheepVax(data.sheep_id);
+          })
+          .then((vax) => {
+            return dispatch(setSheepVax(vax));
+          })
+          .then(() => {
+            setLoading(false);
+            toggleModal();
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: false,
+                message: `Sheep records updated successfully`,
+              })
+            );
+            reset();
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        break;
       //   promise = addVaccination(data);
-    } else if (type === WEIGHT.type) {
-      // promise = addSheepWeight(data);
-      addSheepWeight(data)
-        .then(() => {
-          return fetchSheepWeight(data.sheep_id);
-        })
-        .then((weight) => {
-          console.log("weight", weight);
-          return dispatch(setSheepWeights(weight));
-        })
-        .then(() => {
-          setLoading(false);
-          toggleModal();
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: false,
-              message: `Sheep records updated successfully`,
-            })
-          );
-          reset();
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+      case WEIGHT.type:
+        // promise = addSheepWeight(data);
+        addSheepWeight(data)
+          .then(() => {
+            return fetchSheepWeight(data.sheep_id);
+          })
+          .then((weight) => {
+            return dispatch(setSheepWeights(weight));
+          })
+          .then(() => {
+            setLoading(false);
+            toggleModal();
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: false,
+                message: `Sheep records updated successfully`,
+              })
+            );
+            reset();
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        break;
+      case BREEDING.type:
+        //   console.log("data", data);
+        editSheep({ date_last_bred: data.date }, data.sheep_id)
+          .then(() => {
+            return fetchSheep(data.sheep_id);
+          })
+          .then((sheep) => {
+            //     console.log("sheep after update", sheep);
+            return dispatch(updateSheep(sheep));
+          })
+          .then(() => {
+            setLoading(false);
+            toggleModal();
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: false,
+                message: `Sheep records updated successfully`,
+              })
+            );
+            reset();
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        break;
+      case SALE.type:
+        console.log("saleDate", data.date);
+        editSheep({ dos: data.date }, data.sheep_id)
+          .then(() => {
+            return fetchSheep(data.sheep_id);
+          })
+          .then((sheep) => {
+            //    console.log("sheep after update", sheep);
+            return dispatch(updateSheep(sheep));
+          })
+          .then(() => {
+            setLoading(false);
+            toggleModal();
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: false,
+                message: `Sheep records updated successfully`,
+              })
+            );
+            reset();
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        break;
+      case DEATH.type:
+        console.log("deathDate", data.date);
+        editSheep({ dod: data.date }, data.sheep_id)
+          .then(() => {
+            return fetchSheep(data.sheep_id);
+          })
+          .then((sheep) => {
+            //     console.log("sheep after update", sheep);
+            return dispatch(updateSheep(sheep));
+          })
+          .then(() => {
+            setLoading(false);
+            toggleModal();
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: false,
+                message: `Sheep records updated successfully`,
+              })
+            );
+            reset();
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      case MISC.type:
+        editSheep(
+          { notes: data.notes, last_location: data.last_location },
+          data.sheep_id
+        )
+          .then(() => {
+            return fetchSheep(data.sheep_id);
+          })
+          .then((sheep) => {
+            console.log("sheep after update", sheep);
+            return dispatch(updateSheep(sheep));
+          })
+          .then(() => {
+            setLoading(false);
+            toggleModal();
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: false,
+                message: `Sheep records updated successfully`,
+              })
+            );
+            reset();
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        break;
     }
   };
 
@@ -193,31 +304,34 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
     >
       <View style={styles.formContainer}>
         <Text style={styles.formTitle}>{title}</Text>
-        <Controller
-          control={control}
-          //validate that the date is in format MM/DD/YYYY, and that it is not empty
-          rules={{
-            pattern: {
-              value: /^\d{2}\/\d{2}\/\d{4}$/,
-              message: "Date must be in format MM/DD/YYYY",
-            },
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <DateTextInput
-              error={errors.date ? true : false}
-              label="Date"
-              field="date"
-              value={value}
-              onChangeText={(text) => {
-                onChange(text);
-              }}
-            />
-          )}
-          name="date"
-        />
+        {type !== MISC.type && (
+          <Controller
+            control={control}
+            //validate that the date is in format MM/DD/YYYY, and that it is not empty
+            rules={{
+              pattern: {
+                value: /^\d{2}\/\d{2}\/\d{4}$/,
+                message: "Date must be in format MM/DD/YYYY",
+              },
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <DateTextInput
+                error={errors.date ? true : false}
+                label="Date"
+                field="date"
+                value={value}
+                onChangeText={(text) => {
+                  onChange(text);
+                }}
+              />
+            )}
+            name="date"
+          />
+        )}
         {errors.date && (
           <Text style={styles.errorText}>{errors.date.message}</Text>
         )}
+
         {type === MEDS.type && (
           <View style={styles.inputContainer}>
             <Controller
@@ -290,6 +404,61 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
             />
           </View>
         )}
+        {type === MISC.type && (
+          <KeyboardAvoidingView style={{ width: "100%" }}>
+            <View style={styles.inputContainer}>
+              <Controller
+                control={control}
+                rules={{
+                  maxLength: 15,
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <MyTextInput
+                    error={errors.last_location}
+                    label="Last Location"
+                    field="last_location"
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                )}
+                name="last_location"
+                defaultValue={defaultData.last_location}
+              />
+              {errors.last_location && (
+                <Text style={styles.errorText}>
+                  Please shorten the location name to 15 characters
+                </Text>
+              )}
+            </View>
+            <View style={styles.inputContainer}>
+              <Controller
+                control={control}
+                rules={{
+                  maxLength: 1000,
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <MyTextInput
+                    multiline
+                    numberOfLines={4}
+                    error={errors.notes}
+                    label="Notes"
+                    field="notes"
+                    onChangeText={onChange}
+                    value={value}
+                  />
+                )}
+                name="notes"
+                defaultValue={defaultData.notes}
+              />
+              {errors.notes && (
+                <Text style={styles.errorText}>
+                  Please shorten the note text to 1000 characters
+                </Text>
+              )}
+            </View>
+          </KeyboardAvoidingView>
+        )}
+
         <View style={styles.buttonContainer}>
           <Button
             mode="text"

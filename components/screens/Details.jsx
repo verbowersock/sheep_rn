@@ -18,7 +18,7 @@ import {
   fetchSheepWeight,
   findChildren,
 } from "../../services/db";
-import { format, max, parse, set } from "date-fns";
+import { add, format, max, parse, set } from "date-fns";
 import { useDispatch, useSelector } from "react-redux";
 import {
   resetFormData,
@@ -32,7 +32,7 @@ import { toggleSecondaryFormModal } from "../utils/SharedFunctions";
 import { forms } from "../../Constants";
 import ListItem from "../ListItem";
 import DataList from "../DataList";
-import sheep, {
+import {
   setSheepChildren,
   setSheepMeds,
   setSheepVax,
@@ -40,6 +40,10 @@ import sheep, {
   sheepDataSelector,
 } from "../../store/slices/sheep";
 import AddSheepBtn from "../AddSheepBtn";
+import RNHTMLtoPDF from "react-native-html-to-pdf";
+import RNFS from "react-native-fs";
+import FileViewer from "react-native-file-viewer";
+import { htmlContent } from "./HTMLforPDF";
 
 const Details = ({ route }) => {
   const theme = useTheme();
@@ -49,6 +53,9 @@ const Details = ({ route }) => {
 
   const { sheep, sheepMeds, sheepVax, sheepWeights, sheepChildren } =
     useSelector(sheepDataSelector);
+
+  //find sheep by sheep_id
+  const this_sheep = sheep.find((sheep) => sheep.sheep_id === sheep_id);
   const {
     breed_id,
     breed_name,
@@ -73,7 +80,9 @@ const Details = ({ route }) => {
     tag_id,
     weight_at_birth,
     date_last_bred,
-  } = sheep[0];
+    notes,
+    last_location,
+  } = this_sheep;
 
   const [lastMedication, setLastMedication] = useState({});
   const [lastVaccination, setLastVaccination] = useState({});
@@ -82,6 +91,7 @@ const Details = ({ route }) => {
   const [listData, setListData] = useState([]);
   const [listHeader, setListHeader] = useState("");
   const [listModalvisible, setListModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { contextMenuOpen } = useSelector(uiSelector);
   const dispatch = useDispatch();
@@ -92,34 +102,42 @@ const Details = ({ route }) => {
         parse(a.date, "MM/dd/yyyy", new Date()) -
         parse(b.date, "MM/dd/yyyy", new Date())
     );
-    console.log("data", data);
     return data;
   };
 
   useEffect(() => {
-    console.log("sheep", sheep);
+    //  console.log("sheep", sheep_id);
+    //  console.log("sheep111", sheep);
+    //  console.log("sheepChildren", sheepChildren);
     //fetch children
     async function getChildren() {
+      setLoading(true);
       const children = await findChildren(sheep_id);
+      //    console.log("children for new", children);
       dispatch(setSheepChildren(children));
+      setLoading(false);
     }
     async function getMedications() {
+      setLoading(true);
       const medications = await fetchSheepMeds(sheep_id);
 
       const sortedData = sortData(medications);
-      console.log("medications", medications);
       dispatch(setSheepMeds(sortedData));
+      setLoading(false);
     }
     async function getVaccinations() {
+      setLoading(true);
       const vaccinations = await fetchSheepVax(sheep_id);
-      console.log("vaccinations", vaccinations);
       const sortedData = sortData(vaccinations);
       dispatch(setSheepVax(sortedData));
+      setLoading(false);
     }
     async function getWeights() {
+      setLoading(true);
       const weights = await fetchSheepWeight(sheep_id);
       const sortedData = sortData(weights);
       dispatch(setSheepWeights(sortedData));
+      setLoading(false);
     }
     getWeights();
     getVaccinations();
@@ -129,10 +147,8 @@ const Details = ({ route }) => {
 
   useEffect(() => {
     if (sheepMeds.length > 0) {
-      console.log("sheepMeds", sheepMeds);
       const lastMed = getMostRecentEntry(sheepMeds);
       setLastMedication(lastMed);
-      console.log("lastMed", lastMed);
     }
     if (sheepVax.length > 0) {
       const lastVax = getMostRecentEntry(sheepVax);
@@ -155,6 +171,7 @@ const Details = ({ route }) => {
                   key={index}
                   onPress={() => {
                     navigation.navigate("Details", child);
+                    setSelectedValue("basic");
                   }}
                 >
                   <Text
@@ -217,23 +234,27 @@ const Details = ({ route }) => {
   };
 
   const timeToLambing = () => {
+    //   console.log("lambingDate", date_last_bred);
     //add 165 days to the last breeding date
-    const lambingDate = new Date(
-      date_last_bred(date_last_bred.getDate() + 165)
-    );
+    const dateLastBred = parse(date_last_bred, "MM/dd/yyyy", new Date());
+
+    // Add 165 days to the last breeding date
+    const lambingDate = add(dateLastBred, { days: 165 });
+
+    // Format the lambingDate back into a string
+    const lambingDateString = format(lambingDate, "MM/dd/yyyy");
+
+    return lambingDateString;
   };
 
   const getMostRecentEntry = (data) => {
-    console.log("dataformostrecententry", data);
     const mostRecentDate = max(
       data.map((item) => parse(item.date, "MM/dd/yyyy", new Date()))
     );
-    console.log("mostRecentDate", mostRecentDate);
     const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
     const mostRecentEntry = data.filter(
       (item) => item.date === mostRecentDateString
     );
-    console.log("mostRecentEntry", mostRecentEntry);
     setDataUpdates([...dataUpdates, "lastMedication"]);
     if (mostRecentEntry.length > 1) {
       const mostRecentEntryWithHighestId = mostRecentEntry.reduce(
@@ -256,25 +277,42 @@ const Details = ({ route }) => {
     dispatch(setFormTitle("Edit Sheep"));
 
     const formattedData = {
-      breed: breed_id,
-      color: color_id,
-      marking: marking_id,
-      sire: sire,
-      dam: dam,
-      name: name,
-      dob: dob,
-      dop: dop,
-      dod: dod,
-      dos: dos,
-      tag_id: tag_id,
-      scrapie_id: scrapie_id,
-      id: sheep_id,
-      sex: sex,
-      weight_at_birth: weight_at_birth,
+      breed_id,
+      color_id,
+      marking_id,
+      sire,
+      dam,
+      name,
+      dob,
+      dop,
+      dod,
+      dos,
+      tag_id,
+      scrapie_id,
+      sheep_id,
+      sex,
+      weight_at_birth,
     };
     dispatch(setFormData(formattedData));
     dispatch(setShowFormDialog(true));
     setDataUpdates([...dataUpdates, "sheep"]);
+  };
+
+  const onEditMisc = () => {
+    toggleSecondaryFormModal(
+      forms.MISC,
+      sheep_id,
+      false,
+      dispatch,
+      async () => {
+        updateState(forms.MISC);
+      },
+      {
+        notes,
+        last_location,
+      }
+    );
+    setDataUpdates([...dataUpdates, "misc"]);
   };
 
   /* DELETE
@@ -406,8 +444,8 @@ const Details = ({ route }) => {
       },
     sex === "f" &&
       date_last_bred && {
-        title: "Time until lambing:",
-        description: "2 months 5 days",
+        title: "Expected lambing date:",
+        description: timeToLambing(),
       },
     sex === "f" &&
       sheepChildren.length > 0 && {
@@ -450,11 +488,10 @@ const Details = ({ route }) => {
   ].filter(Boolean);
 
   const misc = [
-    { title: "Last Location:", description: "Paddock3" },
+    { title: "Last Location:", description: last_location },
     {
       title: "Notes",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      description: notes,
     },
   ].filter(Boolean);
 
@@ -523,7 +560,6 @@ const Details = ({ route }) => {
     switch (selectedValue) {
       case "basic":
         setData(basic);
-        console.log("updating data", basic);
         break;
       case "breeding":
         setData(breeding);
@@ -542,19 +578,60 @@ const Details = ({ route }) => {
       // Clear the dataUpdates array
       setDataUpdates([]);
     }
-  }, [selectedValue, dataUpdates, sheep]);
+  }, [selectedValue, dataUpdates, sheep_id, sheepChildren, this_sheep]);
+
+  const pdfName = name ? name : tag_id;
+
+  const createPDF = async () => {
+    let options = {
+      html: htmlContent({
+        ...this_sheep,
+        lastWeight,
+        sheepMeds,
+        sheepVax,
+      }),
+      fileName: pdfName,
+      directory: "Download",
+    };
+
+    let file = await RNHTMLtoPDF.convert(options);
+
+    const destPath = `${RNFS.DownloadDirectoryPath}/${options.fileName}.pdf`;
+
+    RNFS.moveFile(file.filePath, destPath)
+      .then(() => {
+        alert(`File saved!`);
+        // Open the file
+        FileViewer.open(destPath)
+          .then(() => {
+            // success
+          })
+          .catch((error) => {
+            // error
+          });
+      })
+      .catch((err) => {
+        alert("Something went wrong! Please try again");
+        console.log("Error moving file: ", err);
+      });
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
         <Image
           source={picture ? { uri: picture } : placeholder}
-          resizeMode="cover"
           style={{
-            height: 250,
-            width: 250,
+            height: 200,
+            width: 200,
           }}
         />
+        <TouchableOpacity
+          style={{ backgroundColor: theme.colors.primary, padding: 5 }}
+          onPress={() => createPDF()}
+        >
+          <Text>Create PDF</Text>
+        </TouchableOpacity>
       </View>
       <SegmentedButtons
         value={selectedValue}
@@ -580,36 +657,48 @@ const Details = ({ route }) => {
       />
       <View
         style={{
-          flex: 0.6,
-          paddingVertical: 20,
+          paddingTop: 10,
           justifyContent: "space-between",
         }}
       >
-        <View
-          style={
-            selectedValue !== "misc" && selectedValue !== "health"
-              ? { flexDirection: "row", flexWrap: "wrap" }
-              : { flexDirection: "column" }
-          }
-        >
-          {data.map((item, index) => (
-            <ListItem
-              key={index}
-              index={index}
-              item={item}
-              selectedValue={selectedValue}
-              showContextMenu={selectedValue === "health"}
-              onItemPress={() => openContextMenu(index)}
-              isContextMenuOpen={contextMenuOpen}
-              onPlusPress={() => handlePlusPress(item.type)}
-              onListPress={() => handleListPress(item.type)}
-            />
-          ))}
-          {selectedValue === "basic" && (
-            <AddSheepBtn icon="pencil" toggleModal={onEditSheep} />
-          )}
-        </View>
+        {loading ? (
+          <Text>Loading...</Text>
+        ) : (
+          <View
+            style={
+              selectedValue !== "misc" && selectedValue !== "health"
+                ? {
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    position: "relative",
+                  }
+                : { flexDirection: "column" }
+            }
+          >
+            {data.map((item, index) => (
+              <ListItem
+                key={index}
+                index={index}
+                item={item}
+                selectedValue={selectedValue}
+                showContextMenu={selectedValue === "health"}
+                onItemPress={() => openContextMenu(index)}
+                isContextMenuOpen={contextMenuOpen}
+                onPlusPress={() => handlePlusPress(item.type)}
+                onListPress={() => handleListPress(item.type)}
+              />
+            ))}
+          </View>
+        )}
       </View>
+      {selectedValue === "basic" || selectedValue === "misc" ? (
+        <AddSheepBtn
+          icon="pencil"
+          toggleModal={selectedValue === "basic" ? onEditSheep : onEditMisc}
+          style={{ bottom: 5 }}
+        />
+      ) : null}
+
       <Modal visible={listModalvisible} transparent>
         <Pressable onPress={handleModalClose} style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -624,28 +713,17 @@ const Details = ({ route }) => {
 const makeStyles = (theme) =>
   StyleSheet.create({
     container: {
+      width: "100%",
       flex: 1,
       backgroundColor: theme.colors.background,
+      position: "relative",
     },
     imageContainer: {
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 20,
       marginTop: 20,
-      flex: 0.4,
-    },
-    itemStyle: {
-      paddingVertical: 20,
-      paddingHorizontal: 26,
-    },
-    name: {
-      fontSize: 24,
-      fontWeight: "bold",
-      marginBottom: 10,
-    },
-    description: {
-      fontSize: 16,
-      textAlign: "center",
+      height: "30%",
     },
     modalContainer: {
       flex: 1,

@@ -108,24 +108,16 @@ const Sheep = ({ item, index }) => {
   const onEditSheep = (item) => {
     dispatch(setFormTitle("Edit Sheep"));
 
-    const formattedData = {
-      breed: item.breed_id,
-      color: item.color_id,
-      marking: item.marking_id,
-      sire: item.sire,
-      dam: item.dam,
-      name: item.name,
-      dob: item.dob,
-      dop: item.dop,
-      dod: item.dod,
-      dos: item.dos,
-      tag_id: item.tag_id,
-      scrapie_id: item.scrapie_id,
-      id: item.sheep_id,
-      sex: item.sex,
-      weight_at_birth: item.weight_at_birth,
-    };
+    dispatch(setFormData(item));
+    dispatch(setShowFormDialog(true));
+  };
 
+  const onAddLamb = (item) => {
+    // console.log("add lamb", item);
+    const formattedData = {
+      dam: item.sheep_id,
+    };
+    dispatch(setFormTitle("Add Lamb"));
     dispatch(setFormData(formattedData));
     dispatch(setShowFormDialog(true));
   };
@@ -222,13 +214,29 @@ const Sheep = ({ item, index }) => {
               contentStyle={{ flexDirection: "row-reverse" }}
               name="skull"
               label="Death"
-              onPress={() => console.log("press")}
+              onPress={() => {
+                toggleMenuVisible(REMOVE);
+                toggleSecondaryFormModal(
+                  forms.DEATH,
+                  item.sheep_id,
+                  isSecondaryFormDialogVisible,
+                  dispatch
+                );
+              }}
             />
             <ButtonWithIcon
               contentStyle={{ flexDirection: "row-reverse" }}
               name="dollar-sign"
               label="Sale"
-              onPress={() => console.log("press")}
+              onPress={() => {
+                toggleMenuVisible(REMOVE);
+                toggleSecondaryFormModal(
+                  forms.SALE,
+                  item.sheep_id,
+                  isSecondaryFormDialogVisible,
+                  dispatch
+                );
+              }}
             />
             <ButtonWithIcon
               contentStyle={{ flexDirection: "row-reverse" }}
@@ -374,7 +382,7 @@ const Sheep = ({ item, index }) => {
                             ? theme.colors.primary
                             : theme.colors.onPrimary
                         }
-                        onPress={() => toggleMenuVisible(forms.BREEDING)}
+                        onPress={() => toggleMenuVisible(BREEDING)}
                       />
                       {menuVisible.BREEDING && (
                         <View style={styles.iconMenuContainerBreeding}>
@@ -382,13 +390,21 @@ const Sheep = ({ item, index }) => {
                             contentStyle={{ flexDirection: "row-reverse" }}
                             name="venus-mars"
                             label="Breeding Date"
-                            onPress={() => console.log("press")}
+                            onPress={() => {
+                              toggleMenuVisible(BREEDING);
+                              toggleSecondaryFormModal(
+                                forms.BREEDING,
+                                item.sheep_id,
+                                isSecondaryFormDialogVisible,
+                                dispatch
+                              );
+                            }}
                           />
                           <ButtonWithIcon
                             contentStyle={{ flexDirection: "row-reverse" }}
                             name="plus-circle"
                             label="New Lamb"
-                            onPress={() => console.log("press")}
+                            onPress={() => onAddLamb(item)}
                           />
                         </View>
                       )}
@@ -402,10 +418,8 @@ const Sheep = ({ item, index }) => {
                 <Text style={styles.label}>Tag ID: </Text>
                 <Text>{item.tag_id}</Text>
               </Text>
-
               <Text style={styles.info}>
                 <Text style={styles.label}>Scrapie Tag ID: </Text>
-
                 <Text>{item.scrapie_id ? item.scrapie_id : "NA"}</Text>
               </Text>
               <Text style={styles.info}>

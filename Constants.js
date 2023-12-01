@@ -18,7 +18,6 @@ export const forms = {
     title: "Record Breeding Date",
     type: "BREEDING",
     listHeader: "Breeding Dates",
-    
   },
   DEATH: {
     title: "Record Death",
@@ -27,5 +26,9 @@ export const forms = {
   SALE: {
     title: "Record Sale",
     type: "SALE",
+  },
+  MISC: {
+    title: "Edit Misc Info",
+    type: "MISC",
   },
 };

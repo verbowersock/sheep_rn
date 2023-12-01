@@ -33,15 +33,12 @@ const DataList = ({ header, onDismiss }) => {
     if (header === forms.MEDS.listHeader) {
       setType(forms.MEDS.type);
       setListData(sheepMeds);
-      console.log("sheepMeds in list", sheepMeds);
     } else if (header === forms.VAX.listHeader) {
       setType(forms.VAX.type);
       setListData(sheepVax);
-      console.log("sheepVax in list", sheepVax);
     } else if (header === forms.WEIGHT.listHeader) {
       setType(forms.WEIGHT.type);
       setListData(sheepWeights);
-      console.log("sheepWeights in list", sheepWeights);
     }
   }, [header, sheepMeds, sheepVax, sheepWeights]);
 
@@ -57,9 +54,7 @@ const DataList = ({ header, onDismiss }) => {
   };
 
   const deleteValue = async (id) => {
-    console.log(id);
     if (type === forms.MEDS.type) {
-      console.log("deleting med", id);
       removeSheepMed(id)
         .then(() => {
           dispatch(updateSheepMeds(id));
