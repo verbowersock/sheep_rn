@@ -44,6 +44,7 @@ import RNHTMLtoPDF from "react-native-html-to-pdf";
 import RNFS from "react-native-fs";
 import FileViewer from "react-native-file-viewer";
 import { htmlContent } from "./HTMLforPDF";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const Details = ({ route }) => {
   const theme = useTheme();
@@ -618,6 +619,23 @@ const Details = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={{
+          backgroundColor: theme.colors.secondary,
+          padding: 10,
+          borderRadius: 10,
+          maxWidth: 120,
+          marginRight: 10,
+          alignSelf: "flex-end",
+        }}
+        onPress={() => createPDF()}
+      >
+        <Text style={{ color: "white" }}>
+          <Icon name="file-pdf-o" size={20} />
+          {"  "}
+          Export data
+        </Text>
+      </TouchableOpacity>
       <View style={styles.imageContainer}>
         <Image
           source={picture ? { uri: picture } : placeholder}
@@ -626,12 +644,6 @@ const Details = ({ route }) => {
             width: 200,
           }}
         />
-        <TouchableOpacity
-          style={{ backgroundColor: theme.colors.primary, padding: 5 }}
-          onPress={() => createPDF()}
-        >
-          <Text>Create PDF</Text>
-        </TouchableOpacity>
       </View>
       <SegmentedButtons
         value={selectedValue}
@@ -722,8 +734,9 @@ const makeStyles = (theme) =>
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 20,
-      marginTop: 20,
+      marginTop: 5,
       height: "30%",
+      position: "relative",
     },
     modalContainer: {
       flex: 1,
