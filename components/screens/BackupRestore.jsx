@@ -4,6 +4,7 @@ import {
   Text,
   ScrollView,
   PermissionsAndroid,
+  Platform,
 } from "react-native";
 import { Button, useTheme } from "react-native-paper";
 import DocPicker from "react-native-document-picker";
@@ -21,131 +22,119 @@ const BackupRestore = () => {
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+
   async function restoreDB() {
-    try {
-      setLoading(true);
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        {
-          title: "myFlock App Permission",
-          message: "This app needs permission to acess storage.",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK",
-        }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        try {
-          const rsPicker = await DocPicker.pickSingle();
-          const filePath = rsPicker.uri;
-          await RNFS.copyFile(
-            filePath,
-            "/data/user/0/com.sheeprn/files/SQLite/sheep.db"
-          );
-          setLoading(false);
-          await fetchAllSheep().then((res) => {
-            dispatch(setSheep(res));
-          });
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: false,
-              message: "Database restored successfully",
-            })
-          );
-        } catch (e) {
-          setLoading(false);
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: true,
-              message: "Something went wrong. Please try again",
-            })
-          );
-          console.log(e);
-        }
-      } else {
+    setLoading(true);
+    if (checkPermissions()) {
+      try {
+        const rsPicker = await DocPicker.pickSingle();
+        const filePath = rsPicker.uri;
+        await RNFS.copyFile(
+          filePath,
+          "/data/user/0/com.sheeprn/files/SQLite/sheep.db"
+        );
+        setLoading(false);
+        await fetchAllSheep().then((res) => {
+          dispatch(setSheep(res));
+        });
+        dispatch(
+          setShowSnackbar({
+            visible: true,
+            error: false,
+            message: "Database restored successfully",
+          })
+        );
+      } catch (e) {
+        setLoading(false);
         dispatch(
           setShowSnackbar({
             visible: true,
             error: true,
-            message: "Storage Permission denied",
+            message: "Something went wrong. Please try again",
           })
         );
-        return false;
+        console.log(e);
       }
-    } catch (err) {
-      console.warn(err);
+    } else {
       dispatch(
         setShowSnackbar({
           visible: true,
           error: true,
-          message: "Something went wrong. Please try again",
+          message: "Storage Permission denied",
         })
       );
+      return false;
+    }
+  }
+
+  async function checkPermissions() {
+    if (Platform.constants["Release"] >= 13) {
+      return true;
+    } else {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: "myFlock App Permission",
+            message: "This app needs permission to acess storage.",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK",
+          }
+        );
+      } catch (err) {
+        console.warn(err);
+        dispatch(
+          setShowSnackbar({
+            visible: true,
+            error: true,
+            message: "Something went wrong. Please try again",
+          })
+        );
+      }
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
   }
 
   async function backupDB() {
-    try {
-      setLoading(true);
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        {
-          title: "myFlock App Permission",
-          message: "This app needs permission to acess storage.",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK",
-        }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        try {
-          const currDate = format(new Date(), "dd_MM_yyyy_HHmmss");
-          const destPath =
-            RNFS.DownloadDirectoryPath + "/myFlockDB_" + currDate + ".db";
-          await RNFS.copyFile(
-            "/data/user/0/com.sheeprn/files/SQLite/sheep.db",
-            destPath
-          );
-          setLoading(false);
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: false,
-              message: "Database saved to Downloads folder",
-            })
-          );
-        } catch (e) {
-          setLoading(false);
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: true,
-              message: "Something went wrong. Please try again",
-            })
-          );
-          console.log(e);
-        }
-      } else {
+    setLoading(true);
+    if (checkPermissions()) {
+      try {
+        const currDate = format(new Date(), "dd_MM_yyyy_HHmmss");
+        const destPath =
+          RNFS.DownloadDirectoryPath + "/myFlockDB_" + currDate + ".db";
+        await RNFS.copyFile(
+          "/data/user/0/com.sheeprn/files/SQLite/sheep.db",
+          destPath
+        );
+        setLoading(false);
+        dispatch(
+          setShowSnackbar({
+            visible: true,
+            error: false,
+            message: "Database saved to Downloads folder",
+          })
+        );
+      } catch (e) {
+        setLoading(false);
         dispatch(
           setShowSnackbar({
             visible: true,
             error: true,
-            message: "Storage Permission denied",
+            message: "Something went wrong. Please try again",
           })
         );
-        return false;
+        console.log(e);
       }
-    } catch (err) {
-      console.warn(err);
+    } else {
       dispatch(
         setShowSnackbar({
           visible: true,
           error: true,
-          message: "Something went wrong. Please try again",
+          message: "Storage Permission denied",
         })
       );
+      return false;
     }
   }
 

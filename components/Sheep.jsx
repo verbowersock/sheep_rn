@@ -104,7 +104,7 @@ const Sheep = ({ item, index }) => {
       })
     );
   };
-
+  console.log("item.picture", item.picture);
   const onEditSheep = (item) => {
     dispatch(setFormTitle("Edit Sheep"));
 
