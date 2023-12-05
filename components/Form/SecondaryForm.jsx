@@ -184,13 +184,11 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           });
         break;
       case BREEDING.type:
-        //   console.log("data", data);
         editSheep({ date_last_bred: data.date }, data.sheep_id)
           .then(() => {
             return fetchSheep(data.sheep_id);
           })
           .then((sheep) => {
-            //     console.log("sheep after update", sheep);
             return dispatch(updateSheep(sheep));
           })
           .then(() => {
@@ -210,13 +208,11 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           });
         break;
       case SALE.type:
-        console.log("saleDate", data.date);
         editSheep({ dos: data.date }, data.sheep_id)
           .then(() => {
             return fetchSheep(data.sheep_id);
           })
           .then((sheep) => {
-            //    console.log("sheep after update", sheep);
             return dispatch(updateSheep(sheep));
           })
           .then(() => {
@@ -236,13 +232,11 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           });
         break;
       case DEATH.type:
-        console.log("deathDate", data.date);
         editSheep({ dod: data.date }, data.sheep_id)
           .then(() => {
             return fetchSheep(data.sheep_id);
           })
           .then((sheep) => {
-            //     console.log("sheep after update", sheep);
             return dispatch(updateSheep(sheep));
           })
           .then(() => {
@@ -269,7 +263,6 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
             return fetchSheep(data.sheep_id);
           })
           .then((sheep) => {
-            console.log("sheep after update", sheep);
             return dispatch(updateSheep(sheep));
           })
           .then(() => {

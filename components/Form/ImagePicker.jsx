@@ -15,16 +15,11 @@ const ImagePicker = ({ value, onChange }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const [file, setFile] = useState(value);
-  console.log(value);
-
   const [FABstate, setFABState] = React.useState({ open: false });
-
   const onFABStateChange = ({ open }) => setFABState({ open });
-
   const { open } = FABstate;
 
   const requestCameraPermission = async () => {
-    console.log("Requesting camera permission");
     if (Platform.OS === "android") {
       try {
         const granted = await PermissionsAndroid.request(
@@ -34,10 +29,8 @@ const ImagePicker = ({ value, onChange }) => {
             message: "App needs camera permission",
           }
         );
-        console.log("granted");
         // If CAMERA Permission is granted
         return granted === PermissionsAndroid.RESULTS.GRANTED;
-        console.log(granted);
       } catch (err) {
         console.warn(err);
         return false;
@@ -46,7 +39,6 @@ const ImagePicker = ({ value, onChange }) => {
   };
 
   const captureImage = async (type) => {
-    console.log("Launching camera...");
     let options = {
       mediaType: type,
       maxWidth: 300,
@@ -57,9 +49,6 @@ const ImagePicker = ({ value, onChange }) => {
     };
     let isCameraPermitted = await requestCameraPermission();
     if (isCameraPermitted) {
-      console.log(
-        "Camera and Storage permissions granted. Launching camera..."
-      );
       const result = await launchCamera(options, async (response) => {
         if (response.didCancel) {
           alert("User cancelled camera picker");
@@ -74,7 +63,6 @@ const ImagePicker = ({ value, onChange }) => {
           alert(response.errorMessage);
           return;
         }
-        console.log(response);
         const base64 = response.assets[0].base64;
         setFile(`data:image/png;base64,${base64}`);
         onChange(`data:image/png;base64,${base64}`);

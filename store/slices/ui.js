@@ -48,7 +48,6 @@ const uiSlice = createSlice({
       state.formTitle = payload;
     },
     setSecondaryFormData: (state, { payload }) => {
-      console.log("secondary form data payload", payload);
       const updatedData = { ...state.secondaryFormData, ...payload };
       return { ...state, secondaryFormData: updatedData };
     },
