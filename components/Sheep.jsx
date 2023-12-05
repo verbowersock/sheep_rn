@@ -104,16 +104,13 @@ const Sheep = ({ item, index }) => {
       })
     );
   };
-  console.log("item.picture", item.picture);
   const onEditSheep = (item) => {
     dispatch(setFormTitle("Edit Sheep"));
-
     dispatch(setFormData(item));
     dispatch(setShowFormDialog(true));
   };
 
   const onAddLamb = (item) => {
-    // console.log("add lamb", item);
     const formattedData = {
       dam: item.sheep_id,
     };

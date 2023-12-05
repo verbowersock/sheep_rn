@@ -107,14 +107,9 @@ const Details = ({ route }) => {
   };
 
   useEffect(() => {
-    //  console.log("sheep", sheep_id);
-    //  console.log("sheep111", sheep);
-    //  console.log("sheepChildren", sheepChildren);
-    //fetch children
     async function getChildren() {
       setLoading(true);
       const children = await findChildren(sheep_id);
-      //    console.log("children for new", children);
       dispatch(setSheepChildren(children));
       setLoading(false);
     }
@@ -235,8 +230,6 @@ const Details = ({ route }) => {
   };
 
   const timeToLambing = () => {
-    //   console.log("lambingDate", date_last_bred);
-    //add 165 days to the last breeding date
     const dateLastBred = parse(date_last_bred, "MM/dd/yyyy", new Date());
 
     // Add 165 days to the last breeding date
@@ -316,95 +309,6 @@ const Details = ({ route }) => {
     setDataUpdates([...dataUpdates, "misc"]);
   };
 
-  /* DELETE
-  const getLastWeight = () => {
-    const mostRecentDate = max(
-      sheepWeights.map((weight) => parse(weight.date, "MM/dd/yyyy", new Date()))
-    );
-    const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
-    const mostRecentWeight = sheepWeights.filter(
-      (weight) => weight.date === mostRecentDateString
-    );
-    if (mostRecentWeight.length > 1) {
-      const mostRecentWeightWithHighestId = mostRecentWeight.reduce(
-        (prev, current) => {
-          return prev.id > current.id ? prev : current;
-        }
-      );
-      setLastWeight(
-        `${mostRecentWeightWithHighestId.weight}lbs on ${mostRecentDateString}`
-      );
-    } else if (mostRecentWeight.length === 1) {
-      setLastWeight(`${mostRecentWeight[0].weight} on ${mostRecentDateString}`);
-    } else {
-      setLastWeight("");
-    }
-    setDataUpdates([...dataUpdates, "lastWeight"]);
-  };
-
-  const getLastMedication = () => {
-    //  console.log("sheepMeds", sheepMeds);
-    const mostRecentDate = max(
-      sheepMeds.map((med) => {
-        const parsedDate = parse(med.date, "MM/dd/yyyy", new Date());
-        return parsedDate;
-      })
-    );
-    // console.log("mostRecentDate", mostRecentDate);
-    const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
-    const mostRecentMed = sheepMeds.filter(
-      (med) => med.date === mostRecentDateString
-    );
-
-    if (mostRecentMed.length > 1) {
-      const mostRecentMedWithHighestId = mostRecentMed.reduce(
-        (prev, current) => {
-          return prev.id > current.id ? prev : current;
-        }
-      );
-      setLastMedication(
-        `${mostRecentMedWithHighestId.medication_name} on ${mostRecentDateString}`
-      );
-    } else if (mostRecentMed.length === 1) {
-      setLastMedication(
-        `${mostRecentMed[0].medication_name} on ${mostRecentDateString}`
-      );
-    } else {
-      setLastMedication("");
-    }
-    setDataUpdates([...dataUpdates, "lastMedication"]);
-  };
-  const getLastVax = () => {
-    const mostRecentDate = max(
-      sheepVax.map((vax) =>
-        parse(vax.administer_date, "MM/dd/yyyy", new Date())
-      )
-    );
-    const mostRecentDateString = format(mostRecentDate, "MM/dd/yyyy");
-    const mostRecentVax = sheepVax.filter(
-      (vax) => vax.administer_date === mostRecentDateString
-    );
-
-    //  if there are multiple vax on the same date, return one with the highest id
-    if (mostRecentVax.length > 1) {
-      const mostRecentVaxWithHighestId = mostRecentVax.reduce(
-        (prev, current) => {
-          return prev.id > current.id ? prev : current;
-        }
-      );
-      setLastVaccination(
-        `${mostRecentVaxWithHighestId.vaccination_name} on ${mostRecentDateString}`
-      );
-    } else if (mostRecentVax.length === 1) {
-      setLastVaccination(
-        `${mostRecentVax[0].vaccination_name} on ${mostRecentDateString}`
-      );
-    } else {
-      setLastVaccination("");
-    }
-    setDataUpdates([...dataUpdates, "lastVaccination"]);
-  };
-*/
   const basic = [
     name && { title: "Name:", description: name },
     { title: "Tag Id:", description: tag_id },

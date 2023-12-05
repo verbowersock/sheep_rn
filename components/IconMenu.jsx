@@ -14,21 +14,9 @@ const IconMenu = () => {
 
   return (
     <View style={styles.container}>
-      <IconButton
-        icon="calendar-heart"
-        {...buttonStyles}
-        onPress={() => console.log("press")}
-      />
-      <IconButton
-        icon="calendar-heart"
-        {...buttonStyles}
-        onPress={() => console.log("press")}
-      />
-      <IconButton
-        icon="calendar-heart"
-        {...buttonStyles}
-        onPress={() => console.log("press")}
-      />
+      <IconButton icon="calendar-heart" {...buttonStyles} />
+      <IconButton icon="calendar-heart" {...buttonStyles} />
+      <IconButton icon="calendar-heart" {...buttonStyles} />
     </View>
   );
 };

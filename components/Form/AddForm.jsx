@@ -111,10 +111,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
 
   const { isValid, defaultValues } = formState;
   const errors = useMemo(() => formState.errors, [formState]);
-  useEffect(() => {
-    console.log("formData", formData);
-    console.log("isValid", isValid);
-  }, [formData]);
 
   useEffect(() => {
     reset(formData);
@@ -143,7 +139,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       marking_id: data.marking_id,
       weight_at_birth: data.weight_at_birth,
     };
-    console.log("formattedData", formattedData);
     if (formData.sheep_id) {
       editSheep(formattedData, formData.sheep_id)
         .then(() => {

@@ -1,7 +1,6 @@
 import { addMedicalData, database } from "./db";
 
 export const getCurrentSchemaVersion = () => {
-  console.log("getting current version");
   return new Promise((resolve, reject) => {
     database.transaction((transaction) => {
       transaction.executeSql(
@@ -10,7 +9,6 @@ export const getCurrentSchemaVersion = () => {
         (transaction, result) => {
           if (result.rows.length > 0) {
             const version = result.rows.item(0).user_version;
-            console.log("version", version);
             resolve(version);
           } else {
             reject(new Error("No rows returned."));
@@ -26,7 +24,6 @@ export const getCurrentSchemaVersion = () => {
 };
 
 export const updateSchemaVersion = (newVersion) => {
-  console.log("updating version");
   return new Promise((resolve, reject) => {
     database.transaction((transaction) => {
       transaction.executeSql(
@@ -46,8 +43,6 @@ export const updateSchemaVersion = (newVersion) => {
 };
 
 const migrationScript = (transaction) => {
-  console.log("migration script");
-
   addMedicalData(transaction);
   //add notes and last_location to sheep table
   transaction.executeSql(

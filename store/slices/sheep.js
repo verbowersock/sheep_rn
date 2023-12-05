@@ -26,7 +26,6 @@ const sheepSlice = createSlice({
       };
     },
     updateSheep: (state, { payload }) => {
-      //    console.log("payload", payload);
       state.sheep = state.sheep.map((sheep) =>
         sheep.sheep_id === payload.sheep_id ? { ...sheep, ...payload } : sheep
       );
