@@ -1,6 +1,6 @@
 import * as React from "react";
 import { StyleSheet } from "react-native";
-import { useTheme, Snackbar } from "react-native-paper";
+import { useTheme, Snackbar, Portal } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { setShowSnackbar, uiSelector } from "../store/slices/ui";
 
@@ -13,20 +13,22 @@ const ConfirmationSnackbar = () => {
   const onDismissSnackBar = () => dispatch(setShowSnackbar(false));
 
   return (
-    <Snackbar
-      visible={visible}
-      style={error ? styles.errorMessage : styles.confirmationMessage}
-      onDismiss={onDismissSnackBar}
-      action={{
-        label: "Dismiss",
-        color: theme.colors.background,
-        onPress: () => {
-          onDismissSnackBar;
-        },
-      }}
-    >
-      {message}
-    </Snackbar>
+    <Portal>
+      <Snackbar
+        visible={visible}
+        style={error ? styles.errorMessage : styles.confirmationMessage}
+        onDismiss={onDismissSnackBar}
+        action={{
+          label: "Dismiss",
+          labelStyle: { color: theme.colors.background },
+          onPress: () => {
+            onDismissSnackBar;
+          },
+        }}
+      >
+        {message}
+      </Snackbar>
+    </Portal>
   );
 };
 
@@ -35,7 +37,7 @@ const makeStyles = (theme) =>
     confirmationMessage: {
       flex: 1,
       justifyContent: "space-between",
-      backgroundColor: theme.colors.secondary,
+      backgroundColor: theme.colors.primary,
     },
     errorMessage: {
       flex: 1,

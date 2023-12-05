@@ -8,15 +8,14 @@ import {
   PermissionsAndroid,
 } from "react-native";
 
-import RNFetchBlob from "rn-fetch-blob";
-
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { FAB, useTheme } from "react-native-paper";
 
 const ImagePicker = ({ value, onChange }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
-  const [filePath, setFilePath] = useState(value);
+  const [file, setFile] = useState(value);
+  console.log(value);
 
   const [FABstate, setFABState] = React.useState({ open: false });
 
@@ -25,6 +24,7 @@ const ImagePicker = ({ value, onChange }) => {
   const { open } = FABstate;
 
   const requestCameraPermission = async () => {
+    console.log("Requesting camera permission");
     if (Platform.OS === "android") {
       try {
         const granted = await PermissionsAndroid.request(
@@ -34,8 +34,10 @@ const ImagePicker = ({ value, onChange }) => {
             message: "App needs camera permission",
           }
         );
+        console.log("granted");
         // If CAMERA Permission is granted
         return granted === PermissionsAndroid.RESULTS.GRANTED;
+        console.log(granted);
       } catch (err) {
         console.warn(err);
         return false;
@@ -43,73 +45,8 @@ const ImagePicker = ({ value, onChange }) => {
     } else return true;
   };
 
-  const requestExternalWritePermission = async () => {
-    if (Platform.OS === "android") {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: "External Storage Write Permission",
-            message: "App needs write permission",
-          }
-        );
-        // If WRITE_EXTERNAL_STORAGE Permission is granted
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn(err);
-        alert("Write permission err", err);
-      }
-      return false;
-    } else return true;
-  };
-  const getUniqueFileName = (fileExt) => {
-    //It is better naming file with current timestamp to achieve unique name
-    var d = new Date();
-    var year = d.getFullYear();
-    var month = d.getMonth() + 1;
-    var date = d.getDate();
-    var hour = d.getHours();
-    var minute = d.getMinutes();
-    var fileName = "IMG" + year + month + date + hour + minute + "." + fileExt;
-    return fileName;
-  };
-
-  const writeFileToStorage = async (base64Data, fileName) => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        {
-          title: "Storage Permission",
-          message:
-            "This app need your permission to save pictures to internal storage ",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK",
-        }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        const dirs = RNFetchBlob.fs.dirs;
-        var folderPath = dirs.PictureDir + "/MyFlockImages/";
-        var fullPath = folderPath + fileName;
-        RNFetchBlob.fs.writeFile(fullPath, base64Data, "base64").then((res) => {
-          RNFetchBlob.fs
-            .stat(fullPath)
-            .then((stats) => {
-              setFilePath(`file:\/\/${stats.path}`);
-              onChange(`file:\/\/${stats.path}`);
-              alert("Image saved to " + fullPath);
-            })
-
-            .catch((err) => {
-              console.log(err);
-            });
-        });
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
   const captureImage = async (type) => {
+    console.log("Launching camera...");
     let options = {
       mediaType: type,
       maxWidth: 300,
@@ -119,9 +56,11 @@ const ImagePicker = ({ value, onChange }) => {
       includeBase64: true,
     };
     let isCameraPermitted = await requestCameraPermission();
-    let isStoragePermitted = await requestExternalWritePermission();
-    if (isCameraPermitted && isStoragePermitted) {
-      launchCamera(options, async (response) => {
+    if (isCameraPermitted) {
+      console.log(
+        "Camera and Storage permissions granted. Launching camera..."
+      );
+      const result = await launchCamera(options, async (response) => {
         if (response.didCancel) {
           alert("User cancelled camera picker");
           return;
@@ -135,34 +74,10 @@ const ImagePicker = ({ value, onChange }) => {
           alert(response.errorMessage);
           return;
         }
-        /*   RNFS.exists(RNFS.CachesDirectoryPath)
-          .then((success) => {
-            console.log(RNFS.CachesDirectoryPath);
-            console.log(success); // <--- here RNFS can read the file and returns this
-          })
-          .catch((err) => {
-            console.log("Exists Error: " + err.message);
-          });
-        RNFS.copyFile(
-          //remove first 9 characters from response.assets[0].path
-          `${RNFS.CachesDirectoryPath}/${response.assets[0].fileName}`,
-          `${RNFS.DocumentDirectoryPath}/${response.assets[0].fileName}`
-        )
-          .then((success) => console.log("!!!", success))
-          .catch((err) => console.log("!!!", err));
-          */
-        // saveToStorage(
-        //   response.assets[0].path,
-        //   response.assets[0].fileName
-        // );
-        //setFilePath(
-        //  `${RNFS.DocumentDirectoryPath}/${response.assets[0].fileName}`
-        //);
-        const base64Data = response.assets[0].base64;
-        const fileName = getUniqueFileName("jpg");
-        writeFileToStorage(base64Data, fileName);
-
-        // onChange(filePath);
+        console.log(response);
+        const base64 = response.assets[0].base64;
+        setFile(`data:image/png;base64,${base64}`);
+        onChange(`data:image/png;base64,${base64}`);
       });
     }
   };
@@ -189,46 +104,50 @@ const ImagePicker = ({ value, onChange }) => {
         alert(response.errorMessage);
         return;
       }
-      writeFileToStorage(
-        response.assets[0].base64,
-        response.assets[0].fileName
-      );
+      setFile(`data:image/png;base64,${response.assets[0].base64}`);
+      onChange(`data:image/png;base64,${response.assets[0].base64}`);
     });
   };
 
   return (
     <View style={styles.container}>
-      {filePath === null ? (
+      {file === null ? (
         <Image
           source={require("../../assets/images/placeholder.jpg")}
           style={styles.imageStyle}
           resizeMode="contain"
         />
       ) : (
-        <Image source={{ uri: filePath }} style={styles.imageStyle} />
+        <Image source={{ uri: file }} style={styles.imageStyle} />
       )}
 
       <FAB.Group
         open={open}
         color={theme.colors.background}
-        backgroundColor={theme.colors.primary}
-        fabStyle={{ backgroundColor: theme.colors.primary }}
+        backgroundColor={theme.colors.secondary}
+        fabStyle={{ backgroundColor: theme.colors.secondary }}
         style={{
           position: "absolute",
           bottom: 0,
           right: 0,
         }}
-        backdropColor={"transparent"}
+        backdropColor={theme.colors.backdrop}
         icon={open ? "camera" : "plus"}
         actions={[
           {
             icon: "camera",
+            color: "white",
+            style: { backgroundColor: theme.colors.secondary },
             label: "Open Camera",
+            labelStyle: { color: "white" },
             onPress: () => captureImage("photo"),
           },
           {
             icon: "folder-upload",
+            color: "white",
+            style: { backgroundColor: theme.colors.secondary },
             label: "Upload Image",
+            labelStyle: { color: "white" },
             onPress: () => chooseFile("photo"),
           },
         ]}
@@ -239,20 +158,6 @@ const ImagePicker = ({ value, onChange }) => {
           }
         }}
       />
-      {/* <Text>Take Photo</Text>
-        <IconButton
-          icon="camera"
-          color={"green"}
-          size={40}
-          onPress={() => captureImage("photo")}
-        />
-        <Text>Upload Image</Text>
-        <IconButton
-          icon="folder-upload"
-          color={"green"}
-          size={40}
-          onPress={() => chooseFile("photo")}
-        />*/}
     </View>
   );
 };
