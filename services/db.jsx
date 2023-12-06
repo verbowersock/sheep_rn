@@ -1,4 +1,5 @@
 import * as SQLite from "expo-sqlite";
+import { picture1, picture2, picture3 } from "./base54pictures";
 
 export const database = SQLite.openDatabase("sheep.db", "1.1", "", 1, () => {});
 database.exec([{ sql: "PRAGMA foreign_keys = ON;", args: [] }], false, () =>
@@ -43,7 +44,7 @@ const testDataSheep = [
   {
     tag_id: "abc",
     scrapie_id: "abc1245",
-    name: "Test1",
+    name: "Daisy",
     dob: "02/09/2022",
     sex: "f",
     purchase_date: "03/09/2022",
@@ -52,11 +53,12 @@ const testDataSheep = [
     marking_id: 1,
     notes: "test notes",
     last_location: "test location1",
+    picture: picture1,
   },
   {
     tag_id: "def",
     scrapie_id: "def1245",
-    name: "Test2",
+    name: "Luke",
     dob: "02/10/2022",
     sex: "m",
     breed_id: 2,
@@ -66,11 +68,12 @@ const testDataSheep = [
     notes:
       "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum, culpa praesentium ea est laudantium saepe architecto commodi fugiat. Maxime vero dolores magnam consectetur, atque perspiciatis! Excepturi, ipsa magni? Eos harum error dolorum odio quaerat, laudantium aliquid maxime doloremque dicta dolorem quod fugiat labore maiores amet architecto dolore qui atque officia dolores numquam nostrum veritatis nulla neque! In quos ipsa saepe et repellendus magni, iste natus reiciendis, quisquam nobis corporis voluptates corrupti nesciunt aspernatur veritatis modi aliquid esse eveniet dolorum ipsum accusantium dolores beatae at? Nisi voluptatibus recusandae, iste dolores exercitationem debitis dignissimos similique dolor, veniam excepturi dicta porro iusto consequuntur laboriosam delectus aliquam tempore corrupti.",
     last_location: "test location2",
+    picture: picture2,
   },
   {
     tag_id: "hij",
     scrapie_id: "defhij",
-    name: "Test3",
+    name: "Baby",
     dob: "02/10/2022",
     sex: "f",
     breed_id: 2,
@@ -80,6 +83,7 @@ const testDataSheep = [
     notes:
       "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum, culpa praesentium ea est laudantium saepe architecto commodi fugiat. Maxime vero dolores magnam consectetur, atque perspiciatis! Excepturi, ipsa magni? Eos harum error dolorum odio quaerat, laudantium aliquid maxime doloremque dicta dolorem quod fugiat labore maiores amet architecto dolore qui atque officia dolores numquam nostrum veritatis nulla neque! In quos ipsa saepe et repellendus magni, iste natus reiciendis, quisquam nobis corporis voluptates corrupti nesciunt aspernatur veritatis modi aliquid esse eveniet dolorum ipsum accusantium dolores beatae at? Nisi voluptatibus recusandae, iste dolores exercitationem debitis dignissimos similique dolor, veniam excepturi dicta porro iusto consequuntur laboriosam delectus aliquam tempore corrupti.",
     last_location: "test location3",
+    picture: picture3,
   },
 ];
 
@@ -577,8 +581,8 @@ export function insertSheepData() {
         testDataSheep.map((sheepData) => {
           return new Promise((resolve, reject) => {
             tx.executeSql(
-              `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred, notes, last_location) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred, notes, last_location, picture) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 sheepData.tag_id,
                 sheepData.scrapie_id,
@@ -597,6 +601,7 @@ export function insertSheepData() {
                 sheepData.date_last_bred,
                 sheepData.notes,
                 sheepData.last_location,
+                sheepData.picture,
               ],
               (t, success) => {
                 resolve(success);

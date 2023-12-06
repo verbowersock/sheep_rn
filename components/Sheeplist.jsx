@@ -18,7 +18,9 @@ const SheepList = ({ sheep }) => {
         <FlatList data={sheep} renderItem={renderSheep} />
       ) : (
         <View style={styles.NothingFound}>
-          <Text style={styles.NothingFoundText}>Sorry, no sheep found!</Text>
+          <Text style={styles.NothingFoundText}>
+            Sorry, no sheep found! Add some by clicking the plus icon below
+          </Text>
         </View>
       )}
     </ScrollView>
@@ -36,6 +38,8 @@ const makeStyles = (theme) =>
       justifyContent: "center",
       alignItems: "center",
       paddingTop: 100,
+      width: "70%",
+      alignSelf: "center",
     },
     NothingFoundText: {
       fontSize: 18,

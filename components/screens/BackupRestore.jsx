@@ -23,6 +23,36 @@ const BackupRestore = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
+  async function checkPermissions() {
+    if (Platform.constants["Release"] >= 13) {
+      return true;
+    } else {
+      let granted;
+      try {
+        granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: "myFlock App Permission",
+            message: "This app needs permission to acess storage.",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK",
+          }
+        );
+      } catch (err) {
+        console.warn(err);
+        dispatch(
+          setShowSnackbar({
+            visible: true,
+            error: true,
+            message: "Something went wrong. Please try again",
+          })
+        );
+      }
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+  }
+
   async function restoreDB() {
     setLoading(true);
     if (checkPermissions()) {
@@ -67,38 +97,9 @@ const BackupRestore = () => {
     }
   }
 
-  async function checkPermissions() {
-    if (Platform.constants["Release"] >= 13) {
-      return true;
-    } else {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: "myFlock App Permission",
-            message: "This app needs permission to acess storage.",
-            buttonNeutral: "Ask Me Later",
-            buttonNegative: "Cancel",
-            buttonPositive: "OK",
-          }
-        );
-      } catch (err) {
-        console.warn(err);
-        dispatch(
-          setShowSnackbar({
-            visible: true,
-            error: true,
-            message: "Something went wrong. Please try again",
-          })
-        );
-      }
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    }
-  }
-
   async function backupDB() {
     setLoading(true);
-    if (checkPermissions()) {
+    if (await checkPermissions()) {
       try {
         const currDate = format(new Date(), "dd_MM_yyyy_HHmmss");
         const destPath =
@@ -142,7 +143,7 @@ const BackupRestore = () => {
     <ScrollView contentContainerStyle={styles.mainContainer}>
       <Text style={styles.title}>Backup your database</Text>
       <Button
-        color={theme.colors.primary}
+        buttonColor={theme.colors.primary}
         loading={loading}
         dark
         style={{ width: "40%", marginTop: 25, marginBottom: 25 }}
@@ -155,7 +156,7 @@ const BackupRestore = () => {
       </Button>
       <Text style={styles.title}>Restore from backup</Text>
       <Button
-        color={theme.colors.primary}
+        buttonColor={theme.colors.primary}
         dark
         style={{ width: "40%", marginTop: 15 }}
         mode="contained"

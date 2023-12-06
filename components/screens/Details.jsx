@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import {
   Image,
   Modal,
+  PermissionsAndroid,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -487,6 +489,30 @@ const Details = ({ route }) => {
 
   const pdfName = name ? name : tag_id;
 
+  async function checkPermissions() {
+    if (Platform.constants["Release"] >= 13) {
+      return true;
+    } else {
+      let granted;
+      try {
+        granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: "myFlock App Permission",
+            message: "This app needs permission to acess storage.",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK",
+          }
+        );
+      } catch (err) {
+        console.warn(err);
+        alert("No permission to access storage");
+      }
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+  }
+
   const createPDF = async () => {
     let options = {
       html: htmlContent({
@@ -500,25 +526,31 @@ const Details = ({ route }) => {
     };
 
     let file = await RNHTMLtoPDF.convert(options);
+    if (await checkPermissions()) {
+      try {
+        const destPath = `${RNFS.DownloadDirectoryPath}/${options.fileName}.pdf`;
 
-    const destPath = `${RNFS.DownloadDirectoryPath}/${options.fileName}.pdf`;
-
-    RNFS.moveFile(file.filePath, destPath)
-      .then(() => {
-        alert(`File saved!`);
-        // Open the file
-        FileViewer.open(destPath)
+        RNFS.moveFile(file.filePath, destPath)
           .then(() => {
-            // success
+            alert(`File saved!`);
+            // Open the file
+            FileViewer.open(destPath)
+              .then(() => {
+                // success
+              })
+              .catch((error) => {
+                // error
+              });
           })
-          .catch((error) => {
-            // error
+          .catch((err) => {
+            alert("Something went wrong! Please try again");
+            console.log("Error moving file: ", err);
           });
-      })
-      .catch((err) => {
+      } catch (err) {
         alert("Something went wrong! Please try again");
         console.log("Error moving file: ", err);
-      });
+      }
+    }
   };
 
   return (
@@ -526,10 +558,11 @@ const Details = ({ route }) => {
       <TouchableOpacity
         style={{
           backgroundColor: theme.colors.secondary,
-          padding: 10,
+          padding: 7,
           borderRadius: 10,
           maxWidth: 120,
           marginRight: 10,
+          marginBottom: 10,
           alignSelf: "flex-end",
         }}
         onPress={() => createPDF()}
