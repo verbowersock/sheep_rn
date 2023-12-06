@@ -40,7 +40,7 @@ const testDataMarkings = [
   "sponget",
   "yuglet",
 ];
-const testDataSheep = [
+/*const testDataSheep = [
   {
     tag_id: "abc",
     scrapie_id: "abc1245",
@@ -164,7 +164,7 @@ const testDataVax = [
     date: "05/25/2022",
   },
 ];
-
+*/
 export const medicationData = [
   "Cydectin® (Moxidectin)",
   "Ivomec® (Ivermectin)",
@@ -574,7 +574,7 @@ export function insertMarkingData() {
   });
 }
 
-export function insertSheepData() {
+/*export function insertSheepData() {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       Promise.all(
@@ -626,7 +626,7 @@ export function insertSheepData() {
     });
   });
 }
-
+*/
 export function insertMedList() {
   return new Promise((resolve, reject) => {
     medicationData.map((medData) => {
@@ -678,7 +678,7 @@ export function insertVaxList() {
     });
   });
 }
-
+/*
 export function insertMedData() {
   return new Promise((resolve, reject) => {
     testDataMeds.map((medData) => {
@@ -730,7 +730,7 @@ export function insertVaxData() {
     });
   });
 }
-
+*/
 export function fetchAllSheep() {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {

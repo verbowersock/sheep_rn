@@ -395,10 +395,13 @@ const Details = ({ route }) => {
   ].filter(Boolean);
 
   const misc = [
-    { title: "Last Location:", description: last_location },
+    {
+      title: "Last Location:",
+      description: last_location ? last_location : "N/A",
+    },
     {
       title: "Notes",
-      description: notes,
+      description: notes ? notes : "N/A",
     },
   ].filter(Boolean);
 

@@ -53,11 +53,11 @@ export default function App() {
         await insertBreedData();
         await insertColorData();
         await insertMarkingData();
-        await insertSheepData();
+        //  await insertSheepData();
         await insertMedList();
         await insertVaxList();
-        await insertMedData();
-        await insertVaxData();
+        //  await insertMedData();
+        // await insertVaxData();
       } catch (e) {
         console.log("!e", e);
       }
