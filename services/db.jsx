@@ -40,7 +40,7 @@ const testDataMarkings = [
   "sponget",
   "yuglet",
 ];
-/*const testDataSheep = [
+const testDataSheep = [
   {
     tag_id: "abc",
     scrapie_id: "abc1245",
@@ -54,6 +54,7 @@ const testDataMarkings = [
     notes: "test notes",
     last_location: "test location1",
     picture: picture1,
+    weight_at_birth: 10,
   },
   {
     tag_id: "def",
@@ -164,7 +165,7 @@ const testDataVax = [
     date: "05/25/2022",
   },
 ];
-*/
+
 export const medicationData = [
   "Cydectin® (Moxidectin)",
   "Ivomec® (Ivermectin)",
@@ -574,7 +575,7 @@ export function insertMarkingData() {
   });
 }
 
-/*export function insertSheepData() {
+export function insertSheepData() {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       Promise.all(
@@ -604,7 +605,26 @@ export function insertMarkingData() {
                 sheepData.picture,
               ],
               (t, success) => {
-                resolve(success);
+                const sheep_id = success.insertId;
+                if (sheepData.weight_at_birth) {
+                  tx.executeSql(
+                    `INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)`,
+                    [sheep_id, sheepData.weight_at_birth, sheepData.dob],
+                    (t, success) => {
+                      resolve(success);
+                    },
+                    (t, success) => {
+                      resolve(success);
+                    },
+                    (t, error) => {
+                      console.log("db error insert weight");
+                      console.log(error);
+                      reject(error);
+                    }
+                  );
+                } else {
+                  resolve(success);
+                }
               },
               (t, error) => {
                 console.log("db error insert sheep");
@@ -626,7 +646,7 @@ export function insertMarkingData() {
     });
   });
 }
-*/
+
 export function insertMedList() {
   return new Promise((resolve, reject) => {
     medicationData.map((medData) => {
@@ -678,7 +698,7 @@ export function insertVaxList() {
     });
   });
 }
-/*
+
 export function insertMedData() {
   return new Promise((resolve, reject) => {
     testDataMeds.map((medData) => {
@@ -730,7 +750,7 @@ export function insertVaxData() {
     });
   });
 }
-*/
+
 export function fetchAllSheep() {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
@@ -990,7 +1010,23 @@ export function addSheep(sheepData) {
             //1,
           ],
           (t, success) => {
-            resolve(success);
+            const sheep_id = success.insertId;
+            if (sheepData.weight_at_birth) {
+              tx.executeSql(
+                `INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)`,
+                [sheep_id, sheepData.weight_at_birth, sheepData.dob],
+                (t, success) => {
+                  resolve(success);
+                },
+                (t, error) => {
+                  console.log("db error insert weight");
+                  console.log(error);
+                  reject(error);
+                }
+              );
+            } else {
+              resolve(success);
+            }
           },
           (t, error) => {
             console.log("db error insert sheep");
@@ -1191,8 +1227,6 @@ export function deleteSheep(val) {
 export function editSheep(sheepData, id) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
-      console.log("sheepData", sheepData);
-
       // Generate the SQL query and the parameters array
       const columns = Object.keys(sheepData).filter((col) => col !== "id");
       const values = Object.values(sheepData);
@@ -1205,6 +1239,25 @@ export function editSheep(sheepData, id) {
         sqlQuery,
         parameters,
         (t, success) => {
+          if (sheepData.weight_at_birth) {
+            tx.executeSql(
+              `INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)`,
+              [id, sheepData.weight_at_birth, sheepData.dob],
+              (t, success) => {
+                resolve(success);
+              },
+              (t, success) => {
+                resolve(success);
+              },
+              (t, error) => {
+                console.log("db error insert weight");
+                console.log(error);
+                reject(error);
+              }
+            );
+          } else {
+            resolve(success);
+          }
           console.log("success", success);
           resolve(success);
         },

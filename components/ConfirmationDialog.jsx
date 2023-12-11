@@ -19,7 +19,7 @@ const ConfirmationDialog = ({ onConfirm }) => {
   };
 
   const onConfirmDelete = () => {
-    onConfirm(id, field, title);
+    onConfirm(id, field, title, name);
   };
 
   return (

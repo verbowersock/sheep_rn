@@ -44,8 +44,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   const dispatch = useDispatch();
   const { sheep } = useSelector(sheepDataSelector);
   const sex = [
-    { id: "m", title: "Male" },
-    { id: "f", title: "Female" },
+    { id: "m", title: "Ram" },
+    { id: "f", title: "Ewe" },
     { id: "w", title: "Wether" },
   ];
   const { colors, markings, breeds } = useSelector(attributesDataSelector);
@@ -332,7 +332,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           control={control}
           rules={{
             validate: (value) => {
-              if (JSON.stringify(value) === JSON.stringify({})) {
+              if (JSON.stringify(value) === JSON.stringify({}) || !value) {
                 return "Sex is required";
               }
             },
