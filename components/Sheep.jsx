@@ -61,11 +61,11 @@ const Sheep = ({ item, index }) => {
   const { sheep } = useSelector(sheepDataSelector);
   const { isSecondaryFormDialogVisible } = useSelector(uiSelector);
 
-  useEffect(() => {
-    if (activeCardId !== item.sheep_id) {
-      setMenuVisible(initialMenuState);
-    }
-  }, [activeCardId]);
+  // useEffect(() => {
+  //   if (activeCardId !== item.sheep_id) {
+  //    setMenuVisible(initialMenuState);
+  //   }
+  // }, [activeCardId]);
 
   //parse date of birth to string in format dd/mm/yyyy
   const date = (date) => {
@@ -79,9 +79,9 @@ const Sheep = ({ item, index }) => {
   };
 
   const toggleMenuVisible = (menu) => {
-    if (activeCardId !== item.sheep_id) {
-      dispatch(setActiveCardId(item.sheep_id));
-    }
+    // if (activeCardId !== item.sheep_id) {
+    //  dispatch(setActiveCardId(item.sheep_id));
+    // }
     //set menu visible if it equals the menu passed in, the rest are false
     setMenuVisible({
       MEDICAL: menu === MEDICAL ? !menuVisible.MEDICAL : false,
@@ -91,8 +91,8 @@ const Sheep = ({ item, index }) => {
   };
 
   const onDeleteSheep = (item) => {
+    toggleMenuVisible(REMOVE);
     //stop event bubbling up to the card
-
     dispatch(
       setShowConfirmationDialog({
         visible: true,
@@ -119,7 +119,7 @@ const Sheep = ({ item, index }) => {
     dispatch(setShowFormDialog(true));
   };
 
-  const onDeleteConfirm = (id) => {
+  const onDeleteConfirm = (id, field, title, name) => {
     deleteSheep(id)
       .then((res) => {
         dispatch(deleteSheepRedux(id));
@@ -128,7 +128,7 @@ const Sheep = ({ item, index }) => {
           setShowSnackbar({
             visible: true,
             error: false,
-            message: `Sheep ${item.name} deleted`,
+            message: `Sheep ${name} deleted`,
           })
         );
       })
@@ -481,7 +481,11 @@ const Sheep = ({ item, index }) => {
         </TouchableWithoutFeedback>
       </View>
 
-      <ConfirmationDialog onConfirm={(id) => onDeleteConfirm(id)} />
+      <ConfirmationDialog
+        onConfirm={(id, field, title, name) =>
+          onDeleteConfirm(id, field, title, name)
+        }
+      />
     </View>
   );
 };

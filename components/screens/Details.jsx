@@ -288,6 +288,7 @@ const Details = ({ route }) => {
       sheep_id,
       sex,
       weight_at_birth,
+      picture,
     };
     dispatch(setFormData(formattedData));
     dispatch(setShowFormDialog(true));
