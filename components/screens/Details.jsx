@@ -591,15 +591,17 @@ const Details = ({ route }) => {
         onValueChange={setSelectedValue}
         buttons={buttons.map((button, index) => ({
           value: button.value,
-          label: button.label,
-          showSelectedCheck: true,
+          label: <Text style={{ fontSize: 13 }}>{button.label}</Text>,
           checkedColor: button.color,
           uncheckedColor: theme.colors.background,
+          showSelectedCheck: true,
           style: {
+            paddingRight: -100,
+
             backgroundColor:
               selectedValue === button.value ? "white" : `${button.color}98`,
             borderColor: `${button.color}80`,
-            borderWidth: 1,
+            borderWidth: 2,
             borderTopLeftRadius: 8,
             borderTopRightRadius: 8,
             borderBottomLeftRadius: 0,

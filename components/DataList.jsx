@@ -120,7 +120,7 @@ const DataList = ({ header, onDismiss }) => {
 
       <Text
         style={{
-          fontSize: 25,
+          fontSize: 20,
           fontWeight: "bold",
           alignSelf: "center",
           marginBottom: 20,
@@ -141,21 +141,30 @@ const DataList = ({ header, onDismiss }) => {
         >
           <View
             style={{
-              width: 220,
+              width: "100%",
               maxHeight: 25,
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
             }}
           >
             <Text
-              style={{ fontSize: 17, paddingHorizontal: 15 }}
+              style={{ fontSize: 15, paddingLeft: 5 }}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
               {type === forms.WEIGHT.type ? `${item.entry}lb` : item.entry}
             </Text>
+
+            <Text
+              style={{
+                fontSize: 17,
+                paddingRight: 5,
+              }}
+            >
+              {item.date}
+            </Text>
           </View>
-          <Text style={{ fontSize: 17, paddingHorizontal: 15 }}>
-            {item.date}
-          </Text>
         </TouchableOpacity>
       ))}
       <ConfirmationDialog onConfirm={(id) => deleteValue(id)} />

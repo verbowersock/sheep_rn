@@ -101,6 +101,7 @@ const MainContainer = () => {
           disabled={checkboxDisabled}
           label="Show deceased"
           position="trailing"
+          style={{ flexDirection: "row-reverse" }}
           labelStyle={{ color: theme.colors.accent }}
           color={theme.colors.accent}
           status={deadChecked ? "checked" : "unchecked"}
@@ -113,6 +114,7 @@ const MainContainer = () => {
           label="Show sold"
           position="trailing"
           labelStyle={{ color: theme.colors.accent }}
+          style={{ flexDirection: "row-reverse" }}
           color={theme.colors.accent}
           status={soldChecked ? "checked" : "unchecked"}
           onPress={() => {
@@ -144,7 +146,8 @@ const makeStyles = (theme) =>
       flex: 1,
     },
     checkboxContainer: {
-      width: "50%",
+      flexDirection: "row",
+      width: "100%",
       alignSelf: "flex-end",
     },
   });
