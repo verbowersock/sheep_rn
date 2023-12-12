@@ -296,7 +296,7 @@ export const addMedicalData = async (tx) => {
           `
           CREATE TABLE IF NOT EXISTS sheep_meds (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+            sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
             entry_id BIGINT REFERENCES medications (id) ON DELETE RESTRICT ON UPDATE CASCADE,
             date VARCHAR(50) NOT NULL
           );
@@ -317,7 +317,7 @@ export const addMedicalData = async (tx) => {
                   `
                   CREATE TABLE IF NOT EXISTS sheep_vax (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+                    sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
                     entry_id BIGINT REFERENCES vaccines (id) ON DELETE RESTRICT ON UPDATE CASCADE,
                     date VARCHAR(50) NOT NULL 
                   );
@@ -329,7 +329,7 @@ export const addMedicalData = async (tx) => {
                       `
                           CREATE TABLE IF NOT EXISTS sheep_weights (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+                            sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
                             entry BIGINT,
                             date VARCHAR(50) NOT NULL
                           );
