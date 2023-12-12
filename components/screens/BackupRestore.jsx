@@ -16,6 +16,11 @@ import { setShowSnackbar } from "../../store/slices/ui";
 import { useState } from "react";
 import { fetchAllSheep } from "../../services/db";
 import { setSheep } from "../../store/slices/sheep";
+import {
+  executeMigration,
+  getCurrentSchemaVersion,
+  updateSchemaVersion,
+} from "../../services/migration";
 
 const BackupRestore = () => {
   const theme = useTheme();
@@ -63,10 +68,17 @@ const BackupRestore = () => {
           filePath,
           "/data/user/0/com.sheeprn/files/SQLite/sheep.db"
         );
-        setLoading(false);
+        const currentSchemaVersion = await getCurrentSchemaVersion();
+        const expectedSchemaVersion = 2; // The version your app expects
+
+        if (currentSchemaVersion !== expectedSchemaVersion) {
+          await executeMigration();
+          await updateSchemaVersion(expectedSchemaVersion);
+        }
         await fetchAllSheep().then((res) => {
           dispatch(setSheep(res));
         });
+        setLoading(false);
         dispatch(
           setShowSnackbar({
             visible: true,
