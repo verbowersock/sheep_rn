@@ -19,6 +19,7 @@ const ImagePicker = ({ value, onChange }) => {
   const onFABStateChange = ({ open }) => setFABState({ open });
   const { open } = FABstate;
 
+  console.log("value", value);
   const requestCameraPermission = async () => {
     if (Platform.OS === "android") {
       try {
@@ -99,14 +100,14 @@ const ImagePicker = ({ value, onChange }) => {
 
   return (
     <View style={styles.container}>
-      {file === null ? (
+      {file && /^data:image\/[a-zA-Z]*;base64,/.test(file) ? (
+        <Image source={{ uri: file }} style={styles.imageStyle} />
+      ) : (
         <Image
           source={require("../../assets/images/placeholder.jpg")}
           style={styles.imageStyle}
           resizeMode="contain"
         />
-      ) : (
-        <Image source={{ uri: file }} style={styles.imageStyle} />
       )}
 
       <FAB.Group

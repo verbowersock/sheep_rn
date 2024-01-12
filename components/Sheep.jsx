@@ -277,7 +277,12 @@ const Sheep = ({ item, index }) => {
             >
               <View style={styles.photoWrapper}>
                 <Image
-                  source={item.picture ? { uri: item.picture } : placeholder}
+                  source={
+                    item.picture &&
+                    /^data:image\/[a-zA-Z]*;base64,/.test(item.picture)
+                      ? { uri: item.picture }
+                      : placeholder
+                  }
                   resizeMode="cover"
                   style={{
                     height: 150,
