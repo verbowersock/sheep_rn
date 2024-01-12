@@ -579,7 +579,11 @@ const Details = ({ route }) => {
       </TouchableOpacity>
       <View style={styles.imageContainer}>
         <Image
-          source={picture ? { uri: picture } : placeholder}
+          source={
+            picture && /^data:image\/[a-zA-Z]*;base64,/.test(picture)
+              ? { uri: picture }
+              : placeholder
+          }
           style={{
             height: 200,
             width: 200,

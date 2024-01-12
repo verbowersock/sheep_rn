@@ -79,7 +79,8 @@ const About = () => {
       <Text style={styles.aboutSubtitle}>In conclusion...</Text>
       <Paragraph style={styles.aboutParagraph}>
         I hope you enjoy using myFlock as much as I enjoyed developing it. If
-        you wish to contact me, please send an email to {"myflock@gmail.com"}.
+        you wish to contact me, please send an email to{" "}
+        {"vbdesignapps@gmail.com"}.
       </Paragraph>
       <TouchableOpacity
         onPress={() =>

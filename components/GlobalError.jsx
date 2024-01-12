@@ -8,9 +8,9 @@ const GlobalError = ({ error, resetError }) => {
     <View style={styles.mainContainer}>
       <Text style={styles.errorTitle}>Oh No! Something went wrong!</Text>
       <Text style={styles.errorText}>
-        Please email myflock@gmail.com with the following error information and
-        the description of what you were trying to do. We will try to resolve
-        this as soon as possible.
+        Please email vbdesignapps@gmail.com with the following error information
+        and the description of what you were trying to do. We will try to
+        resolve this as soon as possible.
       </Text>
       <Text style={styles.errorText}>{error.toString()}</Text>
       <View style={styles.errorButton}>

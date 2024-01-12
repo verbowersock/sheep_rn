@@ -6,10 +6,9 @@ import SheepList from "./Sheeplist";
 import AddForm from "./Form/AddForm";
 import { useDispatch, useSelector } from "react-redux";
 import { sheepDataSelector } from "../store/slices/sheep";
-import { Checkbox, useTheme } from "react-native-paper";
+import { Checkbox, Text, useTheme } from "react-native-paper";
 import {
   resetFormData,
-  resetSecondaryFormData,
   setFormTitle,
   setShowFormDialog,
   setShowSecondaryFormDialog,
@@ -24,7 +23,7 @@ const MainContainer = () => {
   const [filteredSheep, setFilteredSheep] = useState(sheep);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchTag, setSearchTag] = useState("");
-  const [deadChecked, setDeadChecked] = useState(true);
+  const [deadChecked, setDeadChecked] = useState(false);
 
   const [soldChecked, setSoldChecked] = useState(false);
 
@@ -45,48 +44,46 @@ const MainContainer = () => {
   };
 
   useEffect(() => {
-    if (sheep) {
-      if (deadChecked === true && soldChecked === true) {
-        // Both checkboxes are selected, return default data
-        setFilteredSheep(sheep);
-      } else if (deadChecked === true) {
-        // Only checkbox 1 is selected, filter data by criteria 1
-        const filteredSheep = sheep.filter(
-          (sheep) => sheep.dos === "" || sheep.dos === null
-        );
-        setFilteredSheep(filteredSheep);
-      } else if (soldChecked === true) {
-        // Only checkbox 2 is selected, filter data by criteria 2
-        const filteredSheep = sheep.filter(
-          (sheep) => sheep.dod === "" || sheep.dod === null
-        );
-        setFilteredSheep(filteredSheep);
-      } else {
-        // Neither checkbox is selected, remove items that meet criteria 1 and criteria 2
-        const filteredSheep = sheep
-          .filter((sheep) => sheep.dos === "" || sheep.dos === null)
-          .filter((sheep) => sheep.dod === "" || sheep.dod === null);
-        setFilteredSheep(filteredSheep);
-      }
-    }
-  }, [sheep, deadChecked, soldChecked]);
+    let filteredSheep = sheep;
 
-  useEffect(() => {
+    // Apply checkbox filters
+    if (deadChecked === true && soldChecked === true) {
+      // Both checkboxes are selected, return default data
+      filteredSheep = sheep;
+    } else if (deadChecked === true) {
+      // Only checkbox 1 is selected, filter data by criteria 1
+      filteredSheep = sheep.filter(
+        (sheep) => sheep.dos === "" || sheep.dos === null
+      );
+    } else if (soldChecked === true) {
+      // Only checkbox 2 is selected, filter data by criteria 2
+      filteredSheep = sheep.filter(
+        (sheep) => sheep.dod === "" || sheep.dod === null
+      );
+    } else {
+      // Neither checkbox is selected, remove items that meet criteria 1 and criteria 2
+      filteredSheep = sheep
+        .filter((sheep) => sheep.dos === "" || sheep.dos === null)
+        .filter((sheep) => sheep.dod === "" || sheep.dod === null);
+    }
+
+    // Apply search query filter
     if (searchQuery !== "") {
-      setCheckboxDisabled(true);
-      const foundSheep = sheep.filter((el) => {
+      // setCheckboxDisabled(true);
+      filteredSheep = filteredSheep.filter((el) => {
         if (el[searchTag]) {
           return el[searchTag]
             .toLowerCase()
             .includes(searchQuery.toLowerCase());
         }
+        return false;
       });
-      setFilteredSheep(foundSheep);
     } else {
       setCheckboxDisabled(false);
-      setFilteredSheep(sheep);
     }
-  }, [searchQuery, searchTag]);
+
+    setFilteredSheep(filteredSheep);
+  }, [sheep, deadChecked, soldChecked, searchQuery, searchTag]);
 
   return (
     <View style={styles.mainContainer}>
@@ -121,6 +118,18 @@ const MainContainer = () => {
             setSoldChecked(!soldChecked);
           }}
         />
+      </View>
+      <View style={{ display: "flex", width: "100%", paddingBottom: 10 }}>
+        <Text
+          style={{
+            color: theme.colors.secondary,
+            fontSize: 21,
+            fontWeight: "bold",
+            textAlign: "center",
+          }}
+        >
+          Total Count: {filteredSheep.length}
+        </Text>
       </View>
       {filteredSheep && <SheepList sheep={filteredSheep} />}
       <AddSheepBtn toggleModal={toggleMainModal} />
