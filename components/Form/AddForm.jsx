@@ -37,6 +37,7 @@ import {
 } from "../../store/slices/attributes";
 import MyImagePicker from "./ImagePicker";
 import { setShowSnackbar, uiSelector } from "../../store/slices/ui";
+import { isValid as isValidDate, parse, parseISO } from "date-fns";
 
 const AddForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
@@ -361,6 +362,20 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           control={control}
           rules={{
             required: { value: true, message: "Date of Birth is required" },
+            validate: {
+              validDate: (value) => {
+                const dateFormat =
+                  /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
+                if (!dateFormat.test(value)) {
+                  return "Invalid date format. Please use MM/dd/yyyy";
+                }
+                const parsedDate = parse(value, "MM/dd/yyyy", new Date());
+                return (
+                  isValidDate(parsedDate) ||
+                  "Invalid date format. Please use MM/dd/yyyy"
+                );
+              },
+            },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
@@ -368,13 +383,20 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               label="Date of Birth (required)"
               field="dob"
               value={value}
-              onChangeText={onChange}
+              onChangeText={(text) => {
+                onChange(text);
+                console.log(
+                  "valid",
+                  isValidDate(parse(text, "MM/dd/yyyy", new Date()))
+                );
+                trigger("dob");
+              }}
             />
           )}
           name="dob"
         />
         {errors.dob && (
-          <Text style={styles.errorText}>Date of birth is required.</Text>
+          <Text style={styles.errorText}>{errors.dob.message}</Text>
         )}
 
         <Controller
@@ -398,7 +420,20 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         <Controller
           control={control}
           rules={{
-            maxLength: 100,
+            validate: {
+              validDate: (value) => {
+                const dateFormat =
+                  /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
+                if (!dateFormat.test(value)) {
+                  return "Invalid date format. Please use MM/dd/yyyy";
+                }
+                const parsedDate = parse(value, "MM/dd/yyyy", new Date());
+                return (
+                  isValidDate(parsedDate) ||
+                  "Invalid date format. Please use MM/dd/yyyy"
+                );
+              },
+            },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
@@ -411,11 +446,27 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           )}
           name="dop"
         />
+        {errors.dop && (
+          <Text style={styles.errorText}>{errors.dop.message}</Text>
+        )}
 
         <Controller
           control={control}
           rules={{
-            maxLength: 100,
+            validate: {
+              validDate: (value) => {
+                const dateFormat =
+                  /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
+                if (!dateFormat.test(value)) {
+                  return "Invalid date format. Please use MM/dd/yyyy";
+                }
+                const parsedDate = parse(value, "MM/dd/yyyy", new Date());
+                return (
+                  isValidDate(parsedDate) ||
+                  "Invalid date format. Please use MM/dd/yyyy"
+                );
+              },
+            },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
@@ -428,11 +479,27 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           )}
           name="dos"
         />
+        {errors.dos && (
+          <Text style={styles.errorText}>{errors.dos.message}</Text>
+        )}
 
         <Controller
           control={control}
           rules={{
-            maxLength: 100,
+            validate: {
+              validDate: (value) => {
+                const dateFormat =
+                  /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
+                if (!dateFormat.test(value)) {
+                  return "Invalid date format. Please use MM/dd/yyyy";
+                }
+                const parsedDate = parse(value, "MM/dd/yyyy", new Date());
+                return (
+                  isValidDate(parsedDate) ||
+                  "Invalid date format. Please use MM/dd/yyyy"
+                );
+              },
+            },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
@@ -445,6 +512,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           )}
           name="dod"
         />
+        {errors.dod && (
+          <Text style={styles.errorText}>{errors.dod.message}</Text>
+        )}
 
         <Controller
           control={control}
