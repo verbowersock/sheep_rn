@@ -193,6 +193,8 @@ const Sheep = ({ item, index }) => {
         }}
       >
         <IconButton
+          accessible={true}
+          accessibilityLabel="Delete"
           icon="delete"
           iconColor={
             menuVisible.REMOVE ? theme.colors.onPrimary : theme.colors.accent
@@ -208,6 +210,8 @@ const Sheep = ({ item, index }) => {
         {menuVisible.REMOVE && (
           <View style={styles.iconMenuContainerRemove}>
             <ButtonWithIcon
+              accessible={true}
+              accessibilityLabel="Report Death"
               contentStyle={{ flexDirection: "row-reverse" }}
               name="skull"
               label="Death"
@@ -222,6 +226,8 @@ const Sheep = ({ item, index }) => {
               }}
             />
             <ButtonWithIcon
+              accessible={true}
+              accessibilityLabel="Report Sale"
               contentStyle={{ flexDirection: "row-reverse" }}
               name="dollar-sign"
               label="Sale"
@@ -236,6 +242,8 @@ const Sheep = ({ item, index }) => {
               }}
             />
             <ButtonWithIcon
+              accessible={true}
+              accessibilityLabel="Remove from list"
               contentStyle={{ flexDirection: "row-reverse" }}
               name="trash-alt"
               label="Remove"
@@ -299,6 +307,8 @@ const Sheep = ({ item, index }) => {
                   }}
                 >
                   <IconButton
+                    accessible={true}
+                    accessibilityLabel="Edit Sheep Data"
                     icon="pencil"
                     iconColor={theme.colors.secondary}
                     size={25}
@@ -308,6 +318,8 @@ const Sheep = ({ item, index }) => {
                   {!item.dod && (
                     <View>
                       <IconButton
+                        accessible={true}
+                        accessibilityLabel="Edit Medical Information"
                         icon="medical-bag"
                         iconColor={
                           menuVisible.MEDICAL
@@ -326,6 +338,8 @@ const Sheep = ({ item, index }) => {
                       {menuVisible.MEDICAL && (
                         <View style={styles.iconMenuContainerMeds}>
                           <ButtonWithIcon
+                            accessible={true}
+                            accessibilityLabel="Add Medication"
                             name="prescription-bottle-alt"
                             label="Meds"
                             onPress={() => {
@@ -341,6 +355,8 @@ const Sheep = ({ item, index }) => {
                           <ButtonWithIcon
                             name="syringe"
                             label="Vaccines"
+                            accessible={true}
+                            accessibilityLabel="Add Vaccination"
                             onPress={() => {
                               toggleMenuVisible(MEDICAL);
                               toggleSecondaryFormModal(
@@ -354,6 +370,8 @@ const Sheep = ({ item, index }) => {
                           <ButtonWithIcon
                             name="weight"
                             label="Weight"
+                            accessible={true}
+                            accessibilityLabel="Add Weight"
                             onPress={() => {
                               toggleMenuVisible(MEDICAL);
                               toggleSecondaryFormModal(
@@ -371,6 +389,8 @@ const Sheep = ({ item, index }) => {
                   {!item.dod && item.sex === "f" && (
                     <View>
                       <IconButton
+                        accessible={true}
+                        accessibilityLabel="Edit Breeding information"
                         icon="calendar-heart"
                         size={25}
                         iconColor={
@@ -389,6 +409,8 @@ const Sheep = ({ item, index }) => {
                       {menuVisible.BREEDING && (
                         <View style={styles.iconMenuContainerBreeding}>
                           <ButtonWithIcon
+                            accessible={true}
+                            accessibilityLabel="Add Breeding Date"
                             contentStyle={{ flexDirection: "row-reverse" }}
                             name="venus-mars"
                             label="Breeding Date"
@@ -403,6 +425,8 @@ const Sheep = ({ item, index }) => {
                             }}
                           />
                           <ButtonWithIcon
+                            accessible={true}
+                            accessibilityLabel="Report New Lamb"
                             contentStyle={{ flexDirection: "row-reverse" }}
                             name="plus-circle"
                             label="New Lamb"
