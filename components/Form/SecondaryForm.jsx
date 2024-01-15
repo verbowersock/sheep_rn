@@ -309,6 +309,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <DateTextInput
+                accessible={true}
+                accessibilityLabel="Date"
                 error={errors.date ? true : false}
                 label="Date"
                 field="date"
@@ -335,6 +337,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <MyDropdown
+                  accessible={true}
+                  accessibilityLabel="Medication Dropdown"
                   error={errors.value ? true : false}
                   data={meds}
                   label="Medication"
@@ -360,6 +364,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <MyDropdown
+                  accessible={true}
+                  accessibilityLabel="Vaccine Dropdown"
                   error={errors.vaccine ? true : false}
                   data={vaccines}
                   label="Vaccine"
@@ -386,6 +392,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
               render={({ field: { onChange, onBlur, value } }) => (
                 <MyTextInput
                   error={errors.weight_at_birth ? true : false}
+                  accessible={true}
+                  accessibilityLabel="Weight Input"
                   label="Weight"
                   field="value"
                   onChangeText={onChange}
@@ -408,6 +416,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <MyTextInput
                     error={errors.last_location}
+                    accessible={true}
+                    accessibilityLabel="Last Location input field"
                     label="Last Location"
                     field="last_location"
                     onChangeText={onChange}
@@ -434,6 +444,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                     multiline
                     numberOfLines={4}
                     error={errors.notes}
+                    accessible={true}
+                    accessibilityLabel="Notes Input Field"
                     label="Notes"
                     field="notes"
                     onChangeText={onChange}

@@ -379,6 +379,8 @@ const MyDropdown = ({
           >
             {searchable && (
               <TextInput
+                accessible={true}
+                accessibilityLabel="Search"
                 ref={searchRef}
                 mode="outlined"
                 outlineColor={theme.colors.primary}
@@ -395,9 +397,13 @@ const MyDropdown = ({
                 placeholder="Search"
                 right={
                   <TextInput.Icon
-                    name="close"
-                    color={theme.colors.primary}
-                    style={{ textAlign: "center" }}
+                    accessible={true}
+                    accessibilityLabel="Clear"
+                    icon="close"
+                    style={{
+                      textAlign: "center",
+                      marginBottom: -2,
+                    }}
                     onPress={() => {
                       setQuery("");
                     }}
@@ -444,6 +450,8 @@ const MyDropdown = ({
                         mode="outlined"
                         outlineColor={theme.colors.primary}
                         activeOutlineColor={theme.colors.primary}
+                        accessible={true}
+                        accessibilityLabel="Custom Value Input Field"
                         style={{
                           height: 40,
                           width: "80%",
@@ -451,9 +459,11 @@ const MyDropdown = ({
                         value={newValue}
                         right={
                           <TextInput.Icon
-                            name="close"
+                            icon="close"
+                            accessible={true}
+                            accessibilityLabel="Close"
                             color={theme.colors.primary}
-                            style={{ marginTop: 10 }}
+                            style={{ marginBottom: -5 }}
                             onPress={() => {
                               setNewValue("");
                             }}
@@ -463,6 +473,8 @@ const MyDropdown = ({
                       ></TextInput>
                       <IconButton
                         icon="check"
+                        accessible={true}
+                        accessibilityLabel="Accept"
                         color={theme.colors.primary}
                         dark
                         style={{ marginLeft: 15 }}

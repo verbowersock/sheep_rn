@@ -195,6 +195,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         toggleModal();
         reset(defaultValues);
       }}
+      accessible={true}
+      accessibilityLabel={`${formTitle} form`}
     >
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -206,6 +208,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           control={control}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyImagePicker
+              accessible={true}
+              accessibilityLabel="Image picker for the sheep photo"
               value={value}
               onChange={(value) => {
                 setValue(value && setValue("picture", value));
@@ -239,6 +243,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
+              accessible={true}
+              accessibilityLabel="Name input field"
               error={errors.name ? true : false}
               label={"Name"}
               placeholder={"Name"}
@@ -278,6 +284,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
+              accessible={true}
+              accessibilityLabel="Tag ID input field"
               error={errors.tag_id ? true : false}
               label={"Tag ID (required)"}
               placeholder={"Tag Id"}
@@ -315,6 +323,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
+              accessible={true}
+              accessibilityLabel="Scrapie Tag ID input field"
               error={errors.scrapie_id ? true : false}
               label={"Scrapie Tag ID"}
               placeholder={"Scrapie Tag Id"}
@@ -340,6 +350,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              accessible={true}
+              accessibilityLabel="Sheep sex input field"
               error={errors.sex ? true : false}
               data={sex}
               label="Sex (required)"
@@ -379,6 +391,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
+              accessible={true}
+              accessibilityLabel="Date of Birth input field"
               error={errors.dob ? true : false}
               label="Date of Birth (required)"
               field="dob"
@@ -406,6 +420,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
+              accessible={true}
+              accessibilityLabel="Weight input field"
               error={errors.weight_at_birth ? true : false}
               label="Weight At Birth"
               field="weight_at_birth"
@@ -437,6 +453,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
+              accessible={true}
+              accessibilityLabel="Date of Purchase input field"
               error={errors.dop ? true : false}
               label="Date of Purchase"
               field="dop"
@@ -470,6 +488,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
+              accessible={true}
+              accessibilityLabel="Date of Sale input field"
               error={errors.dos ? true : false}
               label="Date of Sale"
               field="dos"
@@ -503,6 +523,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
+              accessible={true}
+              accessibilityLabel="Date of Death field"
               error={errors.dod ? true : false}
               label="Date of Death"
               field="dod"
@@ -523,6 +545,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              accessible={true}
+              accessibilityLabel="Sheep Sire"
               error={errors.sire ? true : false}
               data={males.filter((sheep) => sheep.id !== formData.sheep_id)}
               label="Father"
@@ -540,6 +564,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              accessible={true}
+              accessibilityLabel="Sheep Dam"
               error={errors.dam ? true : false}
               data={females.filter((sheep) => sheep.id !== formData.sheep_id)}
               label={"Mother"}
@@ -562,6 +588,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              accessible={true}
+              accessibilityLabel="Breed Dropdown"
               error={errors.breed ? true : false}
               data={breeds}
               label="Breed (required)"
@@ -587,6 +615,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              accessible={true}
+              accessibilityLabel="Color Dropdown"
               error={errors.color ? true : false}
               data={colors}
               label={"Color"}
@@ -611,6 +641,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              accessible={true}
+              accessibilityLabel="Marking Dropdown"
               error={errors.marking ? true : false}
               data={markings}
               label={"Marking"}

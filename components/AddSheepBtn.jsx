@@ -11,6 +11,8 @@ const AddSheepBtn = ({ toggleModal, icon = "plus", style }) => {
       style={[styles.fab, style]}
       onPress={toggleModal}
       color={theme.colors.background}
+      accessible={true}
+      accessibilityLabel={icon === "plus" ? "Add Sheep" : "Edit Sheep"}
     />
   );
 };
