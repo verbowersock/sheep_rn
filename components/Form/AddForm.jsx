@@ -593,6 +593,7 @@ const makeStyles = (theme) =>
       backgroundColor: theme.colors.background,
       paddingHorizontal: 20,
       paddingVertical: 10,
+      maxWidth: 415,
     },
     formTitle: {
       fontSize: 18,

@@ -24,7 +24,7 @@ const ListItem = ({
         paddingBottom: 6,
         paddingLeft: 20,
         paddingRight: 20,
-        maxHeight: 200,
+        maxHeight: item.title === "Notes" ? "80%" : 200,
       }}
     >
       {showContextMenu ? (
@@ -62,7 +62,13 @@ const Item = ({ item }) => {
   return (
     <>
       <Text style={{ fontSize: 17, fontWeight: "bold" }}>{item.title} </Text>
-      <ScrollView style={{ maxHeight: "90%" }}>
+      <ScrollView
+        style={{
+          borderColor: item.title === "Notes" ? "#ebedf0" : "white",
+          borderWidth: 1,
+          padding: item.title === "Notes" ? 20 : 0,
+        }}
+      >
         <Text style={{ fontSize: 17 }}>{item.description}</Text>
       </ScrollView>
     </>
