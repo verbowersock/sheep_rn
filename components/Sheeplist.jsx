@@ -13,9 +13,19 @@ const SheepList = ({ sheep }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   return (
-    <ScrollView style={styles.SheepListWrapper}>
+    <ScrollView
+      style={styles.SheepListWrapper}
+      contentContainerStyle={{ alignItems: "center" }}
+    >
       {sheep.length !== 0 ? (
-        <FlatList data={sheep} renderItem={renderSheep} />
+        <FlatList
+          data={sheep}
+          renderItem={renderSheep}
+          style={{
+            width: "95%",
+            maxWidth: 420,
+          }}
+        />
       ) : (
         <View style={styles.NothingFound}>
           <Text style={styles.NothingFoundText}>

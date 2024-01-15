@@ -1,6 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   Modal,
   PermissionsAndroid,
@@ -47,6 +48,7 @@ import RNFS from "react-native-fs";
 import FileViewer from "react-native-file-viewer";
 import { htmlContent } from "./HTMLforPDF";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { Dimensions } from "react-native";
 
 const Details = ({ route }) => {
   const theme = useTheme();
@@ -95,6 +97,13 @@ const Details = ({ route }) => {
   const [listHeader, setListHeader] = useState("");
   const [listModalvisible, setListModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  // Get the window dimensions
+  const windowWidth = Dimensions.get("window").width;
+  const windowHeight = Dimensions.get("window").height;
+
+  // Calculate font size based on window size
+  const fontSize =
+    windowWidth > windowHeight ? windowHeight * 0.03 : windowWidth * 0.03;
 
   const { contextMenuOpen } = useSelector(uiSelector);
   const dispatch = useDispatch();
@@ -536,15 +545,18 @@ const Details = ({ route }) => {
 
         RNFS.moveFile(file.filePath, destPath)
           .then(() => {
-            alert(`File saved!`);
-            // Open the file
-            FileViewer.open(destPath)
-              .then(() => {
-                // success
-              })
-              .catch((error) => {
-                // error
-              });
+            Alert.alert(
+              "File Saved",
+              "Your document is located in your downloads folder"
+            ),
+              // Open the file
+              FileViewer.open(destPath)
+                .then(() => {
+                  // success
+                })
+                .catch((error) => {
+                  // error
+                });
           })
           .catch((err) => {
             alert("Something went wrong! Please try again");
@@ -595,13 +607,16 @@ const Details = ({ route }) => {
         onValueChange={setSelectedValue}
         buttons={buttons.map((button, index) => ({
           value: button.value,
-          label: <Text style={{ fontSize: 13 }}>{button.label}</Text>,
+          label: (
+            <Text style={{ fontSize, lineHeight: fontSize * 1.3 }}>
+              {button.label}
+            </Text>
+          ),
           checkedColor: button.color,
           uncheckedColor: theme.colors.background,
           showSelectedCheck: true,
           style: {
             paddingRight: -100,
-
             backgroundColor:
               selectedValue === button.value ? "white" : `${button.color}98`,
             borderColor: `${button.color}80`,
@@ -618,6 +633,7 @@ const Details = ({ route }) => {
         style={{
           paddingTop: 10,
           justifyContent: "space-between",
+          maxHeight: "41%",
         }}
       >
         {loading ? (
@@ -695,7 +711,8 @@ const makeStyles = (theme) =>
     modalContent: {
       backgroundColor: "white",
       borderRadius: 10,
-      padding: 20,
+      paddingHorizontal: 15,
+      paddingVertical: 20,
       justifyContent: "center",
       alignItems: "center",
       width: "100%",
