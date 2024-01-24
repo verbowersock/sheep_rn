@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import SearchBar from "./SearchBar";
 import AddSheepBtn from "./AddSheepBtn";

@@ -9,7 +9,7 @@ const renderSheep = ({ item, index }) => {
   return <Sheep item={item} index={index} />;
 };
 
-const SheepList = ({ sheep }) => {
+const SheepList = React.memo(function SheepList({ sheep }) {
   const theme = useTheme();
   const styles = makeStyles(theme);
   return (
@@ -36,7 +36,7 @@ const SheepList = ({ sheep }) => {
       )}
     </ScrollView>
   );
-};
+});
 export default SheepList;
 
 const makeStyles = (theme) =>
