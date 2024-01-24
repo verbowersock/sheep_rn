@@ -52,7 +52,7 @@ const initialMenuState = {
   REMOVE: false,
 };
 
-const Sheep = ({ item, index }) => {
+const Sheep = React.memo(function Sheep({ item, index }) {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
@@ -177,13 +177,7 @@ const Sheep = ({ item, index }) => {
   };
 
   return (
-    <View
-      style={
-        index === sheep.length - 1
-          ? [styles.SheepWrapper, styles.SheepWrapperLast]
-          : styles.SheepWrapper
-      }
-    >
+    <View style={styles.SheepWrapper}>
       <View
         style={{
           position: "absolute",
@@ -517,7 +511,7 @@ const Sheep = ({ item, index }) => {
       />
     </View>
   );
-};
+});
 
 export default Sheep;
 
@@ -534,9 +528,6 @@ const makeStyles = (theme) =>
       margin: 16,
       flexDirection: "column",
       paddingBottom: 16,
-    },
-    SheepWrapperLast: {
-      marginBottom: 96,
     },
     cardTitleWrapper: {
       width: "100%",
