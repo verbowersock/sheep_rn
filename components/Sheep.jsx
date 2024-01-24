@@ -526,7 +526,7 @@ const makeStyles = (theme) =>
     SheepWrapper: {
       backgroundColor: theme.colors.background,
       borderRadius: 15,
-      elevation: 8,
+      elevation: 6,
       justifyContent: "space-between",
       paddingLeft: 16,
       paddingRight: 14,

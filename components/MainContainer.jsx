@@ -131,7 +131,9 @@ const MainContainer = () => {
           Total Count: {filteredSheep.length}
         </Text>
       </View>
+
       {filteredSheep && <SheepList sheep={filteredSheep} />}
+
       <AddSheepBtn toggleModal={toggleMainModal} />
       {isMainFormDialogVisible && (
         <AddForm

@@ -66,6 +66,7 @@ const MyDropdown = ({
   error,
   searchable = true,
   field,
+  accessibilityHint,
 }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
@@ -358,6 +359,15 @@ const MyDropdown = ({
       />
 
       <Modal
+        customBackdrop={
+          <View style={{ flex: 1, backgroundColor: "black" }}>
+            <TouchableOpacity
+              accessibilityLabel="Close Modal"
+              style={{ flex: 1 }}
+              onPress={closeModal}
+            ></TouchableOpacity>
+          </View>
+        }
         isVisible={modalOpen}
         onRequestClose={(event) => {
           closeModal(event);
@@ -377,7 +387,27 @@ const MyDropdown = ({
             style={styles.modal}
             keyboardShouldPersistTaps="handled"
           >
-            {searchable && (
+            {modalData.length === 0 && (
+              <View
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <IconButton
+                  icon="close"
+                  onPress={() => {
+                    setModalOpen(false);
+                  }}
+                ></IconButton>
+                <Text style={{ fontSize: 18 }}>
+                  No applicable {field}s found. Please add a new one or try
+                  again
+                </Text>
+              </View>
+            )}
+            {searchable && modalData.length > 0 && (
               <TextInput
                 accessible={true}
                 accessibilityLabel="Search"
@@ -404,8 +434,13 @@ const MyDropdown = ({
                       textAlign: "center",
                       marginBottom: -2,
                     }}
-                    onPress={() => {
-                      setQuery("");
+                    onPress={(event) => {
+                      if (query === "") {
+                        console.log("empty", query);
+                        closeModal(event);
+                      } else {
+                        setQuery("");
+                      }
                     }}
                   />
                 }
@@ -422,7 +457,7 @@ const MyDropdown = ({
               <View>
                 {!newInput || modalData.length === 0 ? (
                   <Button
-                    color={theme.colors.primary}
+                    buttonColor={theme.colors.primary}
                     dark
                     style={{ width: "60%", marginTop: 15 }}
                     mode="contained"
