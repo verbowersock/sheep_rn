@@ -19,7 +19,6 @@ const ImagePicker = ({ value, onChange }) => {
   const onFABStateChange = ({ open }) => setFABState({ open });
   const { open } = FABstate;
 
-  console.log("value", value);
   const requestCameraPermission = async () => {
     if (Platform.OS === "android") {
       try {

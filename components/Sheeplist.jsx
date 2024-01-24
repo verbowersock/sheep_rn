@@ -24,6 +24,7 @@ const SheepList = ({ sheep }) => {
           style={{
             width: "95%",
             maxWidth: 420,
+            paddingBottom: 100,
           }}
         />
       ) : (

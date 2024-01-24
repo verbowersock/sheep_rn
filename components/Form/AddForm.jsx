@@ -262,14 +262,18 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         <Controller
           control={control}
           rules={{
-            validate: (value) =>
-              !!value.trim() || "Tag Id should not consist of whitespaces",
-            required: {
-              value: true,
-              message: "Tag Id is required",
-            },
-            //check for duplicates
             validate: (value) => {
+              // Check if the value is not empty
+              if (!value) {
+                return "Tag Id is required";
+              }
+
+              // Check if the value is not just whitespace
+              if (!value.trim()) {
+                return "Tag Id should not consist of whitespaces";
+              }
+
+              // Check for duplicates
               if (!formData.sheep_id) {
                 const duplicate = sheep.find(
                   (sheep) =>
@@ -280,12 +284,15 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
                   return "Tag Id must be unique";
                 }
               }
+
+              // If the value passes all validation rules, return true
+              return true;
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
               accessible={true}
-              accessibilityLabel="Tag ID input field"
+              accessibilityHint="Enter sheep Tag ID (required)"
               error={errors.tag_id ? true : false}
               label={"Tag ID (required)"}
               placeholder={"Tag Id"}
@@ -438,6 +445,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           rules={{
             validate: {
               validDate: (value) => {
+                if (!value) {
+                  return true;
+                }
                 const dateFormat =
                   /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
                 if (!dateFormat.test(value)) {
@@ -473,6 +483,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           rules={{
             validate: {
               validDate: (value) => {
+                if (!value) {
+                  return true;
+                }
                 const dateFormat =
                   /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
                 if (!dateFormat.test(value)) {
@@ -508,6 +521,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           rules={{
             validate: {
               validDate: (value) => {
+                if (!value) {
+                  return true;
+                }
                 const dateFormat =
                   /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
                 if (!dateFormat.test(value)) {
@@ -634,6 +650,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         {errors.color && (
           <Text style={styles.errorText}>Color is required.</Text>
         )}
+
         <Controller
           control={control}
           rules={{

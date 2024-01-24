@@ -169,6 +169,7 @@ const BackupRestore = () => {
       <Text style={styles.title}>Restore from backup</Text>
       <Button
         buttonColor={theme.colors.primary}
+        loading={loading}
         dark
         style={{ width: "40%", marginTop: 15 }}
         mode="contained"

@@ -13,13 +13,13 @@ const DrawerNavigator = () => {
   return (
     <Drawer.Navigator
       initialRouteName="MainRoute"
-      screenOptions={{
+      screenOptions={({ navigation }) => ({
         drawerPosition: "right",
         drawerActiveBackgroundColor: theme.colors.secondary,
         drawerActiveTintColor: theme.colors.background,
         drawerInactiveTintColor: theme.colors.text,
-        header: () => <Header />,
-      }}
+        header: () => <Header navigation={navigation} />,
+      })}
     >
       <Drawer.Screen
         name="MainRoute"
