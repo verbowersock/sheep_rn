@@ -336,7 +336,7 @@ const Details = ({ route }) => {
     },
     { title: "Date of Birth:", description: dob },
     { title: "Sex", description: sex },
-    !dod && { title: "Age", description: age(sheep[0]) },
+    !dod && { title: "Age", description: age(this_sheep) },
     dod && { title: "Date of Death:", description: dod },
     dop && { title: "Date of Purchase:", description: dop },
     dos && { title: "Date of Sale:", description: dos },
