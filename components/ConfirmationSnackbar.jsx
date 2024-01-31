@@ -13,7 +13,6 @@ const ConfirmationSnackbar = () => {
   const onDismissSnackBar = () => dispatch(setShowSnackbar(false));
 
   return (
-    <Portal>
       <Snackbar
         visible={visible}
         style={error ? styles.errorMessage : styles.confirmationMessage}
@@ -28,7 +27,7 @@ const ConfirmationSnackbar = () => {
       >
         {message}
       </Snackbar>
-    </Portal>
+
   );
 };
 

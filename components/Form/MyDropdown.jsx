@@ -26,6 +26,7 @@ import {
 } from "../../store/slices/attributes";
 
 import {
+  resetLoading,
   resetShowConfirmationDialog,
   setShowConfirmationDialog,
   setShowSnackbar,
@@ -66,20 +67,10 @@ const MyDropdown = ({
   error,
   searchable = true,
   field,
-  accessibilityHint,
 }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
-  const { colors, markings, breeds } = useSelector(attributesDataSelector);
-  const attributeData =
-    field === "color"
-      ? colors
-      : field === "marking"
-      ? markings
-      : field === "breed"
-      ? breeds
-      : data;
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedValue, setSelectedValue] = useState({
     id: null,
@@ -88,9 +79,8 @@ const MyDropdown = ({
   const [query, setQuery] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [modalData, setModalData] = useState(data);
-  const [newValue, setNewValue] = useState("");
-  const [newInput, setNewInput] = useState(false);
-  const [newInputError, setNewInputError] = useState("");
+  const [searchResult, setSearchResult] = useState(modalData);
+
   const [deletable, setDeletable] = useState(false);
 
   useEffect(() => {
@@ -99,49 +89,34 @@ const MyDropdown = ({
       : setDeletable(false);
   }, [field]);
 
-  const validateNewValue = (val) => {
-    if (val.length > 0) {
-      if (attributeData.some((item) => item.title === val)) {
-        setNewInputError("This value already exists");
-      } else {
-        setNewInputError("");
-        addNewValue(newValue, field);
-      }
-    } else {
-      setNewInputError("This field is empty. Please enter a new value");
-    }
-  };
 
   const addNewValue = async (val, field) => {
-    switch (field) {
+        switch (field) {
       case "color":
         const newColorId = await addColor(val);
         if (newColorId) {
           const newColor = { id: newColorId, title: val };
-          dispatch(addColorRedux(newColor));
-          setModalData([...attributeData, newColor]);
-          setNewInput(false);
-          setNewValue("");
+        dispatch(addColorRedux(newColor));
+          setModalData([...modalData, newColor]);
+          setSearchResult([...searchResult, newColor])
         }
         break;
       case "breed":
         const newBreedId = await addBreed(val);
         if (newBreedId) {
           const newBreed = { id: newBreedId, title: val };
-          dispatch(addBreedRedux(newBreed));
-          setModalData([...attributeData, newBreed]);
-          setNewInput(false);
-          setNewValue("");
+        dispatch(addBreedRedux(newBreed));
+          setModalData([...modalData, newBreed]);
+          setSearchResult([...searchResult, newBreed])
         }
         break;
       case "marking":
         const newMarkingId = await addMarking(val);
         if (newMarkingId) {
           const newMarking = { id: newMarkingId, title: val };
-          dispatch(addMarkingRedux(newMarking));
-          setModalData([...attributeData, newMarking]);
-          setNewInput(false);
-          setNewValue("");
+        dispatch(addMarkingRedux(newMarking));
+          setModalData([...modalData, newMarking]);
+          setSearchResult([...searchResult, newMarking])
         }
         break;
       default:
@@ -172,7 +147,7 @@ const MyDropdown = ({
                 setShowSnackbar({
                   visible: true,
                   error: true,
-                  message: `Color ${title} is used by some sheep records. Please delete sheep records first`,
+                  message: `Color ${title} is used by some sheep records. Please delete or edit those sheep records first`,
                 })
               );
             } else {
@@ -184,7 +159,11 @@ const MyDropdown = ({
                 })
               );
             }
+          })
+          .finally(() => {
+            dispatch(resetLoading());
           });
+
 
         break;
 
@@ -222,6 +201,9 @@ const MyDropdown = ({
                 })
               );
             }
+          })
+          .finally(() => {
+            dispatch(resetLoading());
           });
         break;
 
@@ -259,6 +241,9 @@ const MyDropdown = ({
                 })
               );
             }
+          })
+          .finally(() => {
+            dispatch(resetLoading());
           });
 
       default:
@@ -266,28 +251,25 @@ const MyDropdown = ({
     }
   };
 
-  const closeModal = (event) => {
-    event.target == event.currentTarget && setModalOpen(false);
-    setNewValue("");
-    setNewInput(false);
+  const closeModal = () => {
+    setModalOpen(false);
   };
 
   useEffect(() => {
     if (query.length > 0) {
       setFilteredData(
-        attributeData.filter((item) =>
+        modalData.filter((item) =>
           item.title.toLowerCase().includes(query.toLowerCase())
         )
       );
-      setTimeout(() => {
-        setModalData(filteredData);
-      }, 800);
+   
+        setSearchResult(filteredData);
+      
     } else {
-      setTimeout(() => {
-        setModalData(attributeData);
-      }, 800);
+
+        setSearchResult(modalData);
     }
-  }, [query]);
+  }, [query, modalData]);
 
   const showConfirmation = (item) => {
     dispatch(
@@ -314,7 +296,6 @@ const MyDropdown = ({
         onPress={() => {
           inputRef.current.blur();
           setQuery("");
-          setNewInput(false);
           setSelectedValue(item);
           setModalOpen(false);
           onChange(item.id);
@@ -323,16 +304,12 @@ const MyDropdown = ({
     );
   };
 
-  const handleNewValuePress = () => {
-    if (modalData.length === 0) {
-      addNewValue(query, field);
-    } else {
-      setNewInput(true);
-    }
+  const handleNewValuePress = async() => {
+      await addNewValue(query, field);
   };
 
   const findSelectedValue = (value) => {
-    const selected = attributeData.find(
+    const selected = modalData.find(
       (item) => item.id.toString() === value.toString()
     );
     setSelectedValue(selected);
@@ -369,8 +346,8 @@ const MyDropdown = ({
           </View>
         }
         isVisible={modalOpen}
-        onRequestClose={(event) => {
-          closeModal(event);
+        onRequestClose={() => {
+          closeModal();
         }}
       >
         <Pressable
@@ -379,8 +356,8 @@ const MyDropdown = ({
             backgroundColor: "transparent",
             justifyContent: "center",
           }}
-          onPress={(event) => {
-            closeModal(event);
+          onPress={() => {
+            closeModal();
           }}
         >
           <KeyboardAvoidingView
@@ -401,7 +378,7 @@ const MyDropdown = ({
                     setModalOpen(false);
                   }}
                 ></IconButton>
-                <Text style={{ fontSize: 18 }}>
+                <Text style={{ fontSize: 18, textAlign: 'center' }}>
                   No applicable {field}s found. Please add a new one or try
                   again
                 </Text>
@@ -415,14 +392,9 @@ const MyDropdown = ({
                 mode="outlined"
                 outlineColor={theme.colors.primary}
                 activeOutlineColor={theme.colors.primary}
-                style={styles.modalSearch}
                 value={query}
-                onFocus={() => {
-                  setNewInput(false);
-                }}
                 onChangeText={(q) => {
                   setQuery(q);
-                  setNewInput(false);
                 }}
                 placeholder="Search"
                 right={
@@ -432,7 +404,7 @@ const MyDropdown = ({
                     icon="close"
                     style={{
                       textAlign: "center",
-                      marginBottom: -2,
+                      
                     }}
                     onPress={(event) => {
                       if (query === "") {
@@ -447,7 +419,7 @@ const MyDropdown = ({
               ></TextInput>
             )}
             <FlatList
-              data={modalData}
+              data={searchResult}
               renderItem={renderItem}
               keyboardShouldPersistTaps="handled"
               keyExtractor={(item) => item.id}
@@ -455,7 +427,9 @@ const MyDropdown = ({
             />
             {deletable && (
               <View>
-                {!newInput || modalData.length === 0 ? (
+                {searchResult.length === 0 ? (
+                  <View>
+                    <Text>This {field} was not found. Click button below to add it to your {field}s.</Text>
                   <Button
                     buttonColor={theme.colors.primary}
                     dark
@@ -467,59 +441,9 @@ const MyDropdown = ({
                   >
                     Add new
                   </Button>
-                ) : (
-                  <View
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignContent: "space-between",
-                      }}
-                    >
-                      <TextInput
-                        mode="outlined"
-                        outlineColor={theme.colors.primary}
-                        activeOutlineColor={theme.colors.primary}
-                        accessible={true}
-                        accessibilityLabel="Custom Value Input Field"
-                        style={{
-                          height: 40,
-                          width: "80%",
-                        }}
-                        value={newValue}
-                        right={
-                          <TextInput.Icon
-                            icon="close"
-                            accessible={true}
-                            accessibilityLabel="Close"
-                            color={theme.colors.primary}
-                            style={{ marginBottom: -5 }}
-                            onPress={() => {
-                              setNewValue("");
-                            }}
-                          />
-                        }
-                        onChangeText={(v) => setNewValue(v)}
-                      ></TextInput>
-                      <IconButton
-                        icon="check"
-                        accessible={true}
-                        accessibilityLabel="Accept"
-                        color={theme.colors.primary}
-                        dark
-                        style={{ marginLeft: 15 }}
-                        onPress={() => validateNewValue(newValue)}
-                      />
-                    </View>
-                    <Text style={{ color: theme.colors.primary }}>
-                      {newInputError}
-                    </Text>
                   </View>
+                ) : (
+                 null
                 )}
               </View>
             )}
@@ -570,12 +494,6 @@ const makeStyles = (theme) =>
       borderRadius: 14,
       maxHeight: 400,
       flexGrow: 0,
-    },
-    modalSearch: {
-      height: 40,
-    },
-    placeholderStyles: {
-      color: theme.colors.disabled,
     },
   });
 
