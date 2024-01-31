@@ -18,6 +18,7 @@ import { useForm, Controller } from "react-hook-form";
 import {
   ActivityIndicator,
   Button,
+  Snackbar,
   TextInput,
   useTheme,
 } from "react-native-paper";
@@ -38,6 +39,7 @@ import {
 import MyImagePicker from "./ImagePicker";
 import { setShowSnackbar, uiSelector } from "../../store/slices/ui";
 import { isValid as isValidDate, parse, parseISO } from "date-fns";
+import ConfirmationSnackbar from "../ConfirmationSnackbar";
 
 const AddForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
@@ -406,10 +408,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               value={value}
               onChangeText={(text) => {
                 onChange(text);
-                console.log(
-                  "valid",
-                  isValidDate(parse(text, "MM/dd/yyyy", new Date()))
-                );
                 trigger("dob");
               }}
             />

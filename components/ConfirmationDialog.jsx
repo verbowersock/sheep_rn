@@ -1,12 +1,13 @@
 import * as React from "react";
 import { Modal } from "react-native";
 import { Button, Paragraph, Dialog, useTheme } from "react-native-paper";
-import { resetShowConfirmationDialog, uiSelector } from "../store/slices/ui";
+import { resetShowConfirmationDialog, setLoading, uiSelector } from "../store/slices/ui";
 import { StyleSheet } from "react-native";
 
 import { useDispatch, useSelector } from "react-redux";
 
 const ConfirmationDialog = ({ onConfirm }) => {
+  const loading = useSelector((state) => state.ui.loading);
   const theme = useTheme();
   const styles = makeStyles(theme);
   const { isConfirmationDialogVisible } = useSelector(uiSelector);
@@ -19,6 +20,7 @@ const ConfirmationDialog = ({ onConfirm }) => {
   };
 
   const onConfirmDelete = () => {
+    dispatch(setLoading(true));
     onConfirm(id, field, title, name);
   };
 
@@ -58,6 +60,7 @@ const ConfirmationDialog = ({ onConfirm }) => {
             mode="contained"
             buttonColor={theme.colors.error}
             onPress={() => onConfirmDelete()}
+            loading={loading}
           >
             Delete
           </Button>

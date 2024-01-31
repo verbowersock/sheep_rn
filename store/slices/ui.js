@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export const initialState = {
+  loading: false,
   isConfirmationDialogVisible: {
     visible: false,
     id: "",
@@ -67,6 +68,12 @@ const uiSlice = createSlice({
       state.isConfirmationDialogVisible =
         initialState.isConfirmationDialogVisible;
     },
+    setLoading: (state) => {
+      state.loading = true;
+    },
+    resetLoading: (state) => {
+      state.loading = false;
+    },
     setShowFormDialog: (state, { payload }) => {
       state.isMainFormDialogVisible = payload;
     },
@@ -119,6 +126,8 @@ export const {
   setVaccines,
   setMeds,
   setContextMenuOpen,
+  setLoading,
+  resetLoading,
 } = uiSlice.actions;
 export const uiSelector = (state) => state.ui;
 export default uiSlice.reducer;
