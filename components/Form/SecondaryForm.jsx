@@ -466,8 +466,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
 
         <View style={styles.buttonContainer}>
           <Button
-            mode="text"
-            style={{ width: "40%" }}
+            mode="outlined"
+            style={{ width: "43%" }}
             onPress={() => {
               toggleModal();
               reset(defaultValues);
@@ -478,12 +478,12 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           <Button
             loading={loading}
             buttonColor={theme.colors.primary}
-            style={{ width: "40%" }}
+            style={{ width: "43%" }}
             mode="contained"
             disabled={!isValid}
             onPress={handleSubmit(onSubmit)}
           >
-            Submit
+            Save
           </Button>
         </View>
       </View>
