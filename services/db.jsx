@@ -419,6 +419,7 @@ export const addBasicData = async (tx) => {
             weight_at_birth INTEGER, 
             dod VARCHAR(255), 
             date_last_bred VARCHAR(255),
+            last_bred_to BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE,
             breed_id BIGINT NOT NULL REFERENCES breeds (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
             color_id BIGINT REFERENCES colors (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
             marking_id BIGINT REFERENCES markings (id) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -582,7 +583,7 @@ export function insertSheepData() {
         testDataSheep.map((sheepData) => {
           return new Promise((resolve, reject) => {
             tx.executeSql(
-              `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred, notes, last_location, picture) 
+              `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred, last_bred_to, notes, last_location, picture) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 sheepData.tag_id,
@@ -600,6 +601,7 @@ export function insertSheepData() {
                 sheepData.color_id,
                 sheepData.marking_id,
                 sheepData.date_last_bred,
+                sheepData.last_bred_to,
                 sheepData.notes,
                 sheepData.last_location,
                 sheepData.picture,
@@ -765,6 +767,8 @@ export function fetchAllSheep() {
   children.dop,
   children.weight_at_birth,
   children.date_last_bred,
+  children.last_bred_to,
+  children.last_bred_to,
   children.dod,
   children.picture,
   children.scrapie_id,
@@ -781,14 +785,16 @@ export function fetchAllSheep() {
   sires.name AS father_name,
   sires.tag_id AS father_tag_id,
   dams.name AS mother_name,
-  dams.tag_id AS mother_tag_id
+  dams.tag_id AS mother_tag_id,
+  COALESCE(last_bred_to_sheep.name, last_bred_to_sheep.tag_id, 'NA') as last_bred_to_name_or_tag
 FROM
   sheep children
   JOIN breeds ON children.breed_id = breeds.id
   LEFT JOIN colors ON children.color_id = colors.id
   LEFT JOIN markings ON children.marking_id = markings.id
   LEFT JOIN sheep sires ON children.sire = sires.sheep_id
-  LEFT JOIN sheep dams ON children.dam = dams.sheep_id;`,
+  LEFT JOIN sheep dams ON children.dam = dams.sheep_id
+  LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id`,
         //  `select * from sheep`,
         [],
         (_, result) => {
@@ -822,6 +828,7 @@ export function fetchSheep(id) {
         children.dop,
         children.weight_at_birth,
         children.date_last_bred,
+        children.last_bred_to,
         children.dod,
         children.picture,
         children.scrapie_id,
@@ -838,14 +845,16 @@ export function fetchSheep(id) {
         sires.name AS father_name,
         sires.tag_id AS father_tag_id,
         dams.name AS mother_name,
-        dams.tag_id AS mother_tag_id
+        dams.tag_id AS mother_tag_id,
+        COALESCE(last_bred_to_sheep.name, last_bred_to_sheep.tag_id, 'NA') as last_bred_to_name_or_tag
       FROM
-        sheep children
-        JOIN breeds ON children.breed_id = breeds.id
-        LEFT JOIN colors ON children.color_id = colors.id
-        LEFT JOIN markings ON children.marking_id = markings.id
-        LEFT JOIN sheep sires ON children.sire = sires.sheep_id
-        LEFT JOIN sheep dams ON children.dam = dams.sheep_id
+      sheep children
+      JOIN breeds ON children.breed_id = breeds.id
+      LEFT JOIN colors ON children.color_id = colors.id
+      LEFT JOIN markings ON children.marking_id = markings.id
+      LEFT JOIN sheep sires ON children.sire = sires.sheep_id
+      LEFT JOIN sheep dams ON children.dam = dams.sheep_id
+      LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id
       WHERE
         children.sheep_id = ?;`,
         [id],
@@ -1226,6 +1235,7 @@ export function deleteSheep(val) {
 
 export function editSheep(sheepData, id) {
   return new Promise((resolve, reject) => {
+    console.log(sheepData);
     database.transaction((tx) => {
       // Generate the SQL query and the parameters array
       const columns = Object.keys(sheepData).filter((col) => col !== "id");
@@ -1275,8 +1285,8 @@ export function updateDateLastBred(data) {
     database.transaction((tx) => {
       console.log("date1", data);
       tx.executeSql(
-        `UPDATE sheep set date_last_bred = ? where sheep_id=?`,
-        [data.date, data.sheep_id],
+        `UPDATE sheep set date_last_bred = ?, last_bred_to = ? where sheep_id=?`,
+        [data.date, last_bred_to, data.sheep_id],
         (t, success) => {
           console.log("success", success);
           resolve(success);

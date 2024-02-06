@@ -40,9 +40,9 @@ export default function App() {
   async function initDb() {
     try {
       await SplashScreen.preventAutoHideAsync();
-      //const currentSchemaVersion = await getCurrentSchemaVersion();
-      const currentSchemaVersion = 2;
-      const expectedSchemaVersion = 2; // The version your app expects
+      const currentSchemaVersion = await getCurrentSchemaVersion();
+      //const currentSchemaVersion = 2;
+      const expectedSchemaVersion = 3; // The version your app expects
 
       if (currentSchemaVersion !== expectedSchemaVersion) {
         await executeMigration();

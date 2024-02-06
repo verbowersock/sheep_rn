@@ -110,6 +110,7 @@ const Sheep = React.memo(function Sheep({ item, index }) {
   const onAddLamb = (item) => {
     const formattedData = {
       dam: item.sheep_id,
+      sire: item.last_bred_to,
     };
     dispatch(setFormTitle("Add Lamb"));
     dispatch(setFormData(formattedData));
