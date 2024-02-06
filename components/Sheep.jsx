@@ -16,27 +16,20 @@ import {
 } from "../store/slices/sheep";
 import {
   resetShowConfirmationDialog,
-  setActiveCardId,
-  setCardMenuOpen,
   setFormData,
   setFormTitle,
-  setSecondaryFormData,
-  setSecondaryFormTitle,
   setShowConfirmationDialog,
   setShowFormDialog,
-  setShowSecondaryFormDialog,
   setShowSnackbar,
-  setSmallFormTitle,
   uiSelector,
 } from "../store/slices/ui";
 import ConfirmationDialog from "./ConfirmationDialog";
 import { useNavigation } from "@react-navigation/native";
 import { age } from "./utils/Age";
-import IconMenu from "./IconMenu";
-import Icon from "react-native-vector-icons/FontAwesome5";
+
 import ButtonWithIcon from "./ButtonWithIcon";
 import { forms } from "../Constants";
-import { toggleSecondaryFormModal } from "./utils/SharedFunctions";
+import { capitalize, toggleSecondaryFormModal } from "./utils/SharedFunctions";
 
 const placeholder = require("../assets/images/placeholder.jpg");
 const dead = require("../assets/images/dead.png");
@@ -56,11 +49,15 @@ const Sheep = React.memo(function Sheep({ item, index }) {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
-  const { activeCardId } = useSelector(uiSelector);
-  const [menuVisible, setMenuVisible] = useState(initialMenuState);
-  const { sheep } = useSelector(sheepDataSelector);
-  const { isSecondaryFormDialogVisible } = useSelector(uiSelector);
 
+  const [menuVisible, setMenuVisible] = useState(initialMenuState);
+
+  const { isSecondaryFormDialogVisible } = useSelector(uiSelector);
+  const sex = [
+    { id: "m", title: "Ram" },
+    { id: "f", title: "Ewe" },
+    { id: "w", title: "Wether" },
+  ];
   // useEffect(() => {
   //   if (activeCardId !== item.sheep_id) {
   //    setMenuVisible(initialMenuState);
@@ -448,7 +445,7 @@ const Sheep = React.memo(function Sheep({ item, index }) {
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Sex: </Text>
-                <Text>{item.sex}</Text>
+                <Text>{sex.find((s) => s.id === item.sex)?.title}</Text>
               </Text>
               {item.purchase_date && (
                 <Text style={styles.info}>
@@ -469,7 +466,7 @@ const Sheep = React.memo(function Sheep({ item, index }) {
               )}
               <Text style={styles.info}>
                 <Text style={styles.label}>Breed: </Text>
-                <Text>{item.breed_name}</Text>
+                <Text>{capitalize(item.breed_name)}</Text>
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Father: </Text>
@@ -493,11 +490,15 @@ const Sheep = React.memo(function Sheep({ item, index }) {
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Color: </Text>
-                <Text>{item.color_name ? item.color_name : "NA"}</Text>
+                <Text>
+                  {item.color_name ? capitalize(item.color_name) : "NA"}
+                </Text>
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Marking: </Text>
-                <Text>{item.marking_name ? item.marking_name : "NA"}</Text>
+                <Text>
+                  {item.marking_name ? capitalize(item.marking_name) : "NA"}
+                </Text>
               </Text>
             </View>
           </View>

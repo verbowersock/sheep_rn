@@ -1296,7 +1296,6 @@ export function updateDateLastBred(data) {
 }
 
 export function findChildren(id) {
-  console.log("finding children for id", id);
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
@@ -1429,7 +1428,6 @@ export function fetchSheepMeds(id) {
         FROM sheep_meds INNER JOIN medications ON sheep_meds.entry_id = medications.id WHERE sheep_meds.sheep_id = ?`,
         [id],
         (t, results) => {
-          console.log("sheepmeds from db", results.rows._array);
           resolve(results.rows._array);
         },
         (t, error) => {
