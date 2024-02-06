@@ -3,13 +3,22 @@ import { Masks, useMaskedInputProps } from "react-native-mask-input";
 import { useTheme } from "react-native-paper";
 import MyTextInput from "./MyTextInput";
 
-const DateTextInput = ({ label, field, onChangeText, value, error }) => {
+const DateTextInput = ({
+  label,
+  field,
+  onChangeText,
+  value,
+  error,
+  dateFormat,
+}) => {
   const theme = useTheme();
   const maskedInputPropsDate = useMaskedInputProps({
     value: value ? value : "",
     onChangeText: (text) => onChangeText(text),
-    mask: Masks.DATE_MMDDYYYY,
+    mask: dateFormat === "mdy" ? Masks.DATE_MMDDYYYY : Masks.DATE_DDMMYYYY,
   });
+
+  console.log("maskedInputPropsDate", value, dateFormat);
 
   return (
     <MyTextInput
