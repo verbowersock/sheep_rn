@@ -31,7 +31,10 @@ import {
   setShowFormDialog,
   uiSelector,
 } from "../../store/slices/ui";
-import { toggleSecondaryFormModal } from "../utils/SharedFunctions";
+import {
+  dateDisplayFormatter,
+  toggleSecondaryFormModal,
+} from "../utils/SharedFunctions";
 import { forms } from "../../Constants";
 import ListItem from "../ListItem";
 import DataList from "../DataList";
@@ -49,12 +52,14 @@ import FileViewer from "react-native-file-viewer";
 import { htmlContent } from "./HTMLforPDF";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Dimensions } from "react-native";
+import { settingsSelector } from "../../store/slices/settings";
 
 const Details = ({ route }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const navigation = useNavigation();
   const { sheep_id } = route.params;
+  const { dateFormat } = useSelector(settingsSelector);
 
   const { sheep, sheepMeds, sheepVax, sheepWeights, sheepChildren } =
     useSelector(sheepDataSelector);
@@ -309,6 +314,7 @@ const Details = ({ route }) => {
       forms.MISC,
       sheep_id,
       false,
+      dateFormat,
       dispatch,
       async () => {
         updateState(forms.MISC);
@@ -334,12 +340,24 @@ const Details = ({ route }) => {
       title: "Marking:",
       description: marking_name,
     },
-    { title: "Date of Birth:", description: dob },
+    {
+      title: "Date of Birth:",
+      description: dateDisplayFormatter(dob, dateFormat),
+    },
     { title: "Sex", description: sex },
     !dod && { title: "Age", description: age(this_sheep) },
-    dod && { title: "Date of Death:", description: dod },
-    dop && { title: "Date of Purchase:", description: dop },
-    dos && { title: "Date of Sale:", description: dos },
+    dod && {
+      title: "Date of Death:",
+      description: dateDisplayFormatter(dod, dateFormat),
+    },
+    dop && {
+      title: "Date of Purchase:",
+      description: dateDisplayFormatter(dop, dateFormat),
+    },
+    dos && {
+      title: "Date of Sale:",
+      description: dateDisplayFormatter(dos, dateFormat),
+    },
   ].filter(Boolean);
 
   const breeding = [
@@ -357,7 +375,7 @@ const Details = ({ route }) => {
     sex === "f" &&
       date_last_bred && {
         title: "Date last bred:",
-        description: date_last_bred,
+        description: dateDisplayFormatter(date_last_bred, dateFormat),
       },
     sex === "f" &&
       date_last_bred && {
@@ -389,19 +407,32 @@ const Details = ({ route }) => {
     sheepMeds.length > 0 && {
       type: forms.MEDS,
       title: "Last Medication:",
-      description: `${lastMedication.entry} on ${lastMedication.date}`,
+      description: `${lastMedication.entry} on ${dateDisplayFormatter(
+        lastMedication.date,
+        dateFormat
+      )}`,
     },
     sheepVax.length > 0 && {
       type: forms.VAX,
       title: "Last Vaccination:",
-      description: `${lastVaccination.entry} on ${lastVaccination.date}`,
+      description: `${lastVaccination.entry} on ${dateDisplayFormatter(
+        lastVaccination.date,
+        dateFormat
+      )}`,
     },
     sheepWeights.length > 0 && {
       type: forms.WEIGHT,
       title: "Last Weight:",
-      description: `${lastWeight.entry}lbs on ${lastWeight.date}`,
+      description: `${lastWeight.entry}lbs on ${dateDisplayFormatter(
+        lastWeight.date,
+        dateFormat
+      )}`,
     },
-    dod && { title: "Date of Death:", description: dod, type: forms.DEATH },
+    dod && {
+      title: "Date of Death:",
+      description: dateDisplayFormatter(dod, dateFormat),
+      type: forms.DEATH,
+    },
   ].filter(Boolean);
 
   const misc = [
@@ -460,9 +491,16 @@ const Details = ({ route }) => {
   };
 
   const handlePlusPress = async (type) => {
-    toggleSecondaryFormModal(type, sheep_id, false, dispatch, async () => {
-      updateState(type);
-    });
+    toggleSecondaryFormModal(
+      type,
+      sheep_id,
+      false,
+      dateFormat,
+      dispatch,
+      async () => {
+        updateState(type);
+      }
+    );
   };
 
   const handleListPress = (type) => {

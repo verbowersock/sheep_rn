@@ -38,8 +38,13 @@ import {
 } from "../../store/slices/attributes";
 import MyImagePicker from "./ImagePicker";
 import { setShowSnackbar, uiSelector } from "../../store/slices/ui";
-import { isValid as isValidDate, parse, parseISO } from "date-fns";
-import ConfirmationSnackbar from "../ConfirmationSnackbar";
+import {
+  dateDisplayFormatter,
+  dateSaveFormater,
+  dateSaveFormatter,
+  validateDate,
+} from "../utils/SharedFunctions";
+import { settingsSelector } from "../../store/slices/settings";
 
 const AddForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
@@ -58,6 +63,21 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   const [females, setFemales] = useState([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { dateFormat } = useSelector(settingsSelector);
+  const dateFields = ["dob", "dod", "dos", "dop"];
+
+  function formatDatesInObject(obj, dateFields, dateFormat) {
+    const newObj = { ...obj };
+    dateFields.forEach((field) => {
+      if (newObj[field]) {
+        newObj[field] = dateDisplayFormatter(newObj[field], dateFormat);
+      }
+    });
+    return newObj;
+  }
+
+  const correctedData = formatDatesInObject(formData, dateFields, dateFormat);
+  console.log("correctedData", correctedData);
 
   useEffect(() => {
     async function loadDataToApp() {
@@ -108,7 +128,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   const { control, handleSubmit, trigger, setValue, reset, formState } =
     useForm({
       shouldUnregister: false,
-      defaultValues: formData,
+      defaultValues: correctedData,
       mode: "onChange",
     });
 
@@ -116,8 +136,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   const errors = useMemo(() => formState.errors, [formState]);
 
   useEffect(() => {
-    reset(formData);
-  }, [reset, formData]);
+    reset(defaultValues);
+  }, [reset, defaultValues]);
 
   useEffect(() => {
     trigger();
@@ -126,10 +146,10 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   const onSubmit = (data) => {
     setLoading(true);
     const formattedData = {
-      dob: data.dob,
-      dod: data.dod,
-      dop: data.dop,
-      dos: data.dos,
+      dob: dateSaveFormatter(data.dob, dateFormat),
+      dod: dateSaveFormatter(data.dod, dateFormat),
+      dop: dateSaveFormatter(data.dop, dateFormat),
+      dos: dateSaveFormatter(data.dos, dateFormat),
       name: data.name,
       picture: data.picture,
       scrapie_id: data.scrapie_id,
@@ -142,6 +162,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       marking_id: data.marking_id,
       weight_at_birth: data.weight_at_birth,
     };
+
     if (formData.sheep_id) {
       editSheep(formattedData, formData.sheep_id)
         .then(() => {
@@ -384,22 +405,12 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           rules={{
             required: { value: true, message: "Date of Birth is required" },
             validate: {
-              validDate: (value) => {
-                const dateFormat =
-                  /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
-                if (!dateFormat.test(value)) {
-                  return "Invalid date format. Please use MM/dd/yyyy";
-                }
-                const parsedDate = parse(value, "MM/dd/yyyy", new Date());
-                return (
-                  isValidDate(parsedDate) ||
-                  "Invalid date format. Please use MM/dd/yyyy"
-                );
-              },
+              validDate: (value) => validateDate(value, dateFormat),
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
+              dateFormat={dateFormat}
               accessible={true}
               accessibilityLabel="Date of Birth input field"
               error={errors.dob ? true : false}
@@ -442,25 +453,12 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           control={control}
           rules={{
             validate: {
-              validDate: (value) => {
-                if (!value) {
-                  return true;
-                }
-                const dateFormat =
-                  /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
-                if (!dateFormat.test(value)) {
-                  return "Invalid date format. Please use MM/dd/yyyy";
-                }
-                const parsedDate = parse(value, "MM/dd/yyyy", new Date());
-                return (
-                  isValidDate(parsedDate) ||
-                  "Invalid date format. Please use MM/dd/yyyy"
-                );
-              },
+              validDate: (value) => validateDate(value, dateFormat),
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
+              dateFormat={dateFormat}
               accessible={true}
               accessibilityLabel="Date of Purchase input field"
               error={errors.dop ? true : false}
@@ -480,25 +478,12 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           control={control}
           rules={{
             validate: {
-              validDate: (value) => {
-                if (!value) {
-                  return true;
-                }
-                const dateFormat =
-                  /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
-                if (!dateFormat.test(value)) {
-                  return "Invalid date format. Please use MM/dd/yyyy";
-                }
-                const parsedDate = parse(value, "MM/dd/yyyy", new Date());
-                return (
-                  isValidDate(parsedDate) ||
-                  "Invalid date format. Please use MM/dd/yyyy"
-                );
-              },
+              validDate: (value) => validateDate(value, dateFormat),
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
+              dateFormat={dateFormat}
               accessible={true}
               accessibilityLabel="Date of Sale input field"
               error={errors.dos ? true : false}
@@ -518,25 +503,12 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           control={control}
           rules={{
             validate: {
-              validDate: (value) => {
-                if (!value) {
-                  return true;
-                }
-                const dateFormat =
-                  /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d\d$/;
-                if (!dateFormat.test(value)) {
-                  return "Invalid date format. Please use MM/dd/yyyy";
-                }
-                const parsedDate = parse(value, "MM/dd/yyyy", new Date());
-                return (
-                  isValidDate(parsedDate) ||
-                  "Invalid date format. Please use MM/dd/yyyy"
-                );
-              },
+              validDate: (value) => validateDate(value, dateFormat),
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
+              dateFormat={dateFormat}
               accessible={true}
               accessibilityLabel="Date of Death field"
               error={errors.dod ? true : false}

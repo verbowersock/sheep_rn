@@ -5,6 +5,7 @@ import MainStackNavigator from "./StackNavigator";
 import { useTheme } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import About from "../screens/About";
+import Settings from "../screens/Settings";
 
 const Drawer = createDrawerNavigator();
 
@@ -38,6 +39,16 @@ const DrawerNavigator = () => {
           drawerLabel: "Backup and Restore",
           drawerIcon: ({ color }) => (
             <Icon name="database-check-outline" color={color} size={25} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          drawerLabel: "Settings",
+          drawerIcon: ({ color, size }) => (
+            <Icon name="cog" color={color} size={25} />
           ),
         }}
       />

@@ -9,6 +9,7 @@ import {
 export const age = (item) => {
   let sheepAge;
   const today = new Date();
+
   if (item.dob) {
     const parsedDob = parse(item.dob, "MM/dd/yyyy", new Date());
     if (isValid(parsedDob) && !item.dod) {

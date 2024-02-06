@@ -4,12 +4,17 @@ import { FlatList } from "react-native";
 import Sheep from "./Sheep";
 import { ScrollView } from "react-native-gesture-handler";
 import { useTheme } from "react-native-paper";
+import { useSelector } from "react-redux";
+import { settingsSelector } from "../store/slices/settings";
 
-const renderSheep = ({ item, index }) => {
-  return <Sheep item={item} index={index} />;
-};
+const renderSheep =
+  (dateFormat) =>
+  ({ item, index }) => {
+    return <Sheep item={item} index={index} dateFormat={dateFormat} />;
+  };
 
 const SheepList = React.memo(function SheepList({ sheep }) {
+  const { dateFormat } = useSelector(settingsSelector);
   const theme = useTheme();
   const styles = makeStyles(theme);
   return (
@@ -20,7 +25,7 @@ const SheepList = React.memo(function SheepList({ sheep }) {
       {sheep.length !== 0 ? (
         <FlatList
           data={sheep}
-          renderItem={renderSheep}
+          renderItem={renderSheep(dateFormat)}
           style={{
             width: "95%",
             maxWidth: 420,

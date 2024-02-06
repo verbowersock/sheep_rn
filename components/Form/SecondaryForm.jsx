@@ -46,6 +46,12 @@ import {
   updateSheepVax,
   updateSheepWeight,
 } from "../../store/slices/sheep";
+import {
+  dateDisplayFormatter,
+  dateSaveFormatter,
+  validateDate,
+} from "../utils/SharedFunctions";
+import { settingsSelector } from "../../store/slices/settings";
 
 const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
@@ -57,8 +63,10 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const { secondaryFormData } = useSelector(uiSelector);
   const { title, type, errorText } = secondaryFormData.type;
   const { defaultData } = secondaryFormData;
+  const { dateFormat } = useSelector(settingsSelector);
 
   const [loading, setLoading] = useState(false);
+  console.log("defaultData", defaultData);
 
   useEffect(() => {
     async function loadDataToForm() {
@@ -107,10 +115,15 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   }, [trigger, secondaryFormData]);
 
   const onSubmit = (data) => {
+    const formattedData = {
+      ...data,
+      date: dateSaveFormatter(data.date, dateFormat),
+    };
+    console.log(formattedData);
     setLoading(true);
     switch (type) {
       case MEDS.type:
-        addMedication(data)
+        addMedication(formattedData)
           .then(() => {
             return fetchSheepMeds(data.sheep_id);
           })
@@ -134,9 +147,9 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           });
         break;
       case VAX.type:
-        addVaccination(data)
+        addVaccination(formattedData)
           .then(() => {
-            return fetchSheepVax(data.sheep_id);
+            return fetchSheepVax(formattedData.sheep_id);
           })
           .then((vax) => {
             return dispatch(setSheepVax(vax));
@@ -160,9 +173,9 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
       //   promise = addVaccination(data);
       case WEIGHT.type:
         // promise = addSheepWeight(data);
-        addSheepWeight(data)
+        addSheepWeight(formattedData)
           .then(() => {
-            return fetchSheepWeight(data.sheep_id);
+            return fetchSheepWeight(formattedData.sheep_id);
           })
           .then((weight) => {
             return dispatch(setSheepWeights(weight));
@@ -184,7 +197,10 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           });
         break;
       case BREEDING.type:
-        editSheep({ date_last_bred: data.date }, data.sheep_id)
+        editSheep(
+          { date_last_bred: formattedData.date },
+          formattedData.sheep_id
+        )
           .then(() => {
             return fetchSheep(data.sheep_id);
           })
@@ -208,7 +224,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           });
         break;
       case SALE.type:
-        editSheep({ dos: data.date }, data.sheep_id)
+        editSheep({ dos: formattedData.date }, formattedData.sheep_id)
           .then(() => {
             return fetchSheep(data.sheep_id);
           })
@@ -232,7 +248,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           });
         break;
       case DEATH.type:
-        editSheep({ dod: data.date }, data.sheep_id)
+        editSheep({ dod: formattedData.date }, formattedData.sheep_id)
           .then(() => {
             return fetchSheep(data.sheep_id);
           })
@@ -256,7 +272,10 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           });
       case MISC.type:
         editSheep(
-          { notes: data.notes, last_location: data.last_location },
+          {
+            notes: formattedData.notes,
+            last_location: formattedData.last_location,
+          },
           data.sheep_id
         )
           .then(() => {
@@ -302,13 +321,11 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
             control={control}
             //validate that the date is in format MM/DD/YYYY, and that it is not empty
             rules={{
-              pattern: {
-                value: /^\d{2}\/\d{2}\/\d{4}$/,
-                message: "Date must be in format MM/DD/YYYY",
-              },
+              validate: (value) => validateDate(value, dateFormat),
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <DateTextInput
+                dateFormat={dateFormat}
                 accessible={true}
                 accessibilityLabel="Date"
                 error={errors.date ? true : false}
