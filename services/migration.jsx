@@ -43,31 +43,17 @@ export const updateSchemaVersion = (newVersion) => {
 };
 
 const migrationScript = (transaction) => {
-  addMedicalData(transaction);
-  //add notes and last_location to sheep table
   transaction.executeSql(
     `
-    ALTER TABLE sheep ADD COLUMN notes VARCHAR(255);
+    ALTER TABLE sheep ADD COLUMN last_bred_to BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE;
     `,
     [],
     () => {},
     (transaction, error) => {
-      console.error("Error adding notes column to sheep table:", error);
+      console.error("Error adding last_bred_to column to sheep table:", error);
       return false; // Rollback the transaction
     }
   );
-  transaction.executeSql(
-    `
-    ALTER TABLE sheep ADD COLUMN last_location VARCHAR(255);
-    `,
-    [],
-    () => {},
-    (transaction, error) => {
-      console.error("Error adding last_location column to sheep table:", error);
-      return false; // Rollback the transaction
-    }
-  );
-
   // Add similar executeSql calls for the other tables
 };
 

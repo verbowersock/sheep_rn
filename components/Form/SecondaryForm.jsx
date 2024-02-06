@@ -15,6 +15,7 @@ import {
   fetchSheepWeight,
   updateDateLastBred,
   fetchSheep,
+  fetchMales,
 } from "../../services/db";
 import DateTextInput from "./DateTextInput";
 import { useForm, Controller } from "react-hook-form";
@@ -29,6 +30,7 @@ import MyTextInput from "./MyTextInput";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
+  setMales,
   setMeds,
   setShowSnackbar,
   setVaccines,
@@ -42,16 +44,13 @@ import {
   setSheepVax,
   setSheepWeights,
   updateSheep,
-  updateSheepMeds,
-  updateSheepVax,
-  updateSheepWeight,
 } from "../../store/slices/sheep";
 
 const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
-  const { meds, vaccines } = useSelector(uiSelector);
+  const { meds, vaccines, males } = useSelector(uiSelector);
   const [dataLoaded, setDataLoaded] = useState(false);
   const { MEDS, VAX, WEIGHT, BREEDING, DEATH, SALE, MISC } = forms;
   const { secondaryFormData } = useSelector(uiSelector);
@@ -81,6 +80,13 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           }));
           vaccines.sort((a, b) => (a.title > b.title ? 1 : -1));
           dispatch(setVaccines(vaccines));
+        } else if (type === BREEDING.type) {
+          let males = await fetchMales();
+          males = males.map(({ sheep_id, name, tag_id }) => ({
+            title: tag_id ? `${tag_id} - ${name}` : tag_id,
+            id: sheep_id,
+          }));
+          dispatch(setMales(males));
         }
       } catch (error) {
         console.log("!!!error", error);
@@ -184,7 +190,10 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           });
         break;
       case BREEDING.type:
-        editSheep({ date_last_bred: data.date }, data.sheep_id)
+        editSheep(
+          { date_last_bred: data.date, last_bred_to: data.last_bred_to },
+          data.sheep_id
+        )
           .then(() => {
             return fetchSheep(data.sheep_id);
           })
@@ -326,6 +335,29 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
         {errors.date && (
           <Text style={styles.errorText}>{errors.date.message}</Text>
         )}
+        {type === BREEDING.type && (
+          <View style={styles.inputContainer}>
+            <Controller
+              control={control}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <MyDropdown
+                  accessible={true}
+                  accessibilityLabel="Select a Ram dropdown"
+                  error={errors.value ? true : false}
+                  data={males}
+                  label="Select Ram"
+                  field="last_bred_to"
+                  onChange={(sheep_id) => {
+                    sheep_id && setValue("last_bred_to", sheep_id);
+                    trigger();
+                  }}
+                  value={value}
+                />
+              )}
+              name="last_bred_to"
+            />
+          </View>
+        )}
 
         {type === MEDS.type && (
           <View style={styles.inputContainer}>
@@ -405,6 +437,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
             />
           </View>
         )}
+
         {type === MISC.type && (
           <KeyboardAvoidingView style={{ width: "100%" }}>
             <View style={styles.inputContainer}>

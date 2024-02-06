@@ -85,6 +85,7 @@ const Details = ({ route }) => {
     tag_id,
     weight_at_birth,
     date_last_bred,
+    last_bred_to_name_or_tag,
     notes,
     last_location,
   } = this_sheep;
@@ -358,6 +359,11 @@ const Details = ({ route }) => {
       date_last_bred && {
         title: "Date last bred:",
         description: date_last_bred,
+      },
+    sex === "f" &&
+      last_bred_to_name_or_tag && {
+        title: "Ram bred to:",
+        description: last_bred_to_name_or_tag,
       },
     sex === "f" &&
       date_last_bred && {
