@@ -138,11 +138,19 @@ const MainContainer = () => {
 
     if (sortValue === "name_asc") {
       setSortedSheep(
-        filteredSheep.sort((a, b) => a.name.localeCompare(b.name))
+        filteredSheep.sort((a, b) => {
+          if (!a.name) return 1; // a is larger if name is empty
+          if (!b.name) return -1; // b is larger if name is empty
+          return a.name.localeCompare(b.name);
+        })
       );
     } else if (sortValue === "name_desc") {
       setSortedSheep(
-        filteredSheep.sort((a, b) => b.name.localeCompare(a.name))
+        filteredSheep.sort((a, b) => {
+          if (!a.name) return 1; // a is larger if name is empty
+          if (!b.name) return -1; // b is larger if name is empty
+          return b.name.localeCompare(a.name);
+        })
       );
     } else if (sortValue === "age_asc") {
       setSortedSheep(

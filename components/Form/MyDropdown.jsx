@@ -22,7 +22,6 @@ import {
   deleteColor as deleteColorRedux,
   deleteMarking as deleteMarkingRedux,
   deleteBreed as deleteBreedRedux,
-  attributesDataSelector,
 } from "../../store/slices/attributes";
 
 import {
@@ -33,6 +32,7 @@ import {
 } from "../../store/slices/ui";
 import ConfirmationDialog from "../ConfirmationDialog";
 import ConfirmationSnackbar from "../ConfirmationSnackbar";
+import { capitalize, sortAlphabetically } from "../utils/SharedFunctions";
 
 const Item = ({ item, onPress, value, onLongPress }) => {
   const theme = useTheme();
@@ -80,7 +80,7 @@ const MyDropdown = ({
   const [filteredData, setFilteredData] = useState([]);
   const [modalData, setModalData] = useState(data);
   const [searchResult, setSearchResult] = useState(modalData);
-
+  const [loading, setLoading] = useState(false);
   const [deletable, setDeletable] = useState(false);
 
   useEffect(() => {
@@ -89,34 +89,39 @@ const MyDropdown = ({
       : setDeletable(false);
   }, [field]);
 
-
   const addNewValue = async (val, field) => {
-        switch (field) {
+    switch (field) {
       case "color":
+        setLoading(true);
         const newColorId = await addColor(val);
         if (newColorId) {
-          const newColor = { id: newColorId, title: val };
-        dispatch(addColorRedux(newColor));
-          setModalData([...modalData, newColor]);
-          setSearchResult([...searchResult, newColor])
+          setLoading(false);
+          const newColor = { id: newColorId, title: capitalize(val) };
+          dispatch(addColorRedux(newColor));
+          //sort modaldata alphabetically
+          const newData = [...modalData, newColor];
+          const sortedData = sortAlphabetically(newData, "title");
+          setModalData(sortedData);
         }
         break;
       case "breed":
         const newBreedId = await addBreed(val);
         if (newBreedId) {
-          const newBreed = { id: newBreedId, title: val };
-        dispatch(addBreedRedux(newBreed));
-          setModalData([...modalData, newBreed]);
-          setSearchResult([...searchResult, newBreed])
+          const newBreed = { id: newBreedId, title: capitalize(val) };
+          dispatch(addBreedRedux(newBreed));
+          const newData = [...modalData, newBreed];
+          const sortedData = sortAlphabetically(newData, "title");
+          setModalData(sortedData);
         }
         break;
       case "marking":
         const newMarkingId = await addMarking(val);
         if (newMarkingId) {
-          const newMarking = { id: newMarkingId, title: val };
-        dispatch(addMarkingRedux(newMarking));
-          setModalData([...modalData, newMarking]);
-          setSearchResult([...searchResult, newMarking])
+          const newMarking = { id: newMarkingId, title: capitalize(val) };
+          dispatch(addMarkingRedux(newMarking));
+          const newData = [...modalData, newMarking];
+          const sortedData = sortAlphabetically(newData, "title");
+          setModalData(sortedData);
         }
         break;
       default:
@@ -163,7 +168,6 @@ const MyDropdown = ({
           .finally(() => {
             dispatch(resetLoading());
           });
-
 
         break;
 
@@ -262,12 +266,10 @@ const MyDropdown = ({
           item.title.toLowerCase().includes(query.toLowerCase())
         )
       );
-   
-        setSearchResult(filteredData);
-      
-    } else {
 
-        setSearchResult(modalData);
+      setSearchResult(filteredData);
+    } else {
+      setSearchResult(modalData);
     }
   }, [query, modalData]);
 
@@ -281,6 +283,12 @@ const MyDropdown = ({
       })
     );
   };
+
+  useEffect(() => {
+    if (query.length > 0) {
+      setSearchResult(filteredData);
+    }
+  }, [filteredData, query]);
 
   const inputRef = useRef(null);
   const searchRef = useRef(null);
@@ -304,8 +312,8 @@ const MyDropdown = ({
     );
   };
 
-  const handleNewValuePress = async() => {
-      await addNewValue(query, field);
+  const handleNewValuePress = async () => {
+    await addNewValue(query, field);
   };
 
   const findSelectedValue = (value) => {
@@ -378,7 +386,7 @@ const MyDropdown = ({
                     setModalOpen(false);
                   }}
                 ></IconButton>
-                <Text style={{ fontSize: 18, textAlign: 'center' }}>
+                <Text style={{ fontSize: 18, textAlign: "center" }}>
                   No applicable {field}s found. Please add a new one or try
                   again
                 </Text>
@@ -404,11 +412,9 @@ const MyDropdown = ({
                     icon="close"
                     style={{
                       textAlign: "center",
-                      
                     }}
                     onPress={(event) => {
                       if (query === "") {
-                        console.log("empty", query);
                         closeModal(event);
                       } else {
                         setQuery("");
@@ -429,22 +435,24 @@ const MyDropdown = ({
               <View>
                 {searchResult.length === 0 ? (
                   <View>
-                    <Text>This {field} was not found. Click button below to add it to your {field}s.</Text>
-                  <Button
-                    buttonColor={theme.colors.primary}
-                    dark
-                    style={{ width: "60%", marginTop: 15 }}
-                    mode="contained"
-                    onPress={() => {
-                      handleNewValuePress();
-                    }}
-                  >
-                    Add new
-                  </Button>
+                    <Text>
+                      This {field} was not found. Click button below to add it
+                      to your {field}s.
+                    </Text>
+                    <Button
+                      buttonColor={theme.colors.primary}
+                      loading={loading}
+                      dark
+                      style={{ width: "60%", marginTop: 15 }}
+                      mode="contained"
+                      onPress={() => {
+                        handleNewValuePress();
+                      }}
+                    >
+                      Add new
+                    </Button>
                   </View>
-                ) : (
-                 null
-                )}
+                ) : null}
               </View>
             )}
           </KeyboardAvoidingView>

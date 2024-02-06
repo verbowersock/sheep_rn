@@ -40,6 +40,7 @@ import MyImagePicker from "./ImagePicker";
 import { setShowSnackbar, uiSelector } from "../../store/slices/ui";
 import { isValid as isValidDate, parse, parseISO } from "date-fns";
 import ConfirmationSnackbar from "../ConfirmationSnackbar";
+import { capitalize } from "../utils/SharedFunctions";
 
 const AddForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
@@ -64,7 +65,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       try {
         let colors = await fetchColors();
         colors = colors.map(({ color_name, id }) => ({
-          title: color_name,
+          title: capitalize(color_name),
           id: id.toString(),
         }));
         //sort the array by title alphabetically
@@ -72,14 +73,14 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         dispatch(setColors(colors));
         let markings = await fetchMarkings();
         markings = markings.map(({ marking_name, id }) => ({
-          title: marking_name,
+          title: capitalize(marking_name),
           id: id.toString(),
         }));
         markings.sort((a, b) => (a.title > b.title ? 1 : -1));
         dispatch(setMarkings(markings));
         let breeds = await fetchBreeds();
         breeds = breeds.map(({ breed_name, id }) => ({
-          title: breed_name,
+          title: capitalize(breed_name),
           id: id.toString(),
         }));
         breeds.sort((a, b) => (a.title > b.title ? 1 : -1));
