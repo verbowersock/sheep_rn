@@ -222,6 +222,22 @@ export const vaccineData = [
   "Volar footrot bacterin",
 ];
 
+export const setCurrentSchemaVersion = (version) => {
+  return new Promise((resolve, reject) => {
+    database.transaction((transaction) => {
+      transaction.executeSql(
+        `PRAGMA user_version = ${version};`,
+        [],
+        () => resolve(),
+        (transaction, error) => {
+          console.log("error", error);
+          reject(error);
+        }
+      );
+    });
+  });
+};
+
 export const dropDbTablesAsync = async () => {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
@@ -767,7 +783,6 @@ export function fetchAllSheep() {
   children.dop,
   children.weight_at_birth,
   children.date_last_bred,
-  children.last_bred_to,
   children.last_bred_to,
   children.dod,
   children.picture,

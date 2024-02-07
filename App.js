@@ -21,6 +21,7 @@ import {
   insertSheepData,
   insertVaxData,
   insertVaxList,
+  setCurrentSchemaVersion,
 } from "./services/db";
 import { setSheep } from "./store/slices/sheep";
 
@@ -40,16 +41,22 @@ export default function App() {
   async function initDb() {
     try {
       await SplashScreen.preventAutoHideAsync();
-      const currentSchemaVersion = await getCurrentSchemaVersion();
+      await init(); // Initialize the database first
+      let currentSchemaVersion = await getCurrentSchemaVersion();
       //const currentSchemaVersion = 2;
       const expectedSchemaVersion = 3; // The version your app expects
 
-      if (currentSchemaVersion !== expectedSchemaVersion) {
+      if (currentSchemaVersion === 0) {
+        // This is a new install, so set the schema version to the expected version
+        await setCurrentSchemaVersion(expectedSchemaVersion);
+        currentSchemaVersion = expectedSchemaVersion;
+      }
+
+      if (currentSchemaVersion < expectedSchemaVersion) {
         await executeMigration();
         await updateSchemaVersion(expectedSchemaVersion);
       }
       try {
-        await init();
         await insertBreedData();
         await insertColorData();
         await insertMarkingData();

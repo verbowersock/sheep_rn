@@ -14,13 +14,14 @@ import { useDispatch } from "react-redux";
 import ConfirmationSnackbar from "../ConfirmationSnackbar";
 import { setShowSnackbar } from "../../store/slices/ui";
 import { useState } from "react";
-import { fetchAllSheep } from "../../services/db";
+import { fetchAllSheep, reopenDatabase } from "../../services/db";
 import { setSheep } from "../../store/slices/sheep";
 import {
   executeMigration,
   getCurrentSchemaVersion,
   updateSchemaVersion,
 } from "../../services/migration";
+import { current } from "@reduxjs/toolkit";
 
 const BackupRestore = () => {
   const theme = useTheme();
@@ -69,15 +70,19 @@ const BackupRestore = () => {
           "/data/user/0/com.sheeprn/files/SQLite/sheep.db"
         );
         const currentSchemaVersion = await getCurrentSchemaVersion();
-        const expectedSchemaVersion = 2; // The version your app expects
+        const expectedSchemaVersion = 3; // The version your app expects
 
         if (currentSchemaVersion !== expectedSchemaVersion) {
           await executeMigration();
           await updateSchemaVersion(expectedSchemaVersion);
+          await fetchAllSheep().then((res) => {
+            dispatch(setSheep(res));
+          });
         }
         await fetchAllSheep().then((res) => {
           dispatch(setSheep(res));
         });
+
         setLoading(false);
         dispatch(
           setShowSnackbar({
