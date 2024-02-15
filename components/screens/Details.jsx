@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Tag,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { IconButton, SegmentedButtons, useTheme } from "react-native-paper";
@@ -171,8 +172,8 @@ const Details = ({ route }) => {
   const showChildren = () => {
     if (sheepChildren.length > 0) {
       return (
-        <View style={{ width: "100%", paddingBottom: 14, paddingRight: 20 }}>
-          <ScrollView style={{ maxHeight: "90%" }}>
+        <View style={{ width: "100%", paddingRight: 20 }}>
+          <ScrollView>
             {sheepChildren.map((child, index) => {
               return (
                 <TouchableOpacity
@@ -185,7 +186,7 @@ const Details = ({ route }) => {
                   <Text
                     style={{ fontSize: 17, textDecorationLine: "underline" }}
                   >
-                    {child.name}
+                    {child.name ? child.name : child.tag_id}
                   </Text>
                 </TouchableOpacity>
               );
@@ -193,6 +194,8 @@ const Details = ({ route }) => {
           </ScrollView>
         </View>
       );
+    } else {
+      return "NA";
     }
   };
 
@@ -242,6 +245,7 @@ const Details = ({ route }) => {
   };
 
   const timeToLambing = () => {
+    if (!date_last_bred) return "NA";
     const dateLastBred = parse(date_last_bred, "MM/dd/yyyy", new Date());
 
     // Add 165 days to the last breeding date
@@ -271,9 +275,16 @@ const Details = ({ route }) => {
       return {
         entry: mostRecentEntryWithHighestId.entry,
         date: mostRecentDateString,
+        dosage:
+          mostRecentEntryWithHighestId.dosage &&
+          mostRecentEntryWithHighestId.dosage,
       };
     } else if (mostRecentEntry.length === 1) {
-      return { entry: mostRecentEntry[0].entry, date: mostRecentDateString };
+      return {
+        entry: mostRecentEntry[0].entry,
+        date: mostRecentDateString,
+        dosage: mostRecentEntry[0].dosage,
+      };
     } else {
       return "";
     }
@@ -344,68 +355,88 @@ const Details = ({ route }) => {
   ].filter(Boolean);
 
   const breeding = [
-    father_name && { title: "Father:", description: father_name },
-    father_tag_id && {
-      title: "Father Tag Id:",
-      description: father_tag_id,
-    },
-    mother_name && { title: "Mother:", description: mother_name },
-    mother_tag_id && {
-      title: "Mother Tag Id:",
-      description: mother_tag_id,
+    {
+      title: "Sire Name/Tag Id:",
+      description: father_name
+        ? father_name
+        : father_tag_id
+        ? father_tag_id
+        : "NA",
     },
 
-    sex === "f" &&
-      date_last_bred && {
-        title: "Date last bred:",
-        description: date_last_bred,
-      },
-    sex === "f" &&
-      last_bred_to_name_or_tag && {
-        title: "Ram bred to:",
-        description: last_bred_to_name_or_tag,
-      },
-    sex === "f" &&
-      date_last_bred && {
-        title: "Expected lambing date:",
-        description: timeToLambing(),
-      },
+    {
+      title: "Dam Name/Tag Id:",
+      description: mother_name
+        ? mother_name
+        : mother_tag_id
+        ? mother_tag_id
+        : "NA",
+    },
+    sex === "f" && {
+      title: "Date last bred:",
+      description: date_last_bred ? date_last_bred : "NA",
+    },
+    sex === "f" && {
+      title: "Ram bred to:",
+      description: last_bred_to_name_or_tag ? last_bred_to_name_or_tag : "NA",
+    },
+    sex === "f" && {
+      title: "Expected lambing date:",
+      description: timeToLambing(),
+    },
+
     sex === "f" &&
       sheepChildren.length > 0 && {
         title: "Average lamb qty:",
         description: getAverageChilrenQty(),
       },
-    sex === "f" &&
-      sheepChildren.length > 0 && {
-        title: "Average lamb weight",
-        description: getAverageChildWeight(),
-      },
-    sex === "f" &&
-      sheepChildren.length > 0 && {
-        title: "Last lamb qty:",
-        description: getMostRecentNumberOfChildren(),
-      },
-    sheepChildren.length > 0 && {
-      title: "Children:",
-      description: showChildren(),
-    },
+    sex === "f" && sheepChildren.length > 0
+      ? {
+          title: "Average lamb weight",
+          description: getAverageChildWeight(),
+        }
+      : {
+          title: "Average lamb weight",
+          description: "NA",
+        },
+    sex === "f" && sheepChildren.length > 0
+      ? {
+          title: "Last lamb qty:",
+          description: getMostRecentNumberOfChildren(),
+        }
+      : { title: "Last lamb qty:", description: "NA" },
+    sheepChildren.length > 0
+      ? {
+          title: "Children:",
+          description: showChildren(),
+        }
+      : { title: "Children:", description: "NA" },
   ].filter(Boolean);
 
   const health = [
-    sheepMeds.length > 0 && {
+    {
       type: forms.MEDS,
       title: "Last Medication:",
-      description: `${lastMedication.entry} on ${lastMedication.date}`,
+      description:
+        sheepMeds.length > 0
+          ? `${lastMedication.entry} - ${lastMedication.dosage} on ${lastMedication.date}`
+          : "No medications found",
     },
-    sheepVax.length > 0 && {
+    {
       type: forms.VAX,
       title: "Last Vaccination:",
-      description: `${lastVaccination.entry} on ${lastVaccination.date}`,
+      description:
+        sheepVax.length > 0
+          ? `${lastVaccination.entry} on ${lastVaccination.date}`
+          : "No vaccinations found",
     },
-    sheepWeights.length > 0 && {
+    {
       type: forms.WEIGHT,
       title: "Last Weight:",
-      description: `${lastWeight.entry}lbs on ${lastWeight.date}`,
+      description:
+        sheepWeights.length > 0
+          ? `${lastWeight.entry}lbs on ${lastWeight.date}`
+          : "No weight entries found",
     },
     dod && { title: "Date of Death:", description: dod, type: forms.DEATH },
   ].filter(Boolean);
@@ -413,11 +444,11 @@ const Details = ({ route }) => {
   const misc = [
     {
       title: "Last Location:",
-      description: last_location ? last_location : "N/A",
+      description: last_location ? last_location : "NA",
     },
     {
       title: "Notes",
-      description: notes ? notes : "N/A",
+      description: notes ? notes : "NA",
     },
   ].filter(Boolean);
 
@@ -639,37 +670,39 @@ const Details = ({ route }) => {
         style={{
           paddingTop: 10,
           justifyContent: "space-between",
-          maxHeight: "41%",
+          maxHeight: "100%",
         }}
       >
         {loading ? (
           <Text>Loading...</Text>
         ) : (
-          <View
-            style={
-              selectedValue !== "misc" && selectedValue !== "health"
-                ? {
-                    flexDirection: "row",
-                    flexWrap: "wrap",
-                    position: "relative",
-                  }
-                : { flexDirection: "column" }
-            }
-          >
-            {data.map((item, index) => (
-              <ListItem
-                key={index}
-                index={index}
-                item={item}
-                selectedValue={selectedValue}
-                showContextMenu={selectedValue === "health"}
-                onItemPress={() => openContextMenu(index)}
-                isContextMenuOpen={contextMenuOpen}
-                onPlusPress={() => handlePlusPress(item.type)}
-                onListPress={() => handleListPress(item.type)}
-              />
-            ))}
-          </View>
+          <ScrollView persistentScrollbar={true}>
+            <View
+              style={
+                selectedValue !== "misc" && selectedValue !== "health"
+                  ? {
+                      flexDirection: "row",
+                      flexWrap: "wrap",
+                      position: "relative",
+                    }
+                  : { flexDirection: "column" }
+              }
+            >
+              {data.map((item, index) => (
+                <ListItem
+                  key={index}
+                  index={index}
+                  item={item}
+                  selectedValue={selectedValue}
+                  showContextMenu={selectedValue === "health"}
+                  onItemPress={() => openContextMenu(index)}
+                  isContextMenuOpen={contextMenuOpen}
+                  onPlusPress={() => handlePlusPress(item.type)}
+                  onListPress={() => handleListPress(item.type)}
+                />
+              ))}
+            </View>
+          </ScrollView>
         )}
       </View>
       {selectedValue === "basic" || selectedValue === "misc" ? (

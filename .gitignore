@@ -67,3 +67,4 @@ android/gradle.properties
 android/app-release.aab
 myflock.apk
 .env
+android/app/upload_certificate.pem

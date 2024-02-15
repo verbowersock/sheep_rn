@@ -68,6 +68,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
             title: entry,
             id: id.toString(),
           }));
+          console.log("meds", meds);
 
           //sort the array by title alphabetically
           meds.sort((a, b) => (a.title > b.title ? 1 : -1));
@@ -384,6 +385,30 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
               )}
               name="value"
             />
+
+            <Controller
+              control={control}
+              rules={{
+                maxLength: 100,
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <MyTextInput
+                  error={errors.dosage}
+                  accessible={true}
+                  accessibilityLabel="Medication Dosage input field"
+                  label="Dosage"
+                  field="dosage"
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="dosage"
+            />
+            {errors.dosage && (
+              <Text style={styles.errorText}>
+                Please shorten the dosage text to 100 characters
+              </Text>
+            )}
           </View>
         )}
         {type === VAX.type && (

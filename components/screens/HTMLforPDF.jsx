@@ -2,7 +2,8 @@ export function htmlContent(htmldata) {
   const medRows = htmldata.sheepMeds.map((med) => {
     return `
       <tr>
-        <td>${med.entry}</td>
+        <td class="med_name">${med.entry}</td>
+        <td class="med_dosage">${med.dosage}</td>
         <td class="date">${med.date}</td>
       </tr>
     `;
@@ -74,8 +75,8 @@ export function htmlContent(htmldata) {
     /* table */
 
     table {
-      font-size: 75%;
-      table-layout: fixed;
+      font-size: 50%;
+      table-layout: auto;
       width: 100%;
       border-collapse: separate;
       border-spacing: 2px;
@@ -94,16 +95,28 @@ export function htmlContent(htmldata) {
       text-align: left;
       font-size: medium;
       padding-left: 6px
+      height: auto;
+      word-wrap: break-word;
+      max-width: 45%;
     }
     th {
       background: #eee;
       width: 35%;
     }
-    td {
-      width: 65%;
+    .med_name {
+      min-width: 40%;
+      padding-right: 6px;
+      padding-left: 6px;
+    }
+    .med_dosage {
+      max-width: 20%;
+      padding-right: 6px;
+      padding-left: 6px;
     }
     .date {
       text-align: right;
+      padding-right: 6px;
+      padding-left: 6px;
     }
     /* page */
 
@@ -144,7 +157,7 @@ export function htmlContent(htmldata) {
         <tr>
           <th><span>Scrapie ID</span></th>
           <td><span>${
-            htmldata.scrapie_id ? htmldata.scrapie_id : "N/A"
+            htmldata.scrapie_id ? htmldata.scrapie_id : "NA"
           }</span></td>
         </tr>
         <tr>
@@ -165,26 +178,26 @@ export function htmlContent(htmldata) {
         </tr>
         <tr>
           <th><span>Date of Purchase</span></th>
-          <td><span>${htmldata.dop ? htmldata.dop : "N/A"}</span></td>
+          <td><span>${htmldata.dop ? htmldata.dop : "NA"}</span></td>
         </tr>
         <tr>
           <th><span>Date of Sale</span></th>
-          <td><span>${htmldata.dos ? htmldata.dos : "N/A"}</span></td>
+          <td><span>${htmldata.dos ? htmldata.dos : "NA"}</span></td>
         </tr>
         <tr>
           <th><span>Date of Death</span></th>
-          <td><span>${htmldata.dod ? htmldata.dod : "N/A"}</span></td>
+          <td><span>${htmldata.dod ? htmldata.dod : "NA"}</span></td>
         </tr>
         <tr>
           <th><span>Weight at birth</span></th>
           <td><span>${
-            htmldata.weight_at_birth ? htmldata.weight_at_birth : "N/A"
+            htmldata.weight_at_birth ? htmldata.weight_at_birth : "NA"
           }</span></td>
         </tr>
         <tr>
           <th><span>Last weight recorded</span></th>
           <td><span>${
-            htmldata.lastWeight.entry ? htmldata.lastWeight.entry : "N/A"
+            htmldata.lastWeight.entry ? htmldata.lastWeight.entry : "NA"
           }</span></td>
         </tr>
   
@@ -198,7 +211,7 @@ export function htmlContent(htmldata) {
               ? htmldata.father_name
               : htmldata.father_tag_id
               ? htmldata.father_tag_id
-              : "N/A"
+              : "NA"
           }</span></td>
         </tr>
         <tr>
@@ -208,13 +221,13 @@ export function htmlContent(htmldata) {
               ? htmldata.mother_name
               : htmldata.mother_tag_id
               ? htmldata.mother_tag_id
-              : "N/A"
+              : "NA"
           }</span></td>
         </tr>
         <tr>
           <th><span>Date Last Bred</span></th>
           <td><span>${
-            htmldata.date_last_bred ? htmldata.date_last_bred : "N/A"
+            htmldata.date_last_bred ? htmldata.date_last_bred : "NA"
           }</span></td>
         </tr>
       </table>
@@ -227,7 +240,7 @@ export function htmlContent(htmldata) {
          ${
            htmldata.sheepMeds.length > 0
              ? "<td>" + medRows.join("") + "</td>"
-             : "<td><span>N/A</span></td>"
+             : "<td><span>NA</span></td>"
          }
         </table>
 
@@ -237,7 +250,7 @@ export function htmlContent(htmldata) {
           ${
             htmldata.sheepVax.length > 0
               ? "<td>" + vaxRows.join("") + "</td>"
-              : "<td><span>N/A</span></td>"
+              : "<td><span>NA</span></td>"
           }
 
      </table>
