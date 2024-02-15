@@ -148,26 +148,26 @@
         </tr>
         <tr>
           <th><span>Date of Purchase</span></th>
-          <td><span>${htmldata.dop ? htmldata.dop : "N/A"}</span></td>
+          <td><span>${htmldata.dop ? htmldata.dop : "NA"}</span></td>
         </tr>
         <tr>
           <th><span>Date of Sale</span></th>
-          <td><span>${htmldata.dos ? htmldata.dos : "N/A"}</span></td>
+          <td><span>${htmldata.dos ? htmldata.dos : "NA"}</span></td>
         </tr>
         <tr>
           <th><span>Date of Death</span></th>
-          <td><span>${htmldata.dod ? htmldata.dod : "N/A"}</span></td>
+          <td><span>${htmldata.dod ? htmldata.dod : "NA"}</span></td>
         </tr>
         <tr>
           <th><span>Weight at birth</span></th>
           <td><span>${
-            htmldata.weight_at_birth ? htmldata.weight_at_birth : "N/A"
+            htmldata.weight_at_birth ? htmldata.weight_at_birth : "NA"
           }</span></td>
         </tr>
         <tr>
           <th><span>Last weight recorded</span></th>
           <td><span>${
-            htmldata.lastWeight.entry ? htmldata.lastWeight.entry : "N/A"
+            htmldata.lastWeight.entry ? htmldata.lastWeight.entry : "NA"
           }</span></td>
         </tr>
   
@@ -177,25 +177,25 @@
         <tr>
           <th><span>Sire Name</span></th>
           <td><span>${
-            htmldata.father_name ? htmldata.father_name : "N/A"
+            htmldata.father_name ? htmldata.father_name : "NA"
           }</span></td>
         </tr>
         <tr>
           <th><span>Dam Name</span></th>
           <td><span>${
-            htmldata.mother_name ? htmldata.mother_name : "N/A"
+            htmldata.mother_name ? htmldata.mother_name : "NA"
           }</span></td>
         </tr>
         <tr>
           <th><span>Average Lamb Qty</span></th>
           <td><span>${
-            htmldata.average_lamb_qty ? htmldata.average_lamb_qty : "N/A"
+            htmldata.average_lamb_qty ? htmldata.average_lamb_qty : "NA"
           }</span></td>
         </tr>
         <tr>
           <th><span>Date Last Bred</span></th>
           <td><span>${
-            htmldata.date_last_bred ? htmldata.date_last_bred : "N/A"
+            htmldata.date_last_bred ? htmldata.date_last_bred : "NA"
           }</span></td>
         </tr>
       </table>
@@ -219,7 +219,7 @@
           ${
             htmldata.sheepVax.length > 0
               ? "<td>" + vaxRows.join("") + "</td>"
-              : "<td><span>N/A</span></td>"
+              : "<td><span>NA</span></td>"
           }
 
      </table>

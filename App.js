@@ -44,7 +44,7 @@ export default function App() {
       await init(); // Initialize the database first
       let currentSchemaVersion = await getCurrentSchemaVersion();
       //const currentSchemaVersion = 2;
-      const expectedSchemaVersion = 3; // The version your app expects
+      const expectedSchemaVersion = 4; // The version your app expects
 
       if (currentSchemaVersion === 0) {
         // This is a new install, so set the schema version to the expected version
@@ -61,6 +61,7 @@ export default function App() {
         await insertColorData();
         await insertMarkingData();
         //await insertSheepData();
+
         await insertMedList();
         await insertVaxList();
         //await insertMedData();

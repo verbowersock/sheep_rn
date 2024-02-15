@@ -314,7 +314,8 @@ export const addMedicalData = async (tx) => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
             entry_id BIGINT REFERENCES medications (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-            date VARCHAR(50) NOT NULL
+            date VARCHAR(50) NOT NULL,
+            dosage VAECHAR(100)
           );
           `,
           [],
@@ -519,7 +520,7 @@ export function insertBreedData() {
     testDataBreeds.map((el) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO breeds (breed_name) 
+          `INSERT OR IGNORE INTO breeds (breed_name) 
             VALUES (?)`,
           [el],
           (t, success) => {
@@ -545,7 +546,7 @@ export function insertColorData() {
     database.transaction((tx) => {
       testDataColors.map((el) => {
         tx.executeSql(
-          `INSERT INTO colors (color_name) 
+          `INSERT OR IGNORE INTO colors (color_name) 
             VALUES (?)`,
           [el],
           (t, success) => {
@@ -571,7 +572,7 @@ export function insertMarkingData() {
     testDataMarkings.map((el) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO markings (marking_name) 
+          `INSERT OR IGNORE INTO markings (marking_name) 
             VALUES (?)`,
           [el],
           (t, success) => {
@@ -670,7 +671,7 @@ export function insertMedList() {
     medicationData.map((medData) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO medications (entry)
+          `INSERT OR IGNORE INTO medications (entry)
             VALUES (?)`,
           [medData],
           (t, success) => {
@@ -696,7 +697,7 @@ export function insertVaxList() {
     vaccineData.map((vaxData) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO vaccines (entry)
+          `INSERT OR IGNORE INTO vaccines (entry)
             VALUES (?)`,
           [vaxData],
           (t, success) => {
@@ -1327,7 +1328,6 @@ export function findChildren(id) {
         `SELECT * FROM sheep WHERE sire = ? OR dam = ?`,
         [id, id],
         (t, results) => {
-          //    console.log("children", results);
           resolve(results.rows._array);
         },
         (t, error) => {
@@ -1382,8 +1382,8 @@ export function addMedication(data) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO sheep_meds (sheep_id, entry_id, date) VALUES (?, ?, ?)`,
-        [data.sheep_id, data.value, data.date],
+        `INSERT INTO sheep_meds (sheep_id, entry_id, date, dosage) VALUES (?, ?, ?, ?)`,
+        [data.sheep_id, data.value, data.date, data.dosage],
         (t, success) => {
           console.log("success", success);
           resolve(success.insertId);
@@ -1449,7 +1449,7 @@ export function fetchSheepMeds(id) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `SELECT sheep_meds.sheep_id, sheep_meds.entry_id, sheep_meds.id, sheep_meds.date, medications.entry 
+        `SELECT sheep_meds.sheep_id, sheep_meds.entry_id, sheep_meds.id, sheep_meds.date, medications.entry, sheep_meds.dosage 
         FROM sheep_meds INNER JOIN medications ON sheep_meds.entry_id = medications.id WHERE sheep_meds.sheep_id = ?`,
         [id],
         (t, results) => {
