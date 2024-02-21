@@ -44,8 +44,8 @@ const Item = ({ item, onPress, value, onLongPress }) => {
       onLongPress={onLongPress}
     >
       <Text
-        numberOfLines={1}
         ellipsizeMode="tail"
+        numberOfLines={1}
         style={styles.modalItemTextStyle}
       >
         {item.title}
@@ -486,7 +486,7 @@ const makeStyles = (theme) =>
       height: 50,
     },
     modalItemTextStyle: {
-      fontSize: 20,
+      fontSize: 18,
     },
     modalIconStyle: {
       width: 30,
@@ -497,8 +497,8 @@ const makeStyles = (theme) =>
     },
     modal: {
       backgroundColor: theme.colors.background,
-      padding: 20,
-      margin: 20,
+      padding: 15,
+      margin: 15,
       borderRadius: 14,
       maxHeight: 400,
       flexGrow: 0,
