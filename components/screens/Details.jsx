@@ -670,7 +670,7 @@ const Details = ({ route }) => {
         style={{
           paddingTop: 10,
           justifyContent: "space-between",
-          maxHeight: "100%",
+          maxHeight: 300,
         }}
       >
         {loading ? (
