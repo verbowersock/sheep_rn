@@ -6,9 +6,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 //import { SearchBarWrapper } from './SearchBar.styles';
 
 const CustomSearchIcon = (color) => (
-  <MaterialCommunityIcons name="chevron-down-circle" size={30} color={color}/>
+  <MaterialCommunityIcons name="chevron-down-circle" size={30} color={color} />
 );
-
 
 const SearchBar = ({ onQueryChange, onSearchTagChange }) => {
   const theme = useTheme();
@@ -63,14 +62,21 @@ const SearchBar = ({ onQueryChange, onSearchTagChange }) => {
   return (
     <>
       <Searchbar
-     // mode="view"
-      elevation={1}
-        icon={()=>CustomSearchIcon (theme.colors.secondary)}
+        // mode="view"
+        elevation={1}
+        icon={() => CustomSearchIcon(theme.colors.secondary)}
         iconColor={theme.colors.secondary}
-        placeholder={`search by ${tagSelected}`}
+        placeholder={`search by ${
+          tagSelected !== "sex" ? tagSelected : `${tagSelected} (f, m or w)`
+        }`}
         onChangeText={onChangeSearch}
-        style={{backgroundColor: theme.colors.background, height: 45, border: 0, borderRadius: 0}}
-        inputStyle={{height: 35, alignSelf: 'center'}}
+        style={{
+          backgroundColor: theme.colors.background,
+          height: 45,
+          border: 0,
+          borderRadius: 0,
+        }}
+        inputStyle={{ height: 35, alignSelf: "center" }}
         placeholderTextColor={theme.colors.secondary}
         value={searchQuery}
         onIconPress={() => {

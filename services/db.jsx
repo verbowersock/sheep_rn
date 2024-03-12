@@ -75,12 +75,13 @@ const testDataSheep = [
     tag_id: "hij",
     scrapie_id: "defhij",
     name: "Baby",
-    dob: "02/10/2022",
+    dob: "02/10/2023",
     sex: "f",
     breed_id: 2,
     color_id: 3,
     marking_id: 2,
     mother: 1,
+    father: 2,
     notes:
       "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum, culpa praesentium ea est laudantium saepe architecto commodi fugiat. Maxime vero dolores magnam consectetur, atque perspiciatis! Excepturi, ipsa magni? Eos harum error dolorum odio quaerat, laudantium aliquid maxime doloremque dicta dolorem quod fugiat labore maiores amet architecto dolore qui atque officia dolores numquam nostrum veritatis nulla neque! In quos ipsa saepe et repellendus magni, iste natus reiciendis, quisquam nobis corporis voluptates corrupti nesciunt aspernatur veritatis modi aliquid esse eveniet dolorum ipsum accusantium dolores beatae at? Nisi voluptatibus recusandae, iste dolores exercitationem debitis dignissimos similique dolor, veniam excepturi dicta porro iusto consequuntur laboriosam delectus aliquam tempore corrupti.",
     last_location: "test location3",
@@ -601,7 +602,7 @@ export function insertSheepData() {
           return new Promise((resolve, reject) => {
             tx.executeSql(
               `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred, last_bred_to, notes, last_location, picture) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 sheepData.tag_id,
                 sheepData.scrapie_id,

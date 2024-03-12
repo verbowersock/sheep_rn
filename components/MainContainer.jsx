@@ -153,20 +153,20 @@ const MainContainer = () => {
       setSortedSheep(list);
     } else if (sortValue === "age_asc") {
       setSortedSheep(
-        filteredSheep.sort(
+        [...filteredSheep].sort(
           (a, b) => dateFromString(a.dob) - dateFromString(b.dob)
         )
       );
     } else if (sortValue === "age_desc") {
       setSortedSheep(
-        filteredSheep.sort(
+        [...filteredSheep].sort(
           (a, b) => dateFromString(b.dob) - dateFromString(a.dob)
         )
       );
     } else if (sortValue === "tag_id_asc") {
-      setSortedSheep(filteredSheep.sort((a, b) => a.tag_id - b.tag_id));
+      setSortedSheep([...filteredSheep].sort((a, b) => a.tag_id - b.tag_id));
     } else if (sortValue === "tag_id_desc") {
-      setSortedSheep(filteredSheep.sort((a, b) => b.tag_id - a.tag_id));
+      setSortedSheep([...filteredSheep].sort((a, b) => b.tag_id - a.tag_id));
     }
   }, [deadChecked, soldChecked, searchQuery, searchTag, sortValue, sheep]);
 
@@ -191,6 +191,7 @@ const MainContainer = () => {
           justifyContent: "center",
           alignItems: "center",
           marginTop: 30,
+          marginBottom: 20,
         }}
       >
         <Text
