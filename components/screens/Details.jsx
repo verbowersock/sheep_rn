@@ -419,7 +419,9 @@ const Details = ({ route }) => {
       title: "Last Medication:",
       description:
         sheepMeds.length > 0
-          ? `${lastMedication.entry} - ${lastMedication.dosage} on ${lastMedication.date}`
+          ? `${lastMedication.entry} - ${
+              lastMedication.dosage ? lastMedication.dosage : ""
+            } on ${lastMedication.date}`
           : "No medications found",
     },
     {
