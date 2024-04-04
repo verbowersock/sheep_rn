@@ -103,7 +103,7 @@ android {
         applicationId "com.sheeprn"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
+        versionCode 10
         versionName "1.1"       
     }
 
@@ -180,3 +180,8 @@ dependencies {
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.fragment:fragment:1.6.2'
+    }
+}

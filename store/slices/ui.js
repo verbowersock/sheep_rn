@@ -38,6 +38,7 @@ export const initialState = {
   activeCardId: null,
   meds: [],
   vaccines: [],
+  males: [],
   contextMenuOpen: { 0: false, 1: false, 2: false },
 };
 
@@ -93,6 +94,10 @@ const uiSlice = createSlice({
     setMeds: (state, { payload }) => {
       state.meds = payload;
     },
+
+    setMales: (state, { payload }) => {
+      state.males = payload;
+    },
     setContextMenuOpen: (state, { payload }) => {
       const newContextMenuOpen = Object.keys(state.contextMenuOpen).reduce(
         (acc, key) => {
@@ -125,6 +130,7 @@ export const {
   setShowSecondaryFormDialog,
   setVaccines,
   setMeds,
+  setMales,
   setContextMenuOpen,
   setLoading,
   resetLoading,

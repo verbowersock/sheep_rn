@@ -1,4 +1,4 @@
-import { addMedicalData, database } from "./db";
+import { addMedicalData, database, insertMedList, insertVaxList } from "./db";
 
 export const getCurrentSchemaVersion = () => {
   return new Promise((resolve, reject) => {
@@ -43,32 +43,82 @@ export const updateSchemaVersion = (newVersion) => {
 };
 
 const migrationScript = (transaction) => {
-  addMedicalData(transaction);
-  //add notes and last_location to sheep table
-  transaction.executeSql(
-    `
-    ALTER TABLE sheep ADD COLUMN notes VARCHAR(255);
-    `,
-    [],
-    () => {},
-    (transaction, error) => {
-      console.error("Error adding notes column to sheep table:", error);
-      return false; // Rollback the transaction
-    }
-  );
-  transaction.executeSql(
-    `
-    ALTER TABLE sheep ADD COLUMN last_location VARCHAR(255);
-    `,
-    [],
-    () => {},
-    (transaction, error) => {
-      console.error("Error adding last_location column to sheep table:", error);
-      return false; // Rollback the transaction
-    }
-  );
+  insertMedList();
+  insertVaxList();
+  return new Promise((resolve, reject) => {
+    database.transaction(
+      (transaction) => {
+        transaction.executeSql(
+          `ALTER TABLE sheep_meds add COLUMN dosage VARCHAR(100);`,
+          [],
+          null,
+          (transaction, error) => {
+            console.error(
+              "Error adding dosage column to sheep_meds table:",
+              error
+            );
+            reject(
+              new Error(
+                "Error adding dosage column to sheep_meds table: " +
+                  error.message
+              )
+            );
+          }
+        );
+      },
+      reject,
+      () => {
+        database.transaction(
+          (transaction) => {
+            transaction.executeSql(
+              `PRAGMA table_info(sheep);`,
+              [],
+              (transaction, resultSet) => {
+                let columnExists = false;
 
-  // Add similar executeSql calls for the other tables
+                for (let i = 0; i < resultSet.rows.length; i++) {
+                  if (resultSet.rows.item(i).name === "last_bred_to") {
+                    columnExists = true;
+                    break;
+                  }
+                }
+
+                if (!columnExists) {
+                  transaction.executeSql(
+                    `ALTER TABLE sheep ADD COLUMN last_bred_to VARCHAR(200);`,
+                    [],
+                    null,
+                    (transaction, error) => {
+                      console.error(
+                        "Error adding last_bred_to column to sheep table:",
+                        error
+                      );
+                      reject(
+                        new Error(
+                          "Error adding last_bred_to column to sheep table: " +
+                            error.message
+                        )
+                      );
+                    }
+                  );
+                }
+              },
+              (transaction, error) => {
+                console.error("Error executing PRAGMA table_info:", error);
+                reject(
+                  new Error(
+                    "Error executing PRAGMA table_info: " + error.message
+                  )
+                );
+              }
+            );
+          },
+          reject,
+          resolve
+        );
+      }
+    );
+  });
 };
 
 export const executeMigration = () => {

@@ -75,12 +75,13 @@ const testDataSheep = [
     tag_id: "hij",
     scrapie_id: "defhij",
     name: "Baby",
-    dob: "02/10/2022",
+    dob: "02/10/2023",
     sex: "f",
     breed_id: 2,
     color_id: 3,
     marking_id: 2,
     mother: 1,
+    father: 2,
     notes:
       "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum, culpa praesentium ea est laudantium saepe architecto commodi fugiat. Maxime vero dolores magnam consectetur, atque perspiciatis! Excepturi, ipsa magni? Eos harum error dolorum odio quaerat, laudantium aliquid maxime doloremque dicta dolorem quod fugiat labore maiores amet architecto dolore qui atque officia dolores numquam nostrum veritatis nulla neque! In quos ipsa saepe et repellendus magni, iste natus reiciendis, quisquam nobis corporis voluptates corrupti nesciunt aspernatur veritatis modi aliquid esse eveniet dolorum ipsum accusantium dolores beatae at? Nisi voluptatibus recusandae, iste dolores exercitationem debitis dignissimos similique dolor, veniam excepturi dicta porro iusto consequuntur laboriosam delectus aliquam tempore corrupti.",
     last_location: "test location3",
@@ -222,6 +223,22 @@ export const vaccineData = [
   "Volar footrot bacterin",
 ];
 
+export const setCurrentSchemaVersion = (version) => {
+  return new Promise((resolve, reject) => {
+    database.transaction((transaction) => {
+      transaction.executeSql(
+        `PRAGMA user_version = ${version};`,
+        [],
+        () => resolve(),
+        (transaction, error) => {
+          console.log("error", error);
+          reject(error);
+        }
+      );
+    });
+  });
+};
+
 export const dropDbTablesAsync = async () => {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
@@ -298,7 +315,8 @@ export const addMedicalData = async (tx) => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
             entry_id BIGINT REFERENCES medications (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-            date VARCHAR(50) NOT NULL
+            date VARCHAR(50) NOT NULL,
+            dosage VAECHAR(100)
           );
           `,
           [],
@@ -419,6 +437,7 @@ export const addBasicData = async (tx) => {
             weight_at_birth INTEGER, 
             dod VARCHAR(255), 
             date_last_bred VARCHAR(255),
+            last_bred_to BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE,
             breed_id BIGINT NOT NULL REFERENCES breeds (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
             color_id BIGINT REFERENCES colors (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
             marking_id BIGINT REFERENCES markings (id) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -502,7 +521,7 @@ export function insertBreedData() {
     testDataBreeds.map((el) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO breeds (breed_name) 
+          `INSERT OR IGNORE INTO breeds (breed_name) 
             VALUES (?)`,
           [el],
           (t, success) => {
@@ -528,7 +547,7 @@ export function insertColorData() {
     database.transaction((tx) => {
       testDataColors.map((el) => {
         tx.executeSql(
-          `INSERT INTO colors (color_name) 
+          `INSERT OR IGNORE INTO colors (color_name) 
             VALUES (?)`,
           [el],
           (t, success) => {
@@ -554,7 +573,7 @@ export function insertMarkingData() {
     testDataMarkings.map((el) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO markings (marking_name) 
+          `INSERT OR IGNORE INTO markings (marking_name) 
             VALUES (?)`,
           [el],
           (t, success) => {
@@ -582,8 +601,8 @@ export function insertSheepData() {
         testDataSheep.map((sheepData) => {
           return new Promise((resolve, reject) => {
             tx.executeSql(
-              `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred, notes, last_location, picture) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred, last_bred_to, notes, last_location, picture) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 sheepData.tag_id,
                 sheepData.scrapie_id,
@@ -600,6 +619,7 @@ export function insertSheepData() {
                 sheepData.color_id,
                 sheepData.marking_id,
                 sheepData.date_last_bred,
+                sheepData.last_bred_to,
                 sheepData.notes,
                 sheepData.last_location,
                 sheepData.picture,
@@ -652,7 +672,7 @@ export function insertMedList() {
     medicationData.map((medData) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO medications (entry)
+          `INSERT OR IGNORE INTO medications (entry)
             VALUES (?)`,
           [medData],
           (t, success) => {
@@ -678,7 +698,7 @@ export function insertVaxList() {
     vaccineData.map((vaxData) => {
       database.transaction((tx) => {
         tx.executeSql(
-          `INSERT INTO vaccines (entry)
+          `INSERT OR IGNORE INTO vaccines (entry)
             VALUES (?)`,
           [vaxData],
           (t, success) => {
@@ -765,6 +785,7 @@ export function fetchAllSheep() {
   children.dop,
   children.weight_at_birth,
   children.date_last_bred,
+  children.last_bred_to,
   children.dod,
   children.picture,
   children.scrapie_id,
@@ -781,14 +802,16 @@ export function fetchAllSheep() {
   sires.name AS father_name,
   sires.tag_id AS father_tag_id,
   dams.name AS mother_name,
-  dams.tag_id AS mother_tag_id
+  dams.tag_id AS mother_tag_id,
+  COALESCE(last_bred_to_sheep.name, last_bred_to_sheep.tag_id, 'NA') as last_bred_to_name_or_tag
 FROM
   sheep children
   JOIN breeds ON children.breed_id = breeds.id
   LEFT JOIN colors ON children.color_id = colors.id
   LEFT JOIN markings ON children.marking_id = markings.id
   LEFT JOIN sheep sires ON children.sire = sires.sheep_id
-  LEFT JOIN sheep dams ON children.dam = dams.sheep_id;`,
+  LEFT JOIN sheep dams ON children.dam = dams.sheep_id
+  LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id`,
         //  `select * from sheep`,
         [],
         (_, result) => {
@@ -822,6 +845,7 @@ export function fetchSheep(id) {
         children.dop,
         children.weight_at_birth,
         children.date_last_bred,
+        children.last_bred_to,
         children.dod,
         children.picture,
         children.scrapie_id,
@@ -838,14 +862,16 @@ export function fetchSheep(id) {
         sires.name AS father_name,
         sires.tag_id AS father_tag_id,
         dams.name AS mother_name,
-        dams.tag_id AS mother_tag_id
+        dams.tag_id AS mother_tag_id,
+        COALESCE(last_bred_to_sheep.name, last_bred_to_sheep.tag_id, 'NA') as last_bred_to_name_or_tag
       FROM
-        sheep children
-        JOIN breeds ON children.breed_id = breeds.id
-        LEFT JOIN colors ON children.color_id = colors.id
-        LEFT JOIN markings ON children.marking_id = markings.id
-        LEFT JOIN sheep sires ON children.sire = sires.sheep_id
-        LEFT JOIN sheep dams ON children.dam = dams.sheep_id
+      sheep children
+      JOIN breeds ON children.breed_id = breeds.id
+      LEFT JOIN colors ON children.color_id = colors.id
+      LEFT JOIN markings ON children.marking_id = markings.id
+      LEFT JOIN sheep sires ON children.sire = sires.sheep_id
+      LEFT JOIN sheep dams ON children.dam = dams.sheep_id
+      LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id
       WHERE
         children.sheep_id = ?;`,
         [id],
@@ -1226,6 +1252,7 @@ export function deleteSheep(val) {
 
 export function editSheep(sheepData, id) {
   return new Promise((resolve, reject) => {
+    console.log(sheepData);
     database.transaction((tx) => {
       // Generate the SQL query and the parameters array
       const columns = Object.keys(sheepData).filter((col) => col !== "id");
@@ -1275,8 +1302,8 @@ export function updateDateLastBred(data) {
     database.transaction((tx) => {
       console.log("date1", data);
       tx.executeSql(
-        `UPDATE sheep set date_last_bred = ? where sheep_id=?`,
-        [data.date, data.sheep_id],
+        `UPDATE sheep set date_last_bred = ?, last_bred_to = ? where sheep_id=?`,
+        [data.date, last_bred_to, data.sheep_id],
         (t, success) => {
           console.log("success", success);
           resolve(success);
@@ -1296,14 +1323,12 @@ export function updateDateLastBred(data) {
 }
 
 export function findChildren(id) {
-  console.log("finding children for id", id);
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
         `SELECT * FROM sheep WHERE sire = ? OR dam = ?`,
         [id, id],
         (t, results) => {
-          //    console.log("children", results);
           resolve(results.rows._array);
         },
         (t, error) => {
@@ -1358,8 +1383,8 @@ export function addMedication(data) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `INSERT INTO sheep_meds (sheep_id, entry_id, date) VALUES (?, ?, ?)`,
-        [data.sheep_id, data.value, data.date],
+        `INSERT INTO sheep_meds (sheep_id, entry_id, date, dosage) VALUES (?, ?, ?, ?)`,
+        [data.sheep_id, data.value, data.date, data.dosage],
         (t, success) => {
           console.log("success", success);
           resolve(success.insertId);
@@ -1425,11 +1450,10 @@ export function fetchSheepMeds(id) {
   return new Promise((resolve, reject) => {
     database.transaction((tx) => {
       tx.executeSql(
-        `SELECT sheep_meds.sheep_id, sheep_meds.entry_id, sheep_meds.id, sheep_meds.date, medications.entry 
+        `SELECT sheep_meds.sheep_id, sheep_meds.entry_id, sheep_meds.id, sheep_meds.date, medications.entry, sheep_meds.dosage 
         FROM sheep_meds INNER JOIN medications ON sheep_meds.entry_id = medications.id WHERE sheep_meds.sheep_id = ?`,
         [id],
         (t, results) => {
-          console.log("sheepmeds from db", results.rows._array);
           resolve(results.rows._array);
         },
         (t, error) => {

@@ -68,3 +68,13 @@ export const dateDisplayFormatter = (value, dateFormat) => {
     return value;
   }
 };
+
+export const capitalize = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+export const sortAlphabetically = (data, key) => {
+  return data.sort((a, b) =>
+    a[key].toLowerCase().localeCompare(b[key].toLowerCase())
+  );
+};
