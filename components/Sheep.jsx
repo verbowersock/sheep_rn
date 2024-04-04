@@ -51,9 +51,9 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
-  const { activeCardId } = useSelector(uiSelector);
+
   const [menuVisible, setMenuVisible] = useState(initialMenuState);
-  const { sheep } = useSelector(sheepDataSelector);
+
   const { isSecondaryFormDialogVisible } = useSelector(uiSelector);
   console.log(dateFormat, item);
 
@@ -98,6 +98,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
   const onAddLamb = (item) => {
     const formattedData = {
       dam: item.sheep_id,
+      sire: item.last_bred_to,
     };
     dispatch(setFormTitle("Add Lamb"));
     dispatch(setFormData(formattedData));
@@ -440,7 +441,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Sex: </Text>
-                <Text>{item.sex}</Text>
+                <Text>{sex.find((s) => s.id === item.sex)?.title}</Text>
               </Text>
               {item.dop && (
                 <Text style={styles.info}>
@@ -461,7 +462,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
               )}
               <Text style={styles.info}>
                 <Text style={styles.label}>Breed: </Text>
-                <Text>{item.breed_name}</Text>
+                <Text>{capitalize(item.breed_name)}</Text>
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Father: </Text>
@@ -485,11 +486,15 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Color: </Text>
-                <Text>{item.color_name ? item.color_name : "NA"}</Text>
+                <Text>
+                  {item.color_name ? capitalize(item.color_name) : "NA"}
+                </Text>
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Marking: </Text>
-                <Text>{item.marking_name ? item.marking_name : "NA"}</Text>
+                <Text>
+                  {item.marking_name ? capitalize(item.marking_name) : "NA"}
+                </Text>
               </Text>
             </View>
           </View>

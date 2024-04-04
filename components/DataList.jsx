@@ -128,45 +128,56 @@ const DataList = ({ header, onDismiss }) => {
       >
         {header}
       </Text>
-      {listData.map((item, index) => (
-        <TouchableOpacity
-          onLongPress={() => handleDeleteItem(item)}
-          key={index}
-          style={{
-            backgroundColor: index % 2 === 0 ? "#D3D3D3" : "white",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingVertical: 15,
-          }}
-        >
-          <View
+      {listData.length === 0 ? (
+        <Text style={{ fontSize: 16, alignSelf: "center" }}>No data found</Text>
+      ) : (
+        listData.map((item, index) => (
+          <TouchableOpacity
+            onLongPress={() => handleDeleteItem(item)}
+            key={index}
             style={{
-              width: "100%",
-              maxHeight: 25,
-              display: "flex",
+              backgroundColor: index % 2 === 0 ? "#D3D3D3" : "white",
               flexDirection: "row",
               justifyContent: "space-between",
+              paddingVertical: 15,
             }}
           >
-            <Text
-              style={{ fontSize: 15, paddingLeft: 5 }}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {type === forms.WEIGHT.type ? `${item.entry}lb` : item.entry}
-            </Text>
-
-            <Text
+            <View
               style={{
-                fontSize: 17,
-                paddingRight: 5,
+                width: "100%",
+
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
               }}
             >
-              {item.date}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      ))}
+              <Text style={{ fontSize: 15, paddingLeft: 5, width: "45%" }}>
+                {type === forms.WEIGHT.type ? `${item.entry}lb` : item.entry}
+              </Text>
+              {item.dosage && (
+                <Text
+                  style={{
+                    fontSize: 15,
+                    paddingRight: 5,
+                    width: "20%",
+                  }}
+                >
+                  {item.dosage}
+                </Text>
+              )}
+
+              <Text
+                style={{
+                  fontSize: 17,
+                  paddingRight: 5,
+                }}
+              >
+                {item.date}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))
+      )}
       <ConfirmationDialog onConfirm={(id) => deleteValue(id)} />
     </ScrollView>
   );

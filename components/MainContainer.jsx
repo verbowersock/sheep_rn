@@ -137,29 +137,36 @@ const MainContainer = () => {
     setFilteredSheep(filteredSheep);
 
     if (sortValue === "name_asc") {
-      setSortedSheep(
-        filteredSheep.sort((a, b) => a.name.localeCompare(b.name))
-      );
+      let list = [...filteredSheep].sort((a, b) => {
+        if (!a.name) return 1; // a is larger if name is empty
+        if (!b.name) return -1; // b is larger if name is empty
+        return a.name.localeCompare(b.name);
+      });
+      setSortedSheep(list);
     } else if (sortValue === "name_desc") {
-      setSortedSheep(
-        filteredSheep.sort((a, b) => b.name.localeCompare(a.name))
-      );
+      let list = [...filteredSheep].sort((a, b) => {
+        if (!a.name) return 1; // a is larger if name is empty
+        if (!b.name) return -1; // b is larger if name is empty
+        return b.name.localeCompare(a.name);
+      });
+
+      setSortedSheep(list);
     } else if (sortValue === "age_asc") {
       setSortedSheep(
-        filteredSheep.sort(
+        [...filteredSheep].sort(
           (a, b) => dateFromString(a.dob) - dateFromString(b.dob)
         )
       );
     } else if (sortValue === "age_desc") {
       setSortedSheep(
-        filteredSheep.sort(
+        [...filteredSheep].sort(
           (a, b) => dateFromString(b.dob) - dateFromString(a.dob)
         )
       );
     } else if (sortValue === "tag_id_asc") {
-      setSortedSheep(filteredSheep.sort((a, b) => a.tag_id - b.tag_id));
+      setSortedSheep([...filteredSheep].sort((a, b) => a.tag_id - b.tag_id));
     } else if (sortValue === "tag_id_desc") {
-      setSortedSheep(filteredSheep.sort((a, b) => b.tag_id - a.tag_id));
+      setSortedSheep([...filteredSheep].sort((a, b) => b.tag_id - a.tag_id));
     }
   }, [deadChecked, soldChecked, searchQuery, searchTag, sortValue, sheep]);
 
@@ -184,6 +191,7 @@ const MainContainer = () => {
           justifyContent: "center",
           alignItems: "center",
           marginTop: 30,
+          marginBottom: 20,
         }}
       >
         <Text

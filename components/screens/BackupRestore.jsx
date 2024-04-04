@@ -69,7 +69,7 @@ const BackupRestore = () => {
           "/data/user/0/com.sheeprn/files/SQLite/sheep.db"
         );
         const currentSchemaVersion = await getCurrentSchemaVersion();
-        const expectedSchemaVersion = 2; // The version your app expects
+        const expectedSchemaVersion = 4; // The version your app expects
 
         if (currentSchemaVersion !== expectedSchemaVersion) {
           await executeMigration();
