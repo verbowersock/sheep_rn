@@ -28,6 +28,7 @@ import { age } from "./utils/Age";
 import ButtonWithIcon from "./ButtonWithIcon";
 import { forms } from "../Constants";
 import {
+  capitalize,
   dateDisplayFormatter,
   toggleSecondaryFormModal,
 } from "./utils/SharedFunctions";
@@ -55,7 +56,12 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
   const [menuVisible, setMenuVisible] = useState(initialMenuState);
 
   const { isSecondaryFormDialogVisible } = useSelector(uiSelector);
-  console.log(dateFormat, item);
+
+  const sex = [
+    { id: "m", title: "Ram" },
+    { id: "f", title: "Ewe" },
+    { id: "w", title: "Wether" },
+  ];
 
   // useEffect(() => {
   //   if (activeCardId !== item.sheep_id) {

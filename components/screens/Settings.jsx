@@ -19,7 +19,6 @@ const Settings = () => {
   const [unitOfMeasurement, setUnitOfMeasurement] = useState(unitFormat);
 
   const changeDateFormat = (value) => {
-    console.log(value);
     setDateFormatState(value);
     dispatch(setDate(value));
   };

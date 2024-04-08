@@ -39,8 +39,9 @@ import {
 import MyImagePicker from "./ImagePicker";
 import { setShowSnackbar, uiSelector } from "../../store/slices/ui";
 import {
+  convertUnitsDisplay,
+  convertUnitsSave,
   dateDisplayFormatter,
-  dateSaveFormater,
   dateSaveFormatter,
   validateDate,
 } from "../utils/SharedFunctions";
@@ -68,19 +69,31 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
   const [loading, setLoading] = useState(false);
   const { dateFormat } = useSelector(settingsSelector);
   const dateFields = ["dob", "dod", "dos", "dop"];
+  const { unitFormat } = useSelector(settingsSelector);
 
-  function formatDatesInObject(obj, dateFields, dateFormat) {
+  function formatDatesUnitsInObject(obj, dateFields, dateFormat, unitFormat) {
     const newObj = { ...obj };
     dateFields.forEach((field) => {
       if (newObj[field]) {
         newObj[field] = dateDisplayFormatter(newObj[field], dateFormat);
       }
     });
+    if (newObj.weight_at_birth) {
+      newObj.weight_at_birth = convertUnitsDisplay(
+        newObj.weight_at_birth,
+        unitFormat
+      ).toString();
+    }
+
     return newObj;
   }
 
-  const correctedData = formatDatesInObject(formData, dateFields, dateFormat);
-  console.log("correctedData", correctedData);
+  const correctedData = formatDatesUnitsInObject(
+    formData,
+    dateFields,
+    dateFormat,
+    unitFormat
+  );
 
   useEffect(() => {
     async function loadDataToApp() {
@@ -163,7 +176,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       breed_id: data.breed_id,
       color_id: data.color_id,
       marking_id: data.marking_id,
-      weight_at_birth: data.weight_at_birth,
+      weight_at_birth: convertUnitsSave(data.weight_at_birth, unitFormat),
     };
 
     if (formData.sheep_id) {
@@ -446,7 +459,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               field="weight_at_birth"
               onChangeText={onChange}
               value={value && value.toString()}
-              right={<TextInput.Affix text="lb" />}
+              right={<TextInput.Affix text={unitFormat} />}
             />
           )}
           name="weight_at_birth"

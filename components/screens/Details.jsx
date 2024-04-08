@@ -33,6 +33,8 @@ import {
   uiSelector,
 } from "../../store/slices/ui";
 import {
+  capitalize,
+  convertUnitsDisplay,
   dateDisplayFormatter,
   toggleSecondaryFormModal,
 } from "../utils/SharedFunctions";
@@ -61,6 +63,7 @@ const Details = ({ route }) => {
   const navigation = useNavigation();
   const { sheep_id } = route.params;
   const { dateFormat } = useSelector(settingsSelector);
+  const { unitFormat } = useSelector(settingsSelector);
 
   const { sheep, sheepMeds, sheepVax, sheepWeights, sheepChildren } =
     useSelector(sheepDataSelector);
@@ -114,6 +117,12 @@ const Details = ({ route }) => {
 
   const { contextMenuOpen } = useSelector(uiSelector);
   const dispatch = useDispatch();
+
+  const sexTypes = [
+    { id: "m", title: "Ram" },
+    { id: "f", title: "Ewe" },
+    { id: "w", title: "Wether" },
+  ];
 
   const sortData = (data) => {
     data.sort(
@@ -170,9 +179,12 @@ const Details = ({ route }) => {
     }
     if (sheepWeights.length > 0) {
       const lastWeight = getMostRecentEntry(sheepWeights);
-      setLastWeight(lastWeight);
+      setLastWeight({
+        ...lastWeight,
+        entry: convertUnitsDisplay(lastWeight.entry, unitFormat),
+      });
     }
-  }, [sheepWeights, sheepMeds, sheepVax]);
+  }, [sheepWeights, sheepMeds, sheepVax, dateFormat]);
 
   const showChildren = () => {
     if (sheepChildren.length > 0) {
@@ -246,7 +258,9 @@ const Details = ({ route }) => {
       ) / childrenWithWeight.length;
 
     // Round the result to the nearest decimal
-    return `${Math.round(averageWeight * 10) / 10} lb`;
+    return `${
+      Math.round(convertUnitsDisplay(averageWeight, unitFormat) * 10) / 10
+    } ${unitFormat}`;
   };
 
   const timeToLambing = () => {
@@ -259,7 +273,7 @@ const Details = ({ route }) => {
     // Format the lambingDate back into a string
     const lambingDateString = format(lambingDate, "MM/dd/yyyy");
 
-    return lambingDateString;
+    return dateDisplayFormatter(lambingDateString, dateFormat);
   };
 
   const getMostRecentEntry = (data) => {
@@ -343,20 +357,23 @@ const Details = ({ route }) => {
     name && { title: "Name:", description: name },
     { title: "Tag Id:", description: tag_id },
     scrapie_id && { title: "Scrapie Id:", description: scrapie_id },
-    { title: "Breed:", description: breed_name },
+    { title: "Breed:", description: capitalize(breed_name) },
     color_name !== "NA" && {
       title: "Color:",
-      description: color_name,
+      description: capitalize(color_name),
     },
     marking_name !== "NA" && {
       title: "Marking:",
-      description: marking_name,
+      description: capitalize(marking_name),
     },
     {
       title: "Date of Birth:",
       description: dateDisplayFormatter(dob, dateFormat),
     },
-    { title: "Sex", description: sex },
+    {
+      title: "Sex",
+      description: sexTypes.find((s) => s.id === sex)?.title,
+    },
     !dod && { title: "Age", description: age(this_sheep) },
     dod && {
       title: "Date of Death:",
@@ -392,7 +409,9 @@ const Details = ({ route }) => {
     },
     sex === "f" && {
       title: "Date last bred:",
-      description: date_last_bred ? date_last_bred : "NA",
+      description: date_last_bred
+        ? dateDisplayFormatter(date_last_bred, dateFormat)
+        : "NA",
     },
     sex === "f" && {
       title: "Ram bred to:",
@@ -439,7 +458,7 @@ const Details = ({ route }) => {
         sheepMeds.length > 0
           ? `${lastMedication.entry} - ${
               lastMedication.dosage ? lastMedication.dosage : ""
-            } on ${lastMedication.date}`
+            } on ${dateDisplayFormatter(lastMedication.date, dateFormat)}`
           : "No medications found",
     },
     {
@@ -447,7 +466,10 @@ const Details = ({ route }) => {
       title: "Last Vaccination:",
       description:
         sheepVax.length > 0
-          ? `${lastVaccination.entry} on ${lastVaccination.date}`
+          ? `${lastVaccination.entry} on ${dateDisplayFormatter(
+              lastVaccination.date,
+              dateFormat
+            )}`
           : "No vaccinations found",
     },
     {
@@ -455,7 +477,10 @@ const Details = ({ route }) => {
       title: "Last Weight:",
       description:
         sheepWeights.length > 0
-          ? `${lastWeight.entry}lbs on ${lastWeight.date}`
+          ? `${lastWeight.entry}${unitFormat} on ${dateDisplayFormatter(
+              lastWeight.date,
+              dateFormat
+            )}`
           : "No weight entries found",
     },
     dod && {
@@ -595,12 +620,44 @@ const Details = ({ route }) => {
   }
 
   const createPDF = async () => {
+    let formattedSheepMeds = sheepMeds.map((item) => ({
+      ...item,
+      date: dateDisplayFormatter(item.date, dateFormat),
+    }));
+
+    let formattedSheepVax = sheepVax.map((item) => ({
+      ...item,
+      date: dateDisplayFormatter(item.date),
+    }));
+    let formattedLastWeight;
+    if (lastWeight.entry) {
+      formattedLastWeight = {
+        entry: `${lastWeight.entry}${unitFormat}`,
+        date: dateDisplayFormatter(lastWeight.date),
+      };
+    } else {
+      formattedLastWeight = lastWeight;
+    }
+
+    let formattedWeightAtBirth;
+    if (weight_at_birth) {
+      formattedWeightAtBirth = `${weight_at_birth}${unitFormat}`;
+    } else {
+      formattedWeightAtBirth = "NA";
+    }
+
     let options = {
       html: htmlContent({
         ...this_sheep,
-        lastWeight,
-        sheepMeds,
-        sheepVax,
+        dod: dateDisplayFormatter(dod, dateFormat),
+        dob: dateDisplayFormatter(dob, dateFormat),
+        dos: dateDisplayFormatter(dos, dateFormat),
+        dop: dateDisplayFormatter(dop, dateFormat),
+        date_last_bred: dateDisplayFormatter(date_last_bred, dateFormat),
+        formattedWeightAtBirth,
+        formattedLastWeight,
+        formattedSheepMeds,
+        formattedSheepVax,
       }),
       fileName: pdfName,
       directory: "Download",
@@ -747,7 +804,12 @@ const Details = ({ route }) => {
       <Modal visible={listModalvisible} transparent>
         <Pressable onPress={handleModalClose} style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <DataList header={listHeader} onDismiss={handleModalClose} />
+            <DataList
+              header={listHeader}
+              onDismiss={handleModalClose}
+              dateFormat={dateFormat}
+              unitFormat={unitFormat}
+            />
           </View>
         </Pressable>
       </Modal>
