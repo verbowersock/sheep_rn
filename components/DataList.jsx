@@ -21,8 +21,9 @@ import sheep, {
   updateSheepVax,
   updateSheepWeight,
 } from "../store/slices/sheep";
+import { dateDisplayFormatter } from "./utils/SharedFunctions";
 
-const DataList = ({ header, onDismiss }) => {
+const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [type, setType] = useState("");
@@ -47,7 +48,10 @@ const DataList = ({ header, onDismiss }) => {
       setShowConfirmationDialog({
         visible: true,
         id: item.id,
-        title: `${item.entry} on ${item.date}`,
+        title: `${item.entry} on ${dateDisplayFormatter(
+          item.date,
+          dateFormat
+        )}`,
         field: "entry",
       })
     );
@@ -152,7 +156,9 @@ const DataList = ({ header, onDismiss }) => {
               }}
             >
               <Text style={{ fontSize: 15, paddingLeft: 5, width: "45%" }}>
-                {type === forms.WEIGHT.type ? `${item.entry}lb` : item.entry}
+                {type === forms.WEIGHT.type
+                  ? `${item.entry}${unitFormat}`
+                  : item.entry}
               </Text>
               {item.dosage && (
                 <Text
@@ -172,7 +178,7 @@ const DataList = ({ header, onDismiss }) => {
                   paddingRight: 5,
                 }}
               >
-                {item.date}
+                {dateDisplayFormatter(item.date, dateFormat)}
               </Text>
             </View>
           </TouchableOpacity>

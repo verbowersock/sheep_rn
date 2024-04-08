@@ -1,5 +1,7 @@
+import { dateDisplayFormatter } from "../utils/SharedFunctions";
+
 export function htmlContent(htmldata) {
-  const medRows = htmldata.sheepMeds.map((med) => {
+  const medRows = htmldata.formattedSheepMeds.map((med) => {
     return `
       <tr>
         <td class="med_name">${med.entry}</td>
@@ -8,7 +10,7 @@ export function htmlContent(htmldata) {
       </tr>
     `;
   });
-  const vaxRows = htmldata.sheepVax.map((vax) => {
+  const vaxRows = htmldata.formattedSheepVax.map((vax) => {
     return `
       <tr>
         <td>${vax.entry}</td>
@@ -190,14 +192,16 @@ export function htmlContent(htmldata) {
         </tr>
         <tr>
           <th><span>Weight at birth</span></th>
-          <td><span>${
-            htmldata.weight_at_birth ? htmldata.weight_at_birth : "NA"
-          }</span></td>
+          <td><span>${htmldata.formattedWeightAtBirth}</span></td>
         </tr>
         <tr>
           <th><span>Last weight recorded</span></th>
           <td><span>${
-            htmldata.lastWeight.entry ? htmldata.lastWeight.entry : "NA"
+            htmldata.formattedLastWeight.entry
+              ? htmldata.formattedLastWeight.entry +
+                " - " +
+                htmldata.formattedLastWeight.date
+              : "NA"
           }</span></td>
         </tr>
   
@@ -238,7 +242,7 @@ export function htmlContent(htmldata) {
           <h3>Medication history</h3>
           <table class="medical">
          ${
-           htmldata.sheepMeds.length > 0
+           htmldata.formattedSheepMeds.length > 0
              ? "<td>" + medRows.join("") + "</td>"
              : "<td><span>NA</span></td>"
          }
@@ -248,7 +252,7 @@ export function htmlContent(htmldata) {
           <h3>Vaccination history</h3>
           <table class="medical">
           ${
-            htmldata.sheepVax.length > 0
+            htmldata.formattedSheepVax.length > 0
               ? "<td>" + vaxRows.join("") + "</td>"
               : "<td><span>NA</span></td>"
           }

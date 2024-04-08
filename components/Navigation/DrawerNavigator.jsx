@@ -5,6 +5,8 @@ import MainStackNavigator from "./StackNavigator";
 import { useTheme } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import About from "../screens/About";
+import Settings from "../screens/Settings";
+import ReviewShare from "../screens/ReviewShare";
 
 const Drawer = createDrawerNavigator();
 
@@ -42,12 +44,32 @@ const DrawerNavigator = () => {
         }}
       />
       <Drawer.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          drawerLabel: "Settings",
+          drawerIcon: ({ color, size }) => (
+            <Icon name="cog" color={color} size={25} />
+          ),
+        }}
+      />
+      <Drawer.Screen
         name="About"
         component={About}
         options={{
           drawerLabel: "About the app",
           drawerIcon: ({ color, size }) => (
             <Icon name="help-circle-outline" color={color} size={25} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="ReviewShare"
+        component={ReviewShare}
+        options={{
+          drawerLabel: "Review and Share",
+          drawerIcon: ({ color, size }) => (
+            <Icon name="star-face" color={color} size={25} />
           ),
         }}
       />

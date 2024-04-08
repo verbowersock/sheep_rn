@@ -11,7 +11,11 @@ const Header = () => {
   const navigation = useNavigation();
   const route = useRoute();
 
-  const isDrawerScreen = route.name === "Backup" || route.name === "About";
+  const isDrawerScreen =
+    route.name === "Backup" ||
+    route.name === "About" ||
+    route.name === "Settings" ||
+    route.name === "ReviewShare";
   return (
     <Appbar.Header elevated style={styles.HeaderWrapper}>
       {isDrawerScreen ? (
