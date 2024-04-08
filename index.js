@@ -2,11 +2,12 @@ import "react-native-reanimated";
 import { registerRootComponent } from "expo";
 import App from "./App";
 import { Provider } from "react-redux";
-import store from "./store/Config";
 import ErrorBoundary from "react-native-error-boundary";
 
 import { DefaultTheme, Provider as PaperProvider } from "react-native-paper";
 import GlobalError from "./components/GlobalError";
+import { PersistGate } from "redux-persist/integration/react";
+import { persistor, store } from "./store/Config";
 
 const theme = {
   ...DefaultTheme,
@@ -30,7 +31,9 @@ const AppWithRedux = () => {
     <PaperProvider theme={theme}>
       <ErrorBoundary FallbackComponent={GlobalError}>
         <Provider store={store}>
-          <App />
+          <PersistGate loading={null} persistor={persistor}>
+            <App />
+          </PersistGate>
         </Provider>
       </ErrorBoundary>
     </PaperProvider>

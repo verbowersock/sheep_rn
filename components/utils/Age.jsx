@@ -15,6 +15,13 @@ export const age = (item) => {
       let units = ["years", "months"];
       if (parsedDob < today) {
         let duration = intervalToDuration({ start: parsedDob, end: today });
+        if (
+          duration.years === 0 &&
+          duration.months === 0 &&
+          duration.days === 0
+        ) {
+          return "0 days";
+        }
         if (duration.months === 0 && duration.years === 0) {
           units.push("weeks");
           if (!duration.weeks) {

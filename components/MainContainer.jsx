@@ -210,16 +210,25 @@ const MainContainer = () => {
             right: 10,
           }}
         >
-          <IconButton
-            icon={() => (
-              <Entypo
-                name="sound-mix"
-                size={24}
-                color={theme.colors.secondary}
-              />
-            )}
-            onPress={(event) => toggleDrawer(event)}
-          />
+          {!isDrawerOpen ? (
+            <IconButton
+              icon={() => (
+                <Entypo
+                  name="sound-mix"
+                  size={24}
+                  color={theme.colors.secondary}
+                />
+              )}
+              onPress={(event) => toggleDrawer(event)}
+            />
+          ) : (
+            <IconButton
+              icon={() => (
+                <Entypo name="cross" size={24} color={theme.colors.secondary} />
+              )}
+              onPress={(event) => toggleDrawer(event)}
+            />
+          )}
         </View>
       </View>
       {isDrawerOpen && (

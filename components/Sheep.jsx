@@ -1,4 +1,3 @@
-import { format, parse, set } from "date-fns";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -7,7 +6,7 @@ import {
   Text,
   TouchableWithoutFeedback,
 } from "react-native";
-import { Button, IconButton, Title, useTheme } from "react-native-paper";
+import { IconButton, useTheme } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteSheep } from "../services/db";
 import {
@@ -26,10 +25,14 @@ import {
 import ConfirmationDialog from "./ConfirmationDialog";
 import { useNavigation } from "@react-navigation/native";
 import { age } from "./utils/Age";
-
 import ButtonWithIcon from "./ButtonWithIcon";
 import { forms } from "../Constants";
-import { capitalize, toggleSecondaryFormModal } from "./utils/SharedFunctions";
+import {
+  capitalize,
+  dateDisplayFormatter,
+  toggleSecondaryFormModal,
+} from "./utils/SharedFunctions";
+import { settingsSelector } from "../store/slices/settings";
 
 const placeholder = require("../assets/images/placeholder.jpg");
 const dead = require("../assets/images/dead.png");
@@ -45,7 +48,7 @@ const initialMenuState = {
   REMOVE: false,
 };
 
-const Sheep = React.memo(function Sheep({ item, index }) {
+const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
@@ -53,27 +56,18 @@ const Sheep = React.memo(function Sheep({ item, index }) {
   const [menuVisible, setMenuVisible] = useState(initialMenuState);
 
   const { isSecondaryFormDialogVisible } = useSelector(uiSelector);
+
   const sex = [
     { id: "m", title: "Ram" },
     { id: "f", title: "Ewe" },
     { id: "w", title: "Wether" },
   ];
+
   // useEffect(() => {
   //   if (activeCardId !== item.sheep_id) {
   //    setMenuVisible(initialMenuState);
   //   }
   // }, [activeCardId]);
-
-  //parse date of birth to string in format dd/mm/yyyy
-  const date = (date) => {
-    if (date) {
-      const parsedDate = parse(date, "MM/dd/yyyy", new Date());
-      const d = parsedDate.toLocaleDateString();
-      return d;
-    } else {
-      return "NA";
-    }
-  };
 
   const toggleMenuVisible = (menu) => {
     // if (activeCardId !== item.sheep_id) {
@@ -213,6 +207,7 @@ const Sheep = React.memo(function Sheep({ item, index }) {
                   forms.DEATH,
                   item.sheep_id,
                   isSecondaryFormDialogVisible,
+                  dateFormat,
                   dispatch
                 );
               }}
@@ -228,7 +223,9 @@ const Sheep = React.memo(function Sheep({ item, index }) {
                 toggleSecondaryFormModal(
                   forms.SALE,
                   item.sheep_id,
+
                   isSecondaryFormDialogVisible,
+                  dateFormat,
                   dispatch
                 );
               }}
@@ -340,6 +337,7 @@ const Sheep = React.memo(function Sheep({ item, index }) {
                                 forms.MEDS,
                                 item.sheep_id,
                                 isSecondaryFormDialogVisible,
+                                dateFormat,
                                 dispatch
                               );
                             }}
@@ -355,6 +353,7 @@ const Sheep = React.memo(function Sheep({ item, index }) {
                                 forms.VAX,
                                 item.sheep_id,
                                 isSecondaryFormDialogVisible,
+                                dateFormat,
                                 dispatch
                               );
                             }}
@@ -370,6 +369,7 @@ const Sheep = React.memo(function Sheep({ item, index }) {
                                 forms.WEIGHT,
                                 item.sheep_id,
                                 isSecondaryFormDialogVisible,
+                                dateFormat,
                                 dispatch
                               );
                             }}
@@ -412,6 +412,7 @@ const Sheep = React.memo(function Sheep({ item, index }) {
                                 forms.BREEDING,
                                 item.sheep_id,
                                 isSecondaryFormDialogVisible,
+                                dateFormat,
                                 dispatch
                               );
                             }}
@@ -442,22 +443,22 @@ const Sheep = React.memo(function Sheep({ item, index }) {
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>DOB: </Text>
-                <Text>{date(item.dob)}</Text>
+                <Text>{dateDisplayFormatter(item.dob, dateFormat)}</Text>
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Sex: </Text>
                 <Text>{sex.find((s) => s.id === item.sex)?.title}</Text>
               </Text>
-              {item.purchase_date && (
+              {item.dop && (
                 <Text style={styles.info}>
                   <Text style={styles.label}>Purchase Date: </Text>
-                  <Text>{date(item.purchase_date)}</Text>
+                  <Text>{dateDisplayFormatter(item.dop, dateFormat)}</Text>
                 </Text>
               )}
-              {item.date_deceased ? (
+              {item.dod ? (
                 <Text style={styles.info}>
                   <Text style={styles.label}>Date Deceased: </Text>
-                  <Text>{date(item.date_deceased)}</Text>
+                  <Text>{dateDisplayFormatter(item.dod, dateFormat)}</Text>
                 </Text>
               ) : (
                 <Text style={styles.info}>
