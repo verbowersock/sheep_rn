@@ -1,6 +1,6 @@
 {
   "name": "sheep-rn",
-  "version": "0.1",
+  "version": "1.2",
   "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client",

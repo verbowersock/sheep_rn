@@ -18,8 +18,6 @@ const DateTextInput = ({
     mask: dateFormat === "mdy" ? Masks.DATE_MMDDYYYY : Masks.DATE_DDMMYYYY,
   });
 
-  console.log("maskedInputPropsDate", value, dateFormat);
-
   return (
     <MyTextInput
       keyboardType="numeric"

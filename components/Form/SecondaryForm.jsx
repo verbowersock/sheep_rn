@@ -65,7 +65,6 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const { dateFormat } = useSelector(settingsSelector);
 
   const [loading, setLoading] = useState(false);
-  console.log("defaultData", defaultData);
 
   useEffect(() => {
     async function loadDataToForm() {
@@ -76,7 +75,6 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
             title: entry,
             id: id.toString(),
           }));
-          console.log("meds", meds);
 
           //sort the array by title alphabetically
           meds.sort((a, b) => (a.title > b.title ? 1 : -1));
@@ -126,7 +124,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
       ...data,
       date: dateSaveFormatter(data.date, dateFormat),
     };
-    console.log(formattedData);
+
     setLoading(true);
     switch (type) {
       case MEDS.type:

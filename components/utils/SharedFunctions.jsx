@@ -34,7 +34,6 @@ export const toggleSecondaryFormModal = async (
 };
 
 export const validateDate = (value, dateFormat) => {
-  console.log("here", value, dateFormat);
   const df = dateFormat === "mdy" ? "MM/dd/yyyy" : "dd/MM/yyyy";
   const dateValidator =
     dateFormat === "mdy"
@@ -61,7 +60,7 @@ export const dateSaveFormatter = (value, dateFormat) => {
 
 export const dateDisplayFormatter = (value, dateFormat) => {
   if (value === null || value === undefined || value === "") {
-    return "N/A";
+    return "NA";
   } else if (dateFormat === "dmy") {
     return format(parse(value, "MM/dd/yyyy", new Date()), "dd/MM/yyyy");
   } else {
@@ -77,4 +76,23 @@ export const sortAlphabetically = (data, key) => {
   return data.sort((a, b) =>
     a[key].toLowerCase().localeCompare(b[key].toLowerCase())
   );
+};
+
+export const convertUnitsDisplay = (value, unitFormat) => {
+  if (unitFormat === "kg") {
+    // convert value from lb to kg
+    return Math.round(value * 0.453592 * 10) / 10;
+  } else {
+    return value;
+  }
+};
+
+export const convertUnitsSave = (value, unitFormat) => {
+  if (unitFormat === "kg") {
+    // convert value from kg to lb
+    //round value to nearest decimal
+    return Math.round((value / 0.453592) * 10) / 10;
+  } else {
+    return value;
+  }
 };
