@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   setDate,
   setUnit,
+  setMonth,
   settingsSelector,
 } from "../../store/slices/settings";
 
@@ -13,10 +14,11 @@ const Settings = () => {
   const styles = makeStyles(theme);
   //get the date format and unit of measurement from the state
   const dispatch = useDispatch();
-  const { dateFormat, unitFormat } = useSelector(settingsSelector);
+  const { dateFormat, unitFormat, monthFormat } = useSelector(settingsSelector);
 
   const [dateFormatState, setDateFormatState] = useState(dateFormat);
   const [unitOfMeasurement, setUnitOfMeasurement] = useState(unitFormat);
+  const [monthFormatState, setMonthFormatState] = useState(monthFormat);
 
   const changeDateFormat = (value) => {
     setDateFormatState(value);
@@ -26,6 +28,11 @@ const Settings = () => {
   const changeUnitOfMeasurement = (value) => {
     setUnitOfMeasurement(value);
     dispatch(setUnit(value));
+  };
+
+  const changeMonthFormat = (value) => {
+    setMonthFormatState(value);
+    dispatch(setMonth(value));
   };
 
   return (
@@ -58,6 +65,32 @@ const Settings = () => {
           </View>
         </RadioButton.Group>
       </View>
+      <Text style={styles.settingsSubtitle}>Month Display Format</Text>
+      <Paragraph style={styles.settingsParagraph}>
+        Choose how you prefer to display the month. It can be either an
+        abbreviation (Jan, Feb, Mar) or a number (01, 02, 03).
+      </Paragraph>
+      <View style={styles.radioButtonGroupContainer}>
+        <RadioButton.Group
+          onValueChange={(newValue) => changeMonthFormat(newValue)}
+          value={monthFormatState}
+        >
+          <View style={styles.radioButtonContainer}>
+            <RadioButton.Item
+              value="number"
+              label="Number"
+              position="leading"
+            />
+          </View>
+          <View style={styles.radioButtonContainer}>
+            <RadioButton.Item
+              value="abbr"
+              label="Abbreviation"
+              position="leading"
+            />
+          </View>
+        </RadioButton.Group>
+      </View>
       <Text style={styles.settingsSubtitle}>Unit of Measurement</Text>
       <Paragraph style={styles.settingsParagraph}>
         Choose the unit of measurement that you prefer. The unit of measurement
@@ -70,6 +103,7 @@ const Settings = () => {
         >
           <View style={styles.radioButtonContainer}>
             <RadioButton.Item
+              style={styles.radioLabel}
               value="lb"
               label="Imperial(Lb)"
               position="leading"
@@ -77,6 +111,7 @@ const Settings = () => {
           </View>
           <View style={styles.radioButtonContainer}>
             <RadioButton.Item
+              style={styles.radioLabel}
               value="kg"
               label="Metric(Kg)"
               position="leading"
@@ -119,16 +154,14 @@ const makeStyles = (theme) =>
       width: "50%",
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 10,
+      marginBottom: 0,
     },
     radioLabel: {
-      fontSize: 16,
-      marginLeft: 10,
       color: theme.colors.text,
     },
     radioButtonGroupContainer: {
-      marginTop: 15,
-      marginBottom: 30,
+      marginTop: 5,
+      marginBottom: 15,
       marginLeft: 20,
     },
   });

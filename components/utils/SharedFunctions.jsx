@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import {
   setSecondaryFormData,
   setShowSecondaryFormDialog,
+  uiSelector,
 } from "../../store/slices/ui";
 import store from "../../store/Config";
 import { parse, isValid } from "date-fns";
@@ -22,6 +23,7 @@ export const toggleSecondaryFormModal = async (
     dispatch
   );
   const today = new Date();
+
   const df = dateFormat === "mdy" ? "MM/dd/yyyy" : "dd/MM/yyyy";
   const formattedDate = format(today, df);
   const data = {
@@ -58,9 +60,15 @@ export const dateSaveFormatter = (value, dateFormat) => {
   }
 };
 
-export const dateDisplayFormatter = (value, dateFormat) => {
+export const dateDisplayFormatter = (
+  value,
+  dateFormat,
+  monthFormat = "number"
+) => {
   if (value === null || value === undefined || value === "") {
     return "NA";
+  } else if (monthFormat === "abbr") {
+    return format(parse(value, "MM/dd/yyyy", new Date()), "MMM dd, yyyy");
   } else if (dateFormat === "dmy") {
     return format(parse(value, "MM/dd/yyyy", new Date()), "dd/MM/yyyy");
   } else {

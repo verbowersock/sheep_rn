@@ -22,12 +22,14 @@ import sheep, {
   updateSheepWeight,
 } from "../store/slices/sheep";
 import { dateDisplayFormatter } from "./utils/SharedFunctions";
+import { settingsSelector } from "../store/slices/settings";
 
 const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [type, setType] = useState("");
   const { sheepMeds, sheepVax, sheepWeights } = useSelector(sheepDataSelector);
+  const { monthFormat } = useSelector(settingsSelector);
   const [listData, setListData] = useState([]);
 
   useEffect(() => {
@@ -50,71 +52,79 @@ const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
         id: item.id,
         title: `${item.entry} on ${dateDisplayFormatter(
           item.date,
-          dateFormat
+          dateFormat,
+          monthFormat
         )}`,
         field: "entry",
       })
     );
   };
 
-  const deleteValue = async (id) => {
-    if (type === forms.MEDS.type) {
-      removeSheepMed(id)
-        .then(() => {
-          dispatch(updateSheepMeds(id));
-          dispatch(resetShowConfirmationDialog());
-          dispatch(
-            setShowSnackbar({ visible: true, message: "Medication deleted" })
-          );
-        })
-        .catch((err) => {
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: true,
-              message: `Something went wrong. Please try again`,
-            })
-          );
-        });
-    } else if (type === forms.VAX.type) {
-      removeSheepVax(id)
-        .then(() => {
-          dispatch(updateSheepVax(id));
-          dispatch(resetShowConfirmationDialog());
-          dispatch(
-            setShowSnackbar({ visible: true, message: "Vaccination deleted" })
-          );
-        })
-        .catch((err) => {
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: true,
-              message: `Something went wrong. Please try again`,
-            })
-          );
-        });
-    } else if (type === forms.WEIGHT.type) {
-      removeSheepWeight(id)
-        .then(() => {
-          dispatch(updateSheepWeight(id));
-          dispatch(resetShowConfirmationDialog());
-          dispatch(
-            setShowSnackbar({ visible: true, message: "Weight deleted" })
-          );
-        })
-        .catch((err) => {
-          dispatch(
-            setShowSnackbar({
-              visible: true,
-              error: true,
-              message: `Something went wrong. Please try again`,
-            })
-          );
-        });
-    }
+  const deleteValue = (id) => {
+    return new Promise((resolve, reject) => {
+      if (type === forms.MEDS.type) {
+        removeSheepMed(id)
+          .then(() => {
+            dispatch(updateSheepMeds(id));
+            dispatch(resetShowConfirmationDialog());
+            dispatch(
+              setShowSnackbar({ visible: true, message: "Medication deleted" })
+            );
+            resolve();
+          })
+          .catch((err) => {
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: true,
+                message: `Something went wrong. Please try again`,
+              })
+            );
+            reject(err);
+          });
+      } else if (type === forms.VAX.type) {
+        removeSheepVax(id)
+          .then(() => {
+            dispatch(updateSheepVax(id));
+            dispatch(resetShowConfirmationDialog());
+            dispatch(
+              setShowSnackbar({ visible: true, message: "Vaccination deleted" })
+            );
+            resolve();
+          })
+          .catch((err) => {
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: true,
+                message: `Something went wrong. Please try again`,
+              })
+            );
+            reject(err);
+          });
+      } else if (type === forms.WEIGHT.type) {
+        removeSheepWeight(id)
+          .then(() => {
+            dispatch(updateSheepWeight(id));
+            dispatch(resetShowConfirmationDialog());
+            dispatch(
+              setShowSnackbar({ visible: true, message: "Weight deleted" })
+            );
+            resolve();
+          })
+          .catch((err) => {
+            dispatch(
+              setShowSnackbar({
+                visible: true,
+                error: true,
+                message: `Something went wrong. Please try again`,
+              })
+            );
+            reject(err);
+          });
+      }
+    });
   };
-
   //const styles = makeStyles(theme);
   return (
     <ScrollView style={{ width: "100%", paddingBottom: 20 }}>
@@ -178,13 +188,13 @@ const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
                   paddingRight: 5,
                 }}
               >
-                {dateDisplayFormatter(item.date, dateFormat)}
+                {dateDisplayFormatter(item.date, dateFormat, monthFormat)}
               </Text>
             </View>
           </TouchableOpacity>
         ))
       )}
-      <ConfirmationDialog onConfirm={(id) => deleteValue(id)} />
+      <ConfirmationDialog onConfirm={async (id) => await deleteValue(id)} />
     </ScrollView>
   );
 };

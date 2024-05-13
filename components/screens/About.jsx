@@ -1,6 +1,7 @@
 import { StyleSheet, Text, ScrollView, Linking } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Paragraph, useTheme } from "react-native-paper";
+import packageJson from "../../package.json"; // adjust the path as needed
 
 const About = () => {
   const theme = useTheme();
@@ -94,7 +95,7 @@ const About = () => {
           Feeling generous? Tip here!
         </Text>
       </TouchableOpacity>
-      <Text style={styles.aboutParagraph}>Version 0.1</Text>
+      <Text style={styles.aboutParagraph}>Version {packageJson.version}</Text>
     </ScrollView>
   );
 };
