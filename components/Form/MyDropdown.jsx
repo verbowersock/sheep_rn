@@ -387,8 +387,8 @@ const MyDropdown = ({
                   }}
                 ></IconButton>
                 <Text style={{ fontSize: 18, textAlign: "center" }}>
-                  No applicable {field}s found. Please add a new one or try
-                  again
+                  No applicable {field === "last_bred_to" ? "ram" : field}s
+                  found. Please add a new one or try again
                 </Text>
               </View>
             )}
@@ -404,7 +404,7 @@ const MyDropdown = ({
                 onChangeText={(q) => {
                   setQuery(q);
                 }}
-                placeholder="Search"
+                placeholder="Search or add new"
                 right={
                   <TextInput.Icon
                     accessible={true}

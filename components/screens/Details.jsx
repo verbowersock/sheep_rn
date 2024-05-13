@@ -62,8 +62,7 @@ const Details = ({ route }) => {
   const styles = makeStyles(theme);
   const navigation = useNavigation();
   const { sheep_id } = route.params;
-  const { dateFormat } = useSelector(settingsSelector);
-  const { unitFormat } = useSelector(settingsSelector);
+  const { dateFormat, unitFormat, monthFormat } = useSelector(settingsSelector);
 
   const { sheep, sheepMeds, sheepVax, sheepWeights, sheepChildren } =
     useSelector(sheepDataSelector);
@@ -184,7 +183,7 @@ const Details = ({ route }) => {
         entry: convertUnitsDisplay(lastWeight.entry, unitFormat),
       });
     }
-  }, [sheepWeights, sheepMeds, sheepVax, dateFormat]);
+  }, [sheepWeights, sheepMeds, sheepVax, dateFormat, unitFormat, monthFormat]);
 
   const showChildren = () => {
     if (sheepChildren.length > 0) {
@@ -273,7 +272,7 @@ const Details = ({ route }) => {
     // Format the lambingDate back into a string
     const lambingDateString = format(lambingDate, "MM/dd/yyyy");
 
-    return dateDisplayFormatter(lambingDateString, dateFormat);
+    return dateDisplayFormatter(lambingDateString, dateFormat, monthFormat);
   };
 
   const getMostRecentEntry = (data) => {
@@ -285,6 +284,8 @@ const Details = ({ route }) => {
       (item) => item.date === mostRecentDateString
     );
     setDataUpdates([...dataUpdates, "lastMedication"]);
+    setDataUpdates([...dataUpdates, "lastVaccination"]);
+    setDataUpdates([...dataUpdates, "lastWeight"]);
     if (mostRecentEntry.length > 1) {
       const mostRecentEntryWithHighestId = mostRecentEntry.reduce(
         (prev, current) => {
@@ -368,7 +369,7 @@ const Details = ({ route }) => {
     },
     {
       title: "Date of Birth:",
-      description: dateDisplayFormatter(dob, dateFormat),
+      description: dateDisplayFormatter(dob, dateFormat, monthFormat),
     },
     {
       title: "Sex",
@@ -377,15 +378,15 @@ const Details = ({ route }) => {
     !dod && { title: "Age", description: age(this_sheep) },
     dod && {
       title: "Date of Death:",
-      description: dateDisplayFormatter(dod, dateFormat),
+      description: dateDisplayFormatter(dod, dateFormat, monthFormat),
     },
     dop && {
       title: "Date of Purchase:",
-      description: dateDisplayFormatter(dop, dateFormat),
+      description: dateDisplayFormatter(dop, dateFormat, monthFormat),
     },
     dos && {
       title: "Date of Sale:",
-      description: dateDisplayFormatter(dos, dateFormat),
+      description: dateDisplayFormatter(dos, dateFormat, monthFormat),
     },
   ].filter(Boolean);
 
@@ -410,7 +411,7 @@ const Details = ({ route }) => {
     sex === "f" && {
       title: "Date last bred:",
       description: date_last_bred
-        ? dateDisplayFormatter(date_last_bred, dateFormat)
+        ? dateDisplayFormatter(date_last_bred, dateFormat, monthFormat)
         : "NA",
     },
     sex === "f" && {
@@ -458,7 +459,11 @@ const Details = ({ route }) => {
         sheepMeds.length > 0
           ? `${lastMedication.entry} - ${
               lastMedication.dosage ? lastMedication.dosage : ""
-            } on ${dateDisplayFormatter(lastMedication.date, dateFormat)}`
+            } on ${dateDisplayFormatter(
+              lastMedication.date,
+              dateFormat,
+              monthFormat
+            )}`
           : "No medications found",
     },
     {
@@ -468,7 +473,8 @@ const Details = ({ route }) => {
         sheepVax.length > 0
           ? `${lastVaccination.entry} on ${dateDisplayFormatter(
               lastVaccination.date,
-              dateFormat
+              dateFormat,
+              monthFormat
             )}`
           : "No vaccinations found",
     },
@@ -479,13 +485,14 @@ const Details = ({ route }) => {
         sheepWeights.length > 0
           ? `${lastWeight.entry}${unitFormat} on ${dateDisplayFormatter(
               lastWeight.date,
-              dateFormat
+              dateFormat,
+              monthFormat
             )}`
           : "No weight entries found",
     },
     dod && {
       title: "Date of Death:",
-      description: dateDisplayFormatter(dod, dateFormat),
+      description: dateDisplayFormatter(dod, dateFormat, monthFormat),
       type: forms.DEATH,
     },
   ].filter(Boolean);
@@ -591,7 +598,19 @@ const Details = ({ route }) => {
       // Clear the dataUpdates array
       setDataUpdates([]);
     }
-  }, [selectedValue, dataUpdates, sheep_id, sheepChildren, this_sheep]);
+  }, [
+    selectedValue,
+    dataUpdates,
+    sheep_id,
+    sheepChildren,
+    this_sheep,
+    dateFormat,
+    unitFormat,
+    monthFormat,
+    sheepMeds,
+    sheepVax,
+    sheepWeights,
+  ]);
 
   const pdfName = name ? name : tag_id;
 
@@ -622,18 +641,18 @@ const Details = ({ route }) => {
   const createPDF = async () => {
     let formattedSheepMeds = sheepMeds.map((item) => ({
       ...item,
-      date: dateDisplayFormatter(item.date, dateFormat),
+      date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
     }));
 
     let formattedSheepVax = sheepVax.map((item) => ({
       ...item,
-      date: dateDisplayFormatter(item.date),
+      date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
     }));
     let formattedLastWeight;
     if (lastWeight.entry) {
       formattedLastWeight = {
         entry: `${lastWeight.entry}${unitFormat}`,
-        date: dateDisplayFormatter(lastWeight.date),
+        date: dateDisplayFormatter(lastWeight.date, dateFormat, monthFormat),
       };
     } else {
       formattedLastWeight = lastWeight;
@@ -649,11 +668,19 @@ const Details = ({ route }) => {
     let options = {
       html: htmlContent({
         ...this_sheep,
-        dod: dateDisplayFormatter(dod, dateFormat),
-        dob: dateDisplayFormatter(dob, dateFormat),
-        dos: dateDisplayFormatter(dos, dateFormat),
-        dop: dateDisplayFormatter(dop, dateFormat),
-        date_last_bred: dateDisplayFormatter(date_last_bred, dateFormat),
+        dod: dateDisplayFormatter(dod, dateFormat, monthFormat),
+        dob: dateDisplayFormatter(dob, dateFormat, monthFormat),
+        dos: dateDisplayFormatter(dos, dateFormat, monthFormat),
+        dop: dateDisplayFormatter(dop, dateFormat, monthFormat),
+        breed_name: capitalize(breed_name),
+        color_name: capitalize(color_name),
+        marking_name: capitalize(marking_name),
+        sex: sexTypes.find((sexType) => sexType.id === this_sheep.sex)?.title,
+        date_last_bred: dateDisplayFormatter(
+          date_last_bred,
+          dateFormat,
+          monthFormat
+        ),
         formattedWeightAtBirth,
         formattedLastWeight,
         formattedSheepMeds,

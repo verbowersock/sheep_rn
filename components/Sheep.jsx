@@ -52,7 +52,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
-
+  const { monthFormat } = useSelector(settingsSelector);
   const [menuVisible, setMenuVisible] = useState(initialMenuState);
 
   const { isSecondaryFormDialogVisible } = useSelector(uiSelector);
@@ -443,7 +443,9 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>DOB: </Text>
-                <Text>{dateDisplayFormatter(item.dob, dateFormat)}</Text>
+                <Text>
+                  {dateDisplayFormatter(item.dob, dateFormat, monthFormat)}
+                </Text>
               </Text>
               <Text style={styles.info}>
                 <Text style={styles.label}>Sex: </Text>
@@ -452,13 +454,17 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
               {item.dop && (
                 <Text style={styles.info}>
                   <Text style={styles.label}>Purchase Date: </Text>
-                  <Text>{dateDisplayFormatter(item.dop, dateFormat)}</Text>
+                  <Text>
+                    {dateDisplayFormatter(item.dop, dateFormat, monthFormat)}
+                  </Text>
                 </Text>
               )}
               {item.dod ? (
                 <Text style={styles.info}>
                   <Text style={styles.label}>Date Deceased: </Text>
-                  <Text>{dateDisplayFormatter(item.dod, dateFormat)}</Text>
+                  <Text>
+                    {dateDisplayFormatter(item.dod, dateFormat, monthFormat)}
+                  </Text>
                 </Text>
               ) : (
                 <Text style={styles.info}>

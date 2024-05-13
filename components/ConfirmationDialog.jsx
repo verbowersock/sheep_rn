@@ -1,7 +1,12 @@
 import * as React from "react";
 import { Modal } from "react-native";
 import { Button, Paragraph, Dialog, useTheme } from "react-native-paper";
-import { resetShowConfirmationDialog, setLoading, uiSelector } from "../store/slices/ui";
+import {
+  resetLoading,
+  resetShowConfirmationDialog,
+  setLoading,
+  uiSelector,
+} from "../store/slices/ui";
 import { StyleSheet } from "react-native";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -16,12 +21,13 @@ const ConfirmationDialog = ({ onConfirm }) => {
   const dispatch = useDispatch();
 
   const hideDialog = () => {
+    dispatch(resetLoading());
     dispatch(resetShowConfirmationDialog());
   };
-
-  const onConfirmDelete = () => {
+  const onConfirmDelete = async () => {
     dispatch(setLoading(true));
-    onConfirm(id, field, title, name);
+    await onConfirm(id, field, title, name);
+    hideDialog();
   };
 
   return (

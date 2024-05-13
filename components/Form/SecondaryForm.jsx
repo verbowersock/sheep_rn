@@ -45,11 +45,7 @@ import {
   setSheepWeights,
   updateSheep,
 } from "../../store/slices/sheep";
-import {
-  dateDisplayFormatter,
-  dateSaveFormatter,
-  validateDate,
-} from "../utils/SharedFunctions";
+import { dateSaveFormatter, validateDate } from "../utils/SharedFunctions";
 import { settingsSelector } from "../../store/slices/settings";
 
 const SecondaryForm = ({ isModalVisible, toggleModal }) => {
@@ -356,7 +352,6 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                 <MyDropdown
                   accessible={true}
                   accessibilityLabel="Select a Ram dropdown"
-                  error={errors.value ? true : false}
                   data={males}
                   label="Select Ram"
                   field="last_bred_to"
