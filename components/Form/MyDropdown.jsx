@@ -10,6 +10,8 @@ import {
   addBreed,
   addColor,
   addMarking,
+  addNewMedication,
+  addNewVaccine,
   deleteBreed,
   deleteColor,
   deleteMarking,
@@ -25,6 +27,8 @@ import {
 } from "../../store/slices/attributes";
 
 import {
+  addNewMed,
+  addNewVax,
   resetLoading,
   resetShowConfirmationDialog,
   setShowConfirmationDialog,
@@ -64,6 +68,7 @@ const MyDropdown = ({
   label,
   onChange,
   value,
+  name,
   error,
   searchable = true,
   field,
@@ -84,7 +89,10 @@ const MyDropdown = ({
   const [deletable, setDeletable] = useState(false);
 
   useEffect(() => {
-    ["marking", "color", "breed"].indexOf(field) !== -1
+    console.log("field", field);
+    ["marking", "color", "breed", "medication", "vaccination"].indexOf(
+      field
+    ) !== -1
       ? setDeletable(true)
       : setDeletable(false);
   }, [field]);
@@ -124,6 +132,27 @@ const MyDropdown = ({
           setModalData(sortedData);
         }
         break;
+      case "medication":
+        const newMedId = await addNewMedication(val);
+        if (newMedId) {
+          const newMed = { id: newMedId, title: capitalize(val) };
+          dispatch(addNewMed(newMed));
+          const newData = [...modalData, newMed];
+          const sortedData = sortAlphabetically(newData, "title");
+          setModalData(sortedData);
+        }
+        break;
+      case "vaccination":
+        const newVaxId = await addNewVaccine(val);
+        if (newVaxId) {
+          const newVax = { id: newVaxId, title: capitalize(val) };
+          dispatch(addNewVax(newVax));
+          const newData = [...modalData, newVax];
+          const sortedData = sortAlphabetically(newData, "title");
+          setModalData(sortedData);
+        }
+        break;
+
       default:
         break;
     }

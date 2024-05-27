@@ -154,13 +154,13 @@ const MainContainer = () => {
     } else if (sortValue === "age_asc") {
       setSortedSheep(
         [...filteredSheep].sort(
-          (a, b) => dateFromString(a.dob) - dateFromString(b.dob)
+          (a, b) => dateFromString(b.dob) - dateFromString(a.dob)
         )
       );
     } else if (sortValue === "age_desc") {
       setSortedSheep(
         [...filteredSheep].sort(
-          (a, b) => dateFromString(b.dob) - dateFromString(a.dob)
+          (a, b) => dateFromString(a.dob) - dateFromString(b.dob)
         )
       );
     } else if (sortValue === "tag_id_asc") {

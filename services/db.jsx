@@ -1571,3 +1571,47 @@ export function removeSheepWeight(id) {
     });
   });
 }
+
+export function addNewMedication(med) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `INSERT INTO medications (entry) VALUES (?)`,
+        [med],
+        (t, success) => {
+          resolve(success.insertId);
+        },
+        (t, error) => {
+          console.log("db error inserting medication");
+          console.log(error);
+          reject(error);
+        },
+        () => {
+          database.close();
+        }
+      );
+    });
+  });
+}
+
+export function addNewVaccine(vax) {
+  return new Promise((resolve, reject) => {
+    database.transaction((tx) => {
+      tx.executeSql(
+        `INSERT INTO vaccines (entry) VALUES (?)`,
+        [vax],
+        (t, success) => {
+          resolve(success.insertId);
+        },
+        (t, error) => {
+          console.log("db error inserting vaccine");
+          console.log(error);
+          reject(error);
+        },
+        () => {
+          database.close();
+        }
+      );
+    });
+  });
+}
