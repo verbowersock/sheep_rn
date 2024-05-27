@@ -118,6 +118,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const onSubmit = (data) => {
     const formattedData = {
       ...data,
+      value: data.medication || data.vaccination,
       date: dateSaveFormatter(data.date, dateFormat),
     };
 
@@ -382,15 +383,15 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                   error={errors.value ? true : false}
                   data={meds}
                   label="Medication"
-                  field="value"
+                  field="medication"
                   onChange={(id) => {
-                    id && setValue("value", id);
+                    id && setValue("medication", id);
                     trigger();
                   }}
                   value={value}
                 />
               )}
-              name="value"
+              name="medication"
             />
 
             <Controller
@@ -433,15 +434,15 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                   error={errors.vaccine ? true : false}
                   data={vaccines}
                   label="Vaccine"
-                  field="value"
+                  field="vaccination"
                   onChange={(id) => {
-                    id && setValue("value", id);
+                    id && setValue("vaccination", id);
                     trigger();
                   }}
                   value={value}
                 />
               )}
-              name="value"
+              name="vaccination"
             />
           </View>
         )}

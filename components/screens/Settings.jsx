@@ -15,6 +15,7 @@ const Settings = () => {
   //get the date format and unit of measurement from the state
   const dispatch = useDispatch();
   const { dateFormat, unitFormat, monthFormat } = useSelector(settingsSelector);
+  console.log(dateFormat, unitFormat, monthFormat);
 
   const [dateFormatState, setDateFormatState] = useState(dateFormat);
   const [unitOfMeasurement, setUnitOfMeasurement] = useState(unitFormat);

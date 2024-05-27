@@ -94,7 +94,12 @@ const uiSlice = createSlice({
     setMeds: (state, { payload }) => {
       state.meds = payload;
     },
-
+    addNewMed: (state, { payload }) => {
+      state.meds = [...state.meds, payload];
+    },
+    addNewVax: (state, { payload }) => {
+      state.vaccines = [...state.vaccines, payload];
+    },
     setMales: (state, { payload }) => {
       state.males = payload;
     },
@@ -134,6 +139,8 @@ export const {
   setContextMenuOpen,
   setLoading,
   resetLoading,
+  addNewMed,
+  addNewVax,
 } = uiSlice.actions;
 export const uiSelector = (state) => state.ui;
 export default uiSlice.reducer;
