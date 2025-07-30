@@ -1,17 +1,10 @@
-import React, { useState } from "react";
-
-import {
-  StyleSheet,
-  View,
-  Image,
-  Platform,
-  PermissionsAndroid,
-} from "react-native";
-
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View, Image } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { FAB, useTheme } from "react-native-paper";
+import * as mediaLibrary from "expo-media-library";
 
-const ImagePicker = ({ value, onChange }) => {
+const ImagePickerComponent = ({ value, onChange }) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   const [file, setFile] = useState(value);
@@ -19,82 +12,49 @@ const ImagePicker = ({ value, onChange }) => {
   const onFABStateChange = ({ open }) => setFABState({ open });
   const { open } = FABstate;
 
-  const requestCameraPermission = async () => {
-    if (Platform.OS === "android") {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: "Camera Permission",
-            message: "App needs camera permission",
-          }
-        );
-        // If CAMERA Permission is granted
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
-        console.warn(err);
-        return false;
-      }
-    } else return true;
-  };
-
-  const captureImage = async (type) => {
-    let options = {
-      mediaType: type,
-      maxWidth: 300,
-      maxHeight: 550,
-      quality: 1,
-      saveToPhotos: true,
-      includeBase64: true,
+  // Request permissions when component mounts
+  useEffect(() => {
+    const getPermissions = async () => {
+      // Request both camera and media library permissions upfront
+      await ImagePicker.requestCameraPermissionsAsync();
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     };
-    let isCameraPermitted = await requestCameraPermission();
-    if (isCameraPermitted) {
-      const result = await launchCamera(options, async (response) => {
-        if (response.didCancel) {
-          alert("User cancelled camera picker");
-          return;
-        } else if (response.errorCode == "camera_unavailable") {
-          alert("Camera not available on device");
-          return;
-        } else if (response.errorCode == "permission") {
-          alert("Permission not satisfied");
-          return;
-        } else if (response.errorCode == "others") {
-          alert(response.errorMessage);
-          return;
-        }
-        const base64 = response.assets[0].base64;
-        setFile(`data:image/png;base64,${base64}`);
-        onChange(`data:image/png;base64,${base64}`);
-      });
+    
+    getPermissions();
+  }, []);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+      base64: true,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const base64 = result.assets[0].base64;
+      setFile(`data:image/png;base64,${base64}`);
+      onChange(`data:image/png;base64,${base64}`);
+      setFABState({ open: false });
     }
   };
 
-  const chooseFile = (type) => {
-    let options = {
-      mediaType: type,
-      maxWidth: 300,
-      maxHeight: 550,
+  const takePhoto = async () => {
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
-      includeBase64: true,
-    };
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        alert("User cancelled camera picker");
-        return;
-      } else if (response.errorCode == "camera_unavailable") {
-        alert("Camera not available on device");
-        return;
-      } else if (response.errorCode == "permission") {
-        alert("Permission not satisfied");
-        return;
-      } else if (response.errorCode == "others") {
-        alert(response.errorMessage);
-        return;
-      }
-      setFile(`data:image/png;base64,${response.assets[0].base64}`);
-      onChange(`data:image/png;base64,${response.assets[0].base64}`);
+      base64: true,
     });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const base64 = result.assets[0].base64;
+      setFile(`data:image/png;base64,${base64}`);
+      onChange(`data:image/png;base64,${base64}`);
+      try {
+        // Save to media library
+        await mediaLibrary.saveToLibraryAsync(result.assets[0].uri);
+      } catch (error) {
+        console.error("Error saving image to media library:", error);
+      }
+      setFABState({ open: false });
+    }
   };
 
   return (
@@ -128,7 +88,7 @@ const ImagePicker = ({ value, onChange }) => {
             style: { backgroundColor: theme.colors.secondary },
             label: "Open Camera",
             labelStyle: { color: "white" },
-            onPress: () => captureImage("photo"),
+            onPress: takePhoto,
           },
           {
             icon: "folder-upload",
@@ -136,7 +96,7 @@ const ImagePicker = ({ value, onChange }) => {
             style: { backgroundColor: theme.colors.secondary },
             label: "Upload Image",
             labelStyle: { color: "white" },
-            onPress: () => chooseFile("photo"),
+            onPress: pickImage,
           },
         ]}
         onStateChange={onFABStateChange}
@@ -150,7 +110,7 @@ const ImagePicker = ({ value, onChange }) => {
   );
 };
 
-export default ImagePicker;
+export default ImagePickerComponent;
 
 const makeStyles = (theme) =>
   StyleSheet.create({
