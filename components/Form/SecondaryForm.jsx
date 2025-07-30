@@ -491,7 +491,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                   />
                 )}
                 name="last_location"
-                defaultValue={defaultData.last_location}
+                defaultValue={defaultData?.last_location}
               />
               {errors.last_location && (
                 <Text style={styles.errorText}>
@@ -519,7 +519,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                   />
                 )}
                 name="notes"
-                defaultValue={defaultData.notes}
+                defaultValue={defaultData?.notes}
               />
               {errors.notes && (
                 <Text style={styles.errorText}>

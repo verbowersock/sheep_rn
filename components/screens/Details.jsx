@@ -760,7 +760,7 @@ const Details = ({ route }) => {
         buttons={buttons.map((button, index) => ({
           value: button.value,
           label: (
-            <Text style={{ fontSize, lineHeight: fontSize * 1.3 }}>
+            <Text style={{ fontSize, lineHeight: fontSize * 1.5 }}>
               {button.label}
             </Text>
           ),

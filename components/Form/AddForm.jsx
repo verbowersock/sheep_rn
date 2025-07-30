@@ -36,7 +36,7 @@ import {
   setColors,
   setMarkings,
 } from "../../store/slices/attributes";
-import MyImagePicker from "./ImagePicker";
+import ImagePickerComponent from "./ImagePicker";
 import { setShowSnackbar, uiSelector } from "../../store/slices/ui";
 import {
   convertUnitsDisplay,
@@ -246,7 +246,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         <Controller
           control={control}
           render={({ field: { onChange, onBlur, value } }) => (
-            <MyImagePicker
+            <ImagePickerComponent
               accessible={true}
               accessibilityLabel="Image picker for the sheep photo"
               value={value}
