@@ -14,14 +14,13 @@ const ImagePickerComponent = ({ value, onChange }) => {
 
   // Request permissions when component mounts
   useEffect(() => {
-    const getPermissions = async () => {
-      // Request both camera and media library permissions upfront
-      await ImagePicker.requestCameraPermissionsAsync();
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    };
-    
-    getPermissions();
-  }, []);
+  const getPermissions = async () => {
+    // Request camera permission
+    await ImagePicker.requestCameraPermissionsAsync();
+  };
+  
+  getPermissions();
+}, []);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -38,24 +37,18 @@ const ImagePickerComponent = ({ value, onChange }) => {
   };
 
   const takePhoto = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-      base64: true,
-    });
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const base64 = result.assets[0].base64;
-      setFile(`data:image/png;base64,${base64}`);
-      onChange(`data:image/png;base64,${base64}`);
-      try {
-        // Save to media library
-        await mediaLibrary.saveToLibraryAsync(result.assets[0].uri);
-      } catch (error) {
-        console.error("Error saving image to media library:", error);
-      }
-      setFABState({ open: false });
-    }
-  };
+  let result = await ImagePicker.launchCameraAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    quality: 1,
+    base64: true,
+  });
+  if (!result.canceled && result.assets && result.assets.length > 0) {
+    const base64 = result.assets[0].base64;
+    setFile(`data:image/png;base64,${base64}`);
+    onChange(`data:image/png;base64,${base64}`);
+    setFABState({ open: false });
+  }
+};
 
   return (
     <View style={styles.container}>
