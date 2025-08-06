@@ -88,11 +88,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
     return newObj;
   }
 
-  const correctedData = formatDatesUnitsInObject(
-    formData,
-    dateFields,
-    dateFormat,
-    unitFormat
+  const correctedData = useMemo(() => 
+    formatDatesUnitsInObject(formData, dateFields, dateFormat, unitFormat),
+    [formData, dateFormat, unitFormat]
   );
 
   useEffect(() => {
@@ -148,16 +146,22 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       mode: "onChange",
     });
 
-  const { isValid, defaultValues } = formState;
+  const { isValid } = formState;
   const errors = useMemo(() => formState.errors, [formState]);
 
+  // Only reset when formData actually changes
   useEffect(() => {
-    reset(defaultValues);
-  }, [reset, defaultValues]);
+    if (Object.keys(formData).length > 0) {
+      reset(correctedData);
+    }
+  }, [formData]);
 
+  // Only trigger validation when formData changes
   useEffect(() => {
-    trigger();
-  }, [trigger, formData]);
+    if (Object.keys(formData).length > 0) {
+      trigger();
+    }
+  }, [formData]);
 
   const onSubmit = (data) => {
     setLoading(true);
@@ -199,6 +203,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         })
         .catch((error) => {
           console.error(error);
+          setLoading(false);
         });
     } else {
       addSheep(formattedData)
@@ -220,9 +225,11 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         })
         .catch((error) => {
           console.error(error);
+          setLoading(false);
         });
     }
   };
+
   if (!dataLoaded) {
     return <ActivityIndicator color={theme.colors.secondary} />;
   }
@@ -232,7 +239,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
       isVisible={isModalVisible}
       onRequestClose={() => {
         toggleModal();
-        reset(defaultValues);
+        reset(correctedData);
       }}
       accessible={true}
       accessibilityLabel={`${formTitle} form`}
@@ -250,44 +257,45 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               accessible={true}
               accessibilityLabel="Image picker for the sheep photo"
               value={value}
-              onChange={(value) => {
-                setValue(value && setValue("picture", value));
-              }}
+              onChange={(value) => setValue("picture", value)}
             />
           )}
           name="picture"
         />
+
         <Controller
           control={control}
           rules={{
-            validate: (value) =>
-              !value ||
-              !!value.trim() ||
-              "Name should not consist of whitespaces",
             maxLength: {
               value: 20,
               message: "Name cannot be more than 20 characters long",
             },
-            //check for duplicates
-            validate: (value) => {
-              if (!formData.sheep_id && value !== "" && value !== null) {
-                const duplicate = sheep.find(
-                  (s) => s.name && s.name.toLowerCase() == value.toLowerCase()
-                );
-                if (duplicate) {
-                  return "Name already exists";
+            validate: {
+              notWhitespace: (value) =>
+                !value ||
+                !!value.trim() ||
+                "Name should not consist of whitespaces",
+              noDuplicate: (value) => {
+                if (!formData.sheep_id && value !== "" && value !== null) {
+                  const duplicate = sheep.find(
+                    (s) => s.name && s.name.toLowerCase() === value.toLowerCase()
+                  );
+                  if (duplicate) {
+                    return "Name already exists";
+                  }
                 }
-              }
+                return true;
+              },
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
               accessible={true}
               accessibilityLabel="Name input field"
-              error={errors.name ? true : false}
+              error={!!errors.name}
               label={"Name"}
               placeholder={"Name"}
-              onBlur={(target) => onBlur(target.value)}
+              onBlur={onBlur}
               onChangeText={onChange}
               value={value}
             />
@@ -301,42 +309,43 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         <Controller
           control={control}
           rules={{
-            validate: (value) => {
-              // Check if the value is not empty
-              if (!value) {
-                return "Tag Id is required";
-              }
-
-              // Check if the value is not just whitespace
-              if (!value.trim()) {
-                return "Tag Id should not consist of whitespaces";
-              }
-
-              // Check for duplicates
-              if (!formData.sheep_id) {
-                const duplicate = sheep.find(
-                  (sheep) =>
-                    sheep.tag_id &&
-                    sheep.tag_id.toLowerCase() == value.toLowerCase()
-                );
-                if (duplicate) {
-                  return "Tag Id must be unique";
+            validate: {
+              required: (value) => {
+                if (!value) {
+                  return "Tag Id is required";
                 }
-              }
-
-              // If the value passes all validation rules, return true
-              return true;
+                return true;
+              },
+              notWhitespace: (value) => {
+                if (value && !value.trim()) {
+                  return "Tag Id should not consist of whitespaces";
+                }
+                return true;
+              },
+              noDuplicate: (value) => {
+                if (!formData.sheep_id && value) {
+                  const duplicate = sheep.find(
+                    (sheep) =>
+                      sheep.tag_id &&
+                      sheep.tag_id.toLowerCase() === value.toLowerCase()
+                  );
+                  if (duplicate) {
+                    return "Tag Id must be unique";
+                  }
+                }
+                return true;
+              },
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
               accessible={true}
               accessibilityHint="Enter sheep Tag ID (required)"
-              error={errors.tag_id ? true : false}
+              error={!!errors.tag_id}
               label={"Tag ID (required)"}
               placeholder={"Tag Id"}
               onChangeText={onChange}
-              onBlur={(target) => onBlur(target.value)}
+              onBlur={onBlur}
               value={value}
             />
           )}
@@ -349,34 +358,35 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         <Controller
           control={control}
           rules={{
-            //if value is not empty, then validate that does not consist of whitespaces
-            validate: (value) =>
-              !value ||
-              !!value.trim() ||
-              "Scrapie Tag Id should not consist of whitespaces",
-            //check for duplicates
-            validate: (value) => {
-              if (!formData.sheep_id && value) {
-                const duplicate = sheep.find((sheep) => {
-                  sheep.scrapie_id &&
-                    sheep.scrapie_id.toLowerCase() === value.toLowerCase();
-                });
-                if (duplicate) {
-                  return "Scrapie Tag Id must be unique";
+            validate: {
+              notWhitespace: (value) =>
+                !value ||
+                !!value.trim() ||
+                "Scrapie Tag Id should not consist of whitespaces",
+              noDuplicate: (value) => {
+                if (!formData.sheep_id && value) {
+                  const duplicate = sheep.find((sheep) => 
+                    sheep.scrapie_id &&
+                    sheep.scrapie_id.toLowerCase() === value.toLowerCase()
+                  );
+                  if (duplicate) {
+                    return "Scrapie Tag Id must be unique";
+                  }
                 }
-              }
+                return true;
+              },
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
               accessible={true}
               accessibilityLabel="Scrapie Tag ID input field"
-              error={errors.scrapie_id ? true : false}
+              error={!!errors.scrapie_id}
               label={"Scrapie Tag ID"}
               placeholder={"Scrapie Tag Id"}
               activeOutlineColor={theme.colors.primary}
               onChangeText={onChange}
-              onBlur={(target) => onBlur(target.value)}
+              onBlur={onBlur}
               value={value}
             />
           )}
@@ -385,6 +395,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         {errors.scrapie_id && (
           <Text style={styles.errorText}>{errors.scrapie_id.message}</Text>
         )}
+
         <Controller
           control={control}
           rules={{
@@ -392,22 +403,19 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               if (JSON.stringify(value) === JSON.stringify({}) || !value) {
                 return "Sex is required";
               }
+              return true;
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
               accessible={true}
               accessibilityLabel="Sheep sex input field"
-              error={errors.sex ? true : false}
+              error={!!errors.sex}
               data={sex}
               label="Sex (required)"
               field="sex"
               searchable={false}
-              onChange={(value) => {
-                setValue(
-                  value && setValue("sex", value, { shouldValidate: true })
-                );
-              }}
+              onChange={(value) => setValue("sex", value, { shouldValidate: true })}
               value={value}
             />
           )}
@@ -416,6 +424,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
         {errors.sex && (
           <Text style={styles.errorText}>{errors.sex.message}</Text>
         )}
+
         <Controller
           control={control}
           rules={{
@@ -429,7 +438,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               dateFormat={dateFormat}
               accessible={true}
               accessibilityLabel="Date of Birth input field"
-              error={errors.dob ? true : false}
+              error={!!errors.dob}
               label="Date of Birth (required)"
               field="dob"
               value={value}
@@ -454,7 +463,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <MyTextInput
               accessible={true}
               accessibilityLabel="Weight input field"
-              error={errors.weight_at_birth ? true : false}
+              error={!!errors.weight_at_birth}
               label="Weight At Birth"
               field="weight_at_birth"
               onChangeText={onChange}
@@ -477,7 +486,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               dateFormat={dateFormat}
               accessible={true}
               accessibilityLabel="Date of Purchase input field"
-              error={errors.dop ? true : false}
+              error={!!errors.dop}
               label="Date of Purchase"
               field="dop"
               onChangeText={onChange}
@@ -502,7 +511,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               dateFormat={dateFormat}
               accessible={true}
               accessibilityLabel="Date of Sale input field"
-              error={errors.dos ? true : false}
+              error={!!errors.dos}
               label="Date of Sale"
               field="dos"
               onChangeText={onChange}
@@ -527,7 +536,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               dateFormat={dateFormat}
               accessible={true}
               accessibilityLabel="Date of Death field"
-              error={errors.dod ? true : false}
+              error={!!errors.dod}
               label="Date of Death"
               field="dod"
               onChangeText={onChange}
@@ -549,16 +558,17 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <MyDropdown
               accessible={true}
               accessibilityLabel="Sheep Sire"
-              error={errors.sire ? true : false}
+              error={!!errors.sire}
               data={males.filter((sheep) => sheep.id !== formData.sheep_id)}
               label="Father"
               field="sire"
-              onChange={(id) => id && setValue("sire", id)}
+              onChange={(id) => setValue("sire", id)}
               value={value}
             />
           )}
           name="sire"
         />
+
         <Controller
           control={control}
           rules={{
@@ -568,11 +578,11 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <MyDropdown
               accessible={true}
               accessibilityLabel="Sheep Dam"
-              error={errors.dam ? true : false}
+              error={!!errors.dam}
               data={females.filter((sheep) => sheep.id !== formData.sheep_id)}
               label={"Mother"}
               field="dam"
-              onChange={(id) => id && setValue("dam", id)}
+              onChange={(id) => setValue("dam", id)}
               value={value}
             />
           )}
@@ -586,28 +596,25 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               if (!value) {
                 return "Breed is required";
               }
+              return true;
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
               accessible={true}
               accessibilityLabel="Breed Dropdown"
-              error={errors.breed ? true : false}
+              error={!!errors.breed_id}
               data={breeds}
               label="Breed (required)"
               field="breed"
-              onChange={(value) => {
-                setValue(
-                  value && setValue("breed_id", value, { shouldValidate: true })
-                );
-              }}
+              onChange={(value) => setValue("breed_id", value, { shouldValidate: true })}
               value={value}
             />
           )}
           name="breed_id"
         />
-        {errors.breed && (
-          <Text style={styles.errorText}>{errors.breed.message}</Text>
+        {errors.breed_id && (
+          <Text style={styles.errorText}>{errors.breed_id.message}</Text>
         )}
 
         <Controller
@@ -619,22 +626,18 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <MyDropdown
               accessible={true}
               accessibilityLabel="Color Dropdown"
-              error={errors.color ? true : false}
+              error={!!errors.color_id}
               data={colors}
               label={"Color"}
               field="color"
-              onChange={(value) => {
-                setValue(
-                  value && setValue("color_id", value, { shouldValidate: true })
-                );
-              }}
+              onChange={(value) => setValue("color_id", value, { shouldValidate: true })}
               value={value}
             />
           )}
           name="color_id"
         />
-        {errors.color && (
-          <Text style={styles.errorText}>Color is required.</Text>
+        {errors.color_id && (
+          <Text style={styles.errorText}>{errors.color_id.message}</Text>
         )}
 
         <Controller
@@ -646,21 +649,17 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <MyDropdown
               accessible={true}
               accessibilityLabel="Marking Dropdown"
-              error={errors.marking ? true : false}
+              error={!!errors.marking_id}
               data={markings}
               label={"Marking"}
               field={"marking"}
-              onChange={(value) => {
-                setValue(
-                  value &&
-                    setValue("marking_id", value, { shouldValidate: true })
-                );
-              }}
+              onChange={(value) => setValue("marking_id", value, { shouldValidate: true })}
               value={value}
             />
           )}
           name="marking_id"
         />
+
         <View style={styles.buttonContainer}>
           <Button
             mode="outlined"
@@ -669,7 +668,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             style={{ width: "40%", borderColor: theme.colors.primary }}
             onPress={() => {
               toggleModal();
-              reset(defaultValues);
+              reset(correctedData);
             }}
           >
             Cancel

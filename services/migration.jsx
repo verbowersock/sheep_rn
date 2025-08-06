@@ -1,9 +1,10 @@
-import { addMedicalData, database, insertMedList, insertVaxList } from "./db";
+import { getDatabase, insertMedList, insertVaxList } from "./db";
 
-export const getCurrentSchemaVersion = () => {
+export const getCurrentSchemaVersion = async () => {
   try {
     console.log("Getting current schema version");
-    const result = database.getFirstSync("PRAGMA user_version;");
+    const db = getDatabase();
+    const result = await db.getFirstAsync("PRAGMA user_version;");
     const version = result ? result.user_version : 0;
     console.log("Current schema version:", version);
     return version;
@@ -13,10 +14,11 @@ export const getCurrentSchemaVersion = () => {
   }
 };
 
-export const updateSchemaVersion = (newVersion) => {
+export const updateSchemaVersion = async (newVersion) => {
   try {
     console.log(`Updating schema version to ${newVersion}`);
-    database.runSync(`PRAGMA user_version = ${newVersion};`);
+    const db = getDatabase();
+    await db.runAsync(`PRAGMA user_version = ${newVersion};`);
     console.log(`Schema version updated to ${newVersion}`);
     return true;
   } catch (error) {
@@ -25,17 +27,18 @@ export const updateSchemaVersion = (newVersion) => {
   }
 };
 
-const migrationScript = () => {
+const migrationScript = async () => {
   try {
     console.log("Starting migration script");
+    const db = getDatabase();
     
     // Insert medication and vaccine lists
-    insertMedList();
-    insertVaxList();
+    await insertMedList();
+    await insertVaxList();
     
     // Add dosage column to sheep_meds table if it doesn't exist
     try {
-      database.runSync(`ALTER TABLE sheep_meds ADD COLUMN dosage VARCHAR(100);`);
+      await db.runAsync(`ALTER TABLE sheep_meds ADD COLUMN dosage VARCHAR(100);`);
       console.log("Added dosage column to sheep_meds table");
     } catch (error) {
       // Column might already exist, check if it's a "duplicate column" error
@@ -48,11 +51,11 @@ const migrationScript = () => {
     }
     
     // Check if last_bred_to column exists in sheep table
-    const tableInfo = database.getAllSync(`PRAGMA table_info(sheep);`);
+    const tableInfo = await db.getAllAsync(`PRAGMA table_info(sheep);`);
     const columnExists = tableInfo.some(column => column.name === "last_bred_to");
     
     if (!columnExists) {
-      database.runSync(`ALTER TABLE sheep ADD COLUMN last_bred_to VARCHAR(200);`);
+      await db.runAsync(`ALTER TABLE sheep ADD COLUMN last_bred_to VARCHAR(200);`);
       console.log("Added last_bred_to column to sheep table");
     } else {
       console.log("last_bred_to column already exists in sheep table");
@@ -67,10 +70,10 @@ const migrationScript = () => {
   }
 };
 
-export const executeMigration = () => {
+export const executeMigration = async () => {
   try {
     console.log("Executing migration");
-    migrationScript();
+    await migrationScript();
     console.log("Migration executed successfully");
     return true;
   } catch (error) {

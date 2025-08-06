@@ -115,11 +115,13 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   }, [trigger, secondaryFormData]);
 
   const onSubmit = (data) => {
+console.log("Form submitted with data:", data);
     const formattedData = {
       ...data,
-      value: data.medication || data.vaccination,
+      value: data.medication || data.vaccination ? data.medication || data.vaccination : data.value,
       date: dateSaveFormatter(data.date, dateFormat),
     };
+
 
     setLoading(true);
     switch (type) {
@@ -199,7 +201,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
         break;
       case BREEDING.type:
         editSheep(
-          { date_last_bred: data.date, last_bred_to: data.last_bred_to },
+          { date_last_bred: dateSaveFormatter(data.date, dateFormat), last_bred_to: data.last_bred_to },
           data.sheep_id
         )
           .then(() => {

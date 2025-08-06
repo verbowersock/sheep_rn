@@ -12,6 +12,7 @@ import {
   Text,
   View,
   Tag,
+  Linking,
 } from "react-native";
 import { IconButton, SegmentedButtons, useTheme } from "react-native-paper";
 import { age } from "../utils/Age";
@@ -767,11 +768,12 @@ const Details = ({ route }) => {
               text: "View",
               onPress: async () => {
                 try {
-                  if (await Sharing.isAvailableAsync()) {
-                    await Sharing.shareAsync(permanentPath);
-                  } else {
-                    Alert.alert("Cannot open", "No app available to open PDF files");
-                  }
+                  // Use sharing with intent to open directly in PDF viewer
+                  await Sharing.shareAsync(permanentPath, {
+                    mimeType: 'application/pdf',
+                    UTI: 'com.adobe.pdf',
+                    dialogTitle: 'Open PDF'
+                  });
                 } catch (openError) {
                   console.log('Open error:', openError);
                   Alert.alert("Open failed", "Could not open the file");
@@ -789,24 +791,31 @@ const Details = ({ route }) => {
         console.log('Error saving to media library:', saveError);
         
         // Fallback: just offer to share the file
-        Alert.alert(
-          "PDF Created",
-          "PDF created successfully. Would you like to share it?",
-          [
-            {
-              text: "Share",
-              onPress: async () => {
-                if (await Sharing.isAvailableAsync()) {
-                  await Sharing.shareAsync(permanentPath);
-                }
-              }
-            },
-            {
-              text: "OK",
-              style: "default"
-            }
-          ]
-        );
+      //   Alert.alert(
+      //     "PDF Created",
+      //     "PDF created successfully. Would you like to view it?",
+      //     [
+      //       {
+      //         text: "View",
+      //         onPress: async () => {
+      //           try {
+      //             await Sharing.shareAsync(permanentPath, {
+      //               mimeType: 'application/pdf',
+      //               UTI: 'com.adobe.pdf',
+      //               dialogTitle: 'Open PDF'
+      //             });
+      //           } catch (openError) {
+      //             console.log('Open error:', openError);
+      //             Alert.alert("Open failed", "Could not open the file");
+      //           }
+      //         }
+      //       },
+      //       {
+      //         text: "Cancel",
+      //         style: "default"
+      //       }
+      //     ]
+      //   );
       }
 
     } else {
@@ -980,3 +989,4 @@ const makeStyles = (theme) =>
   });
 
 export default Details;
+
