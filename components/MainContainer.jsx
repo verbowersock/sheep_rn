@@ -164,9 +164,9 @@ const MainContainer = () => {
         )
       );
     } else if (sortValue === "tag_id_asc") {
-      setSortedSheep([...filteredSheep].sort((a, b) => a.tag_id - b.tag_id));
+      setSortedSheep([...filteredSheep].sort((a, b) => a.tag_id.localeCompare(b.tag_id)));
     } else if (sortValue === "tag_id_desc") {
-      setSortedSheep([...filteredSheep].sort((a, b) => b.tag_id - a.tag_id));
+      setSortedSheep([...filteredSheep].sort((a, b) => b.tag_id.localeCompare(a.tag_id)));
     }
   }, [deadChecked, soldChecked, searchQuery, searchTag, sortValue, sheep]);
 
