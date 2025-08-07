@@ -21,7 +21,7 @@ import sheep, {
   updateSheepVax,
   updateSheepWeight,
 } from "../store/slices/sheep";
-import { dateDisplayFormatter } from "./utils/SharedFunctions";
+import { convertUnitsDisplay, dateDisplayFormatter } from "./utils/SharedFunctions";
 import { settingsSelector } from "../store/slices/settings";
 
 const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
@@ -41,7 +41,12 @@ const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
       setListData(sheepVax);
     } else if (header === forms.WEIGHT.listHeader) {
       setType(forms.WEIGHT.type);
-      setListData(sheepWeights);
+      const weights = []
+      for (const weight of sheepWeights) {
+        convertedWeight = convertUnitsDisplay(weight.entry, unitFormat);
+        weights.push({entry: convertedWeight, date: weight.date, id: weight.id});
+      }
+      setListData(weights);
     }
   }, [header, sheepMeds, sheepVax, sheepWeights]);
 

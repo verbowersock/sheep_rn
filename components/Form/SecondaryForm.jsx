@@ -46,6 +46,7 @@ import {
 } from "../../store/slices/sheep";
 import { dateSaveFormatter, validateDate } from "../utils/SharedFunctions";
 import { settingsSelector } from "../../store/slices/settings";
+import { convertUnitsSave } from "../utils/SharedFunctions";
 
 const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
@@ -57,7 +58,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const { secondaryFormData } = useSelector(uiSelector);
   const { title, type, errorText } = secondaryFormData.type;
   const { defaultData } = secondaryFormData;
-  const { dateFormat } = useSelector(settingsSelector);
+  const { dateFormat, unitFormat } = useSelector(settingsSelector);
+
 
   const [loading, setLoading] = useState(false);
 
@@ -118,7 +120,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
 console.log("Form submitted with data:", data);
     const formattedData = {
       ...data,
-      value: data.medication || data.vaccination ? data.medication || data.vaccination : data.value,
+      value: data.medication || data.vaccination ? data.medication || data.vaccination :  convertUnitsSave(data.value, unitFormat),
       date: dateSaveFormatter(data.date, dateFormat),
     };
 
@@ -464,7 +466,7 @@ console.log("Form submitted with data:", data);
                   field="value"
                   onChangeText={onChange}
                   value={value && value.toString()}
-                  right={<TextInput.Affix text="lb" />}
+                  right={<TextInput.Affix text={unitFormat} />}
                 />
               )}
               name="value"

@@ -1,7 +1,5 @@
 import * as SQLite from 'expo-sqlite';
 import { picture1, picture2, picture3 } from "./base54pictures";
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
-
 console.log('=== SQLite module imported ===');
 
 // Global database variable
@@ -636,6 +634,14 @@ export async function addSheep(sheepData) {
       sheepData.marking_id,
     ]);
     console.log("Sheep added successfully");
+    
+    if (sheepData.weight_at_birth) {
+      await db.runAsync(
+        'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
+        [result.lastInsertRowId, sheepData.weight_at_birth, sheepData.dob]
+      );
+      console.log("Weight inserted successfully");
+    }
     return result.lastInsertRowId;
   } catch (error) {
     console.error("Error adding sheep:", error);
@@ -842,11 +848,11 @@ export async function addNewMedication(med) {
   }
 }
 
-export async function addNewVaccine(vax) {
+export async function addNewVaccine(val) {
   try {
-    console.log("Adding new vaccine:", vax);
+    console.log("Adding new vaccine:", val);
     const db = getDatabase();
-    const result = await db.runAsync('INSERT INTO vaccines (entry) VALUES (?)', [vax]);
+    const result = await db.runAsync('INSERT INTO vaccines (entry) VALUES (?)', [val]);
     console.log("New vaccine added successfully");
     return result.lastInsertRowId;
   } catch (error) {
@@ -854,8 +860,109 @@ export async function addNewVaccine(vax) {
     throw error;
   }
 }
+export async function addBreed(val) {
+   try {
+    console.log("Adding new breed:", val);
+    const db = getDatabase();
+    const result = await db.runAsync(
+        `INSERT INTO breeds (breed_name) 
+            VALUES (?)`,
+        [val],
+    )
+        return result.lastInsertRowId;
+  } catch (error) {
+    console.log("db error inserting breed:", error);
+    throw error;
+  }
+}
+
+export async function addColor(val) {
+ try {
+    console.log("Adding new color:", val);
+    const db = getDatabase();
+    const result = await db.runAsync(
+        `SELECT * FROM colors WHERE color_name = ?`,
+        [val],
+        )
+        return result.lastInsertRowId;
+  } catch (error) {
+    console.log("db error inserting color:", error);
+    throw error;
+  }
+}
+
+export async function addMarking(val) {
+  try {
+    console.log("Adding new marking:", val);
+    const db = getDatabase();
+    const result = await db.runAsync(
+        `INSERT INTO markings (marking_name) 
+            VALUES (?)`,
+        [val],
+        )
+        return result.lastInsertRowId;
+  } catch (error) {
+    console.log("db error inserting marking:", error);
+    throw error;
+  }
+}
+
 
 // REMOVE FUNCTIONS
+export async function deleteMarking(val) {
+  try{
+  const db = getDatabase();
+    await db.execAsync(
+        `DELETE FROM markings WHERE id = ?`,
+        [val],
+        )
+      return { changes: 1 }; // Simulate success response
+  } catch (error) {
+    console.log("db error deleting marking:", error);
+    throw error;
+  }
+}
+
+export async function deleteColor(val) {
+  try{
+  const db = getDatabase();
+    await db.execAsync(
+        `DELETE FROM colors WHERE id = ?`,
+        [val],
+        )
+    return { changes: 1 }; // Simulate success response
+  } catch (error) {
+    console.log("db error deleting color:", error);
+    throw error;
+  }
+}
+
+export async function deleteBreed(val) {
+  try{
+  const db = getDatabase();
+    await db.execAsync(
+        `DELETE FROM breeds WHERE id = ?`,
+        [val],
+        )
+        return { changes: 1 }; // Simulate success response
+  } catch (error) {
+    console.log("db error deleting breed:", error);
+    throw error;
+  }
+}
+
+export async function deleteSheep(val) {
+  try{
+  const db = getDatabase();
+    await db.execAsync(
+        `DELETE FROM sheep WHERE sheep_id = ?`,  [val]
+    )
+    return { changes: 1 }; // Simulate success response
+  } catch (error) {
+    console.log("db error deleting sheep:", error);
+    throw error;
+  }
+}
 export async function removeSheepMed(id) {
   try {
     console.log("Removing sheep medication:", id);
