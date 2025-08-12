@@ -11,6 +11,11 @@
     },
     "ios": {
       "bundleIdentifier": "com.anonymous.sheeprn"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4d38e588-9de2-4bda-82f4-738515b85b4e"
+      }
     }
   }
 }
