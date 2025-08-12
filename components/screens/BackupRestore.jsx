@@ -21,6 +21,7 @@ import {
   getCurrentSchemaVersion,
   updateSchemaVersion,
 } from "../../services/migration";
+import { StorageAccessFramework } from 'expo-file-system';
 
 const BackupRestore = () => {
   const theme = useTheme();
@@ -141,16 +142,31 @@ const BackupRestore = () => {
         to: tempBackupPath,
       });
 
-      // Save to device's Downloads folder
-      const asset = await MediaLibrary.createAssetAsync(tempBackupPath);
-      const album = await MediaLibrary.getAlbumAsync('Download');
-      
-      if (album == null) {
-        await MediaLibrary.createAlbumAsync('Download', asset, false);
-      } else {
-        await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-      }
-
+if (Platform.OS === 'android') {
+  const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync(FileSystem.documentDirectory);
+  if (permissions.granted) {
+    const fileUri = await StorageAccessFramework.createFileAsync(
+      permissions.directoryUri,
+      fileName,
+      'application/octet-stream'
+    );
+    const dbContent = await FileSystem.readAsStringAsync(tempBackupPath, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    await FileSystem.writeAsStringAsync(fileUri, dbContent, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+  }
+} else {
+  const asset = await MediaLibrary.createAssetAsync(tempBackupPath);
+  const album = await MediaLibrary.getAlbumAsync('Documents');
+  
+  if (album == null) {
+    await MediaLibrary.createAlbumAsync('Documents', asset, false);
+  } else {
+    await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+  }
+}
       // Clean up temp file
       await FileSystem.deleteAsync(tempBackupPath, { idempotent: true });
       

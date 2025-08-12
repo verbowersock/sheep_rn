@@ -11,8 +11,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Tag,
-  Linking,
 } from "react-native";
 import { IconButton, SegmentedButtons, useTheme } from "react-native-paper";
 import { age } from "../utils/Age";
@@ -55,8 +53,10 @@ import { Dimensions } from "react-native";
 import { settingsSelector } from "../../store/slices/settings";
 import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
+import * as WebBrowser from 'expo-web-browser';
 import * as Sharing from 'expo-sharing';
 import { printToFileAsync } from 'expo-print';
+import * as Print from 'expo-print';
 
 const Details = ({ route }) => {
   const theme = useTheme();
@@ -615,105 +615,77 @@ const Details = ({ route }) => {
 
   const pdfName = name ? name : tag_id;
 
-  async function checkPermissions() {
-    if (Platform.constants["Release"] >= 13) {
-      return true;
-    } else {
-      let granted;
-      try {
-        granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: "myFlock App Permission",
-            message: "This app needs permission to acess storage.",
-            buttonNeutral: "Ask Me Later",
-            buttonNegative: "Cancel",
-            buttonPositive: "OK",
-          }
-        );
-      } catch (err) {
-        console.warn(err);
-        alert("No permission to access storage");
-      }
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    }
-  }
-
   const createPDF = async () => {
-  try {
-    // Format the data
-    let formattedSheepMeds = sheepMeds.map((item) => ({
-      ...item,
-      date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
-    }));
+    try {
+      // Format the data
+      let formattedSheepMeds = sheepMeds.map((item) => ({
+        ...item,
+        date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
+      }));
 
-    let formattedSheepVax = sheepVax.map((item) => ({
-      ...item,
-      date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
-    }));
-    
-    let formattedLastWeight;
-    if (lastWeight.entry) {
-      formattedLastWeight = {
-        entry: `${lastWeight.entry}${unitFormat}`,
-        date: dateDisplayFormatter(lastWeight.date, dateFormat, monthFormat),
-      };
-    } else {
-      formattedLastWeight = lastWeight;
-    }
-
-    let formattedWeightAtBirth;
-    if (weight_at_birth) {
-      formattedWeightAtBirth = `${weight_at_birth}${unitFormat}`;
-    } else {
-      formattedWeightAtBirth = "NA";
-    }
-
-    // Generate PDF using Expo Print
-    const htmlString = htmlContent({
-      ...this_sheep,
-      dod: dateDisplayFormatter(dod, dateFormat, monthFormat),
-      dob: dateDisplayFormatter(dob, dateFormat, monthFormat),
-      dos: dateDisplayFormatter(dos, dateFormat, monthFormat),
-      dop: dateDisplayFormatter(dop, dateFormat, monthFormat),
-      breed_name: capitalize(breed_name),
-      color_name: capitalize(color_name),
-      marking_name: capitalize(marking_name),
-      sex: sexTypes.find((sexType) => sexType.id === this_sheep.sex)?.title,
-      date_last_bred: dateDisplayFormatter(
-        date_last_bred,
-        dateFormat,
-        monthFormat
-      ),
-      formattedWeightAtBirth,
-      formattedLastWeight,
-      formattedSheepMeds,
-      formattedSheepVax,
-    });
-
-    console.log('Generating PDF...');
-    
-    // Use Expo Print to generate PDF
-    const { uri } = await printToFileAsync({
-      html: htmlString,
-      width: 612,  // Letter size width in points
-      height: 792, // Letter size height in points
-      margins: {
-        left: 40,
-        top: 40,
-        right: 40,
-        bottom: 40,
-      },
-    });
-
-    console.log('PDF generated at:', uri);
-
-    // Check permissions
-    if (await checkPermissions()) {
-      // Create final file name with timestamp
-      const finalFileName = `${pdfName}_${format(new Date(), 'dd_MM_yyyy_HHmmss')}.pdf`;
+      let formattedSheepVax = sheepVax.map((item) => ({
+        ...item,
+        date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
+      }));
       
-      // Copy to a permanent location
+      let formattedLastWeight;
+      if (lastWeight.entry) {
+        formattedLastWeight = {
+          entry: `${lastWeight.entry}${unitFormat}`,
+          date: dateDisplayFormatter(lastWeight.date, dateFormat, monthFormat),
+        };
+      } else {
+        formattedLastWeight = lastWeight;
+      }
+
+      let formattedWeightAtBirth;
+      if (weight_at_birth) {
+        formattedWeightAtBirth = `${weight_at_birth}${unitFormat}`;
+      } else {
+        formattedWeightAtBirth = "NA";
+      }
+
+      // Generate PDF using Expo Print
+      const htmlString = htmlContent({
+        ...this_sheep,
+        dod: dateDisplayFormatter(dod, dateFormat, monthFormat),
+        dob: dateDisplayFormatter(dob, dateFormat, monthFormat),
+        dos: dateDisplayFormatter(dos, dateFormat, monthFormat),
+        dop: dateDisplayFormatter(dop, dateFormat, monthFormat),
+        breed_name: capitalize(breed_name),
+        color_name: capitalize(color_name),
+        marking_name: capitalize(marking_name),
+        sex: sexTypes.find((sexType) => sexType.id === this_sheep.sex)?.title,
+        date_last_bred: dateDisplayFormatter(
+          date_last_bred,
+          dateFormat,
+          monthFormat
+        ),
+        formattedWeightAtBirth,
+        formattedLastWeight,
+        formattedSheepMeds,
+        formattedSheepVax,
+      });
+
+      console.log('Generating PDF...');
+      
+      // Use Expo Print to generate PDF
+      const { uri } = await printToFileAsync({
+        html: htmlString,
+        width: 612,  // Letter size width in points
+        height: 792, // Letter size height in points
+        margins: {
+          left: 40,
+          top: 40,
+          right: 40,
+          bottom: 40,
+        },
+      });
+
+      console.log('PDF generated at:', uri);
+
+      // Create a permanent copy with custom filename
+      const finalFileName = `${pdfName}_${format(new Date(), 'dd_MM_yyyy_HHmmss')}.pdf`;
       const permanentPath = `${FileSystem.cacheDirectory}${finalFileName}`;
       
       await FileSystem.copyAsync({
@@ -721,115 +693,34 @@ const Details = ({ route }) => {
         to: permanentPath,
       });
 
-      console.log('PDF copied to permanent location:', permanentPath);
+      // Simply offer to share the PDF
+      Alert.alert(
+        "PDF Created Successfully",
+        "Your sheep report is ready. Choose an option:",
+        [
+          {
+            text: 'Share PDF',
+            onPress: () => Sharing.shareAsync(permanentPath, { 
+              mimeType: 'application/pdf',
+              dialogTitle: `Share ${pdfName} Report`
+            }),
+          },
+          {
+            text: 'Print or Save',
+            onPress: () => Print.printAsync({ html: htmlString }),
+          },
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ]
+      );
 
-      try {
-        // Save to device's media library
-        const asset = await MediaLibrary.createAssetAsync(permanentPath);
-        console.log('PDF saved to media library');
-        
-        // Try to organize into Downloads album
-        try {
-          let album = await MediaLibrary.getAlbumAsync('Download');
-          if (!album) {
-            album = await MediaLibrary.createAlbumAsync('Download', asset, false);
-          } else {
-            await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-          }
-          console.log('PDF added to Downloads album');
-        } catch (albumError) {
-          console.log('Could not add to Downloads album, but file is saved:', albumError);
-        }
-
-        // Show success alert with options
-        Alert.alert(
-          "PDF Created Successfully",
-          "Your sheep report has been saved to your device",
-          [
-            {
-              text: "Share",
-              onPress: async () => {
-                try {
-                  if (await Sharing.isAvailableAsync()) {
-                    await Sharing.shareAsync(permanentPath, {
-                      mimeType: 'application/pdf',
-                      dialogTitle: 'Share Sheep Report',
-                    });
-                  } else {
-                    Alert.alert("Cannot share", "Sharing is not available on this device");
-                  }
-                } catch (shareError) {
-                  console.log('Share error:', shareError);
-                  Alert.alert("Share failed", "Could not share the file");
-                }
-              }
-            },
-            {
-              text: "View",
-              onPress: async () => {
-                try {
-                  // Use sharing with intent to open directly in PDF viewer
-                  await Sharing.shareAsync(permanentPath, {
-                    mimeType: 'application/pdf',
-                    UTI: 'com.adobe.pdf',
-                    dialogTitle: 'Open PDF'
-                  });
-                } catch (openError) {
-                  console.log('Open error:', openError);
-                  Alert.alert("Open failed", "Could not open the file");
-                }
-              }
-            },
-            {
-              text: "OK",
-              style: "default"
-            }
-          ]
-        );
-
-      } catch (saveError) {
-        console.log('Error saving to media library:', saveError);
-        
-        // Fallback: just offer to share the file
-      //   Alert.alert(
-      //     "PDF Created",
-      //     "PDF created successfully. Would you like to view it?",
-      //     [
-      //       {
-      //         text: "View",
-      //         onPress: async () => {
-      //           try {
-      //             await Sharing.shareAsync(permanentPath, {
-      //               mimeType: 'application/pdf',
-      //               UTI: 'com.adobe.pdf',
-      //               dialogTitle: 'Open PDF'
-      //             });
-      //           } catch (openError) {
-      //             console.log('Open error:', openError);
-      //             Alert.alert("Open failed", "Could not open the file");
-      //           }
-      //         }
-      //       },
-      //       {
-      //         text: "Cancel",
-      //         style: "default"
-      //       }
-      //     ]
-      //   );
-      }
-
-    } else {
-      Alert.alert("Permission Denied", "Cannot save file without storage permission");
+    } catch (error) {
+      console.error('Error with PDF:', error);
+      Alert.alert('Error', 'Failed to generate PDF report');
     }
-
-  } catch (error) {
-    console.error('PDF creation error:', error);
-    Alert.alert(
-      "PDF Creation Failed", 
-      "Something went wrong while creating the PDF. Please try again."
-    );
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
