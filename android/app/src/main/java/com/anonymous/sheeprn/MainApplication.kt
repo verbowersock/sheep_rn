@@ -1,4 +1,4 @@
-package com.anonymous.sheeprn
+package com.sheeprn
 
 import android.app.Application
 import android.content.res.Configuration

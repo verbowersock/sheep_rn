@@ -2,34 +2,27 @@ import { getDatabase, insertMedList, insertVaxList } from "./db";
 
 export const getCurrentSchemaVersion = async () => {
   try {
-    console.log("Getting current schema version");
     const db = getDatabase();
     const result = await db.getFirstAsync("PRAGMA user_version;");
     const version = result ? result.user_version : 0;
-    console.log("Current schema version:", version);
     return version;
   } catch (error) {
-    console.log("Error getting schema version:", error);
     return 0; // Default to 0 if error
   }
 };
 
 export const updateSchemaVersion = async (newVersion) => {
   try {
-    console.log(`Updating schema version to ${newVersion}`);
     const db = getDatabase();
     await db.runAsync(`PRAGMA user_version = ${newVersion};`);
-    console.log(`Schema version updated to ${newVersion}`);
     return true;
   } catch (error) {
-    console.log("Error updating schema version:", error);
     throw error;
   }
 };
 
 const migrationScript = async () => {
   try {
-    console.log("Starting migration script");
     const db = getDatabase();
     
     // Insert medication and vaccine lists
@@ -39,11 +32,9 @@ const migrationScript = async () => {
     // Add dosage column to sheep_meds table if it doesn't exist
     try {
       await db.runAsync(`ALTER TABLE sheep_meds ADD COLUMN dosage VARCHAR(100);`);
-      console.log("Added dosage column to sheep_meds table");
     } catch (error) {
       // Column might already exist, check if it's a "duplicate column" error
       if (error.message.includes("duplicate column") || error.message.includes("already exists")) {
-        console.log("Dosage column already exists in sheep_meds table");
       } else {
         console.error("Error adding dosage column to sheep_meds table:", error);
         throw error;
@@ -56,12 +47,9 @@ const migrationScript = async () => {
     
     if (!columnExists) {
       await db.runAsync(`ALTER TABLE sheep ADD COLUMN last_bred_to VARCHAR(200);`);
-      console.log("Added last_bred_to column to sheep table");
     } else {
-      console.log("last_bred_to column already exists in sheep table");
     }
     
-    console.log("Migration script completed successfully");
     return true;
     
   } catch (error) {
@@ -72,9 +60,7 @@ const migrationScript = async () => {
 
 export const executeMigration = async () => {
   try {
-    console.log("Executing migration");
     await migrationScript();
-    console.log("Migration executed successfully");
     return true;
   } catch (error) {
     console.error("Migration failed:", error);

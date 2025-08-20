@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import * as SplashScreen from "expo-splash-screen";
+import * as SplashScreen from 'expo-splash-screen';
+
 import { useDispatch } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
 
@@ -34,13 +35,17 @@ export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState(null);
 
+
+  useEffect(() => {
+    console.log("isReady:", isReady);
+  }, [isReady]);
+
   async function initDb() {
     try {
-      await SplashScreen.preventAutoHideAsync();
+
       
       // Initialize database FIRST
       await initializeDatabase();
-      console.log('Database initialized');
       
       let currentSchemaVersion = await getCurrentSchemaVersion();
       const expectedSchemaVersion = 4;
@@ -61,54 +66,45 @@ export default function App() {
         await insertMarkingData();
         await insertMedList();
         await insertVaxList();
-        console.log('Initial data inserted');
       } catch (e) {
-        console.log("Error inserting initial data:", e);
+        SplashScreen.hide();
+        console.error("Error inserting initial data:", e);
       }
 
-      // FIXED: Add await here!
+
       const allSheep = await fetchAllSheep();
-      console.log('Fetched sheep:', allSheep?.length || 0);
       dispatch(setSheep(allSheep || []));
       
-      await SplashScreen.hideAsync();
+
       setIsReady(true);
+      console.log("Database initialized and data inserted successfully.");
+      await SplashScreen.hideAsync();
+      console.log("Splash screen hidden successfully.");
     } catch (e) {
       console.error("Database initialization error:", e);
       setError(e.message);
-      await SplashScreen.hideAsync();
+
+    setIsReady(true);
+          SplashScreen.hideAsync();
     }
   }
 
   useEffect(() => {
     initDb();
-  }, []); // Empty dependency array is correct here
+  }, []); 
 
-  if (error) {
-    return (
-
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: 'red', textAlign: 'center', padding: 20 }}>
-            Database Error: {error}
-          </Text>
-        </View>
-    );
-  }
-
-  if (!isReady) {
-    return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" />
-          <Text style={{ marginTop: 10 }}>Setting up database...</Text>
-        </View>
-    );
-  }
-
-  return (
-    <SafeAreaProvider>
+return (
+  <SafeAreaProvider>
+    {isReady ? (
       <NavigationContainer>
         <DrawerNavigator />
       </NavigationContainer>
-    </SafeAreaProvider>
-  );
+    ) : (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        {error && <Text style={{ color: "red" }}>{error}</Text>}
+      </View>
+    )}
+  </SafeAreaProvider>
+);
 }

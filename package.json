@@ -1,6 +1,6 @@
 {
-  "name": "sheep_rn",
-  "version": "1.0.0",
+  "name": "sheep-rn",
+  "version": "1.5.0",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
@@ -25,7 +25,6 @@
     "expo-media-library": "~17.1.7",
     "expo-print": "~14.1.4",
     "expo-sharing": "~13.1.5",
-    "expo-splash-screen": "~0.30.10",
     "expo-sqlite": "^15.2.14",
     "expo-status-bar": "~2.2.3",
     "expo-web-browser": "^14.2.0",
@@ -41,9 +40,12 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "^5.6.0",
     "react-native-screens": "^4.13.1",
+    "react-native-splash-screen": "^3.3.0",
     "react-native-sqlite-storage": "^6.0.1",
     "react-redux": "^9.2.0",
-    "redux-persist": "^6.0.0"
+    "redux-persist": "^6.0.0",
+    "expo-splash-screen": "~0.30.10",
+    "expo-updates": "~0.28.17"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

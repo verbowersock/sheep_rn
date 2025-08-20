@@ -666,8 +666,6 @@ const Details = ({ route }) => {
         formattedSheepMeds,
         formattedSheepVax,
       });
-
-      console.log('Generating PDF...');
       
       // Use Expo Print to generate PDF
       const { uri } = await printToFileAsync({
@@ -682,7 +680,6 @@ const Details = ({ route }) => {
         },
       });
 
-      console.log('PDF generated at:', uri);
 
       // Create a permanent copy with custom filename
       const finalFileName = `${pdfName}_${format(new Date(), 'dd_MM_yyyy_HHmmss')}.pdf`;
