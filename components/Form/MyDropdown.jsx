@@ -89,7 +89,6 @@ const MyDropdown = ({
   const [deletable, setDeletable] = useState(false);
 
   useEffect(() => {
-    console.log("field", field);
     ["marking", "color", "breed", "medication", "vaccination"].indexOf(
       field
     ) !== -1

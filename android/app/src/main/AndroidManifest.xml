@@ -21,6 +21,14 @@
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="exp+sheep-rn"/>
+      </intent-filter>
+      <meta-data android:name="android.app.splashscreen.icon_animation_disable" android:value="true"/>
+      <meta-data android:name="android.app.splashscreen.icon_background_color" android:resource="@android:color/transparent"/>
     </activity>
   </application>
 </manifest>

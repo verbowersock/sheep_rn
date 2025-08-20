@@ -87,12 +87,12 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.sheeprn'
+    namespace 'com.sheeprn'
     defaultConfig {
-        applicationId 'com.anonymous.sheeprn'
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        applicationId 'com.sheeprn'
+        minSdkVersion = 24
+        targetSdkVersion = 36
+        versionCode 17
         versionName "1.5.0"
     }
     signingConfigs {
@@ -101,6 +101,12 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+        release {     
+                storeFile file(MYAPP_RELEASE_STORE_FILE)
+                storePassword MYAPP_RELEASE_STORE_PASSWORD
+                keyAlias MYAPP_RELEASE_KEY_ALIAS
+                keyPassword MYAPP_RELEASE_KEY_PASSWORD
         }
     }
     buildTypes {

@@ -22,6 +22,9 @@ import {
   updateSchemaVersion,
 } from "../../services/migration";
 import { StorageAccessFramework } from 'expo-file-system';
+import * as Updates from 'expo-updates';
+
+
 
 const BackupRestore = () => {
   const theme = useTheme();
@@ -65,6 +68,8 @@ const BackupRestore = () => {
       
       // Define destination path for the database
       const destPath = `${FileSystem.documentDirectory}SQLite/sheep.db`;
+
+      
       
       // Ensure the SQLite directory exists
       await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}SQLite/`, { 
@@ -77,6 +82,28 @@ const BackupRestore = () => {
         to: destPath,
       });
 
+        if (Platform.OS === 'android') {
+      // The copied file might be read-only, we need to make it writable
+      // Unfortunately FileSystem doesn't have chmod, so we need to recreate it
+      const tempPath = `${FileSystem.documentDirectory}SQLite/temp_sheep.db`;
+      
+      // Read the content and write it again (this sets proper permissions)
+      const dbContent = await FileSystem.readAsStringAsync(destPath, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      await FileSystem.writeAsStringAsync(tempPath, dbContent, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      // Replace the original with the properly permissioned file
+      await FileSystem.deleteAsync(destPath);
+      await FileSystem.moveAsync({
+        from: tempPath,
+        to: destPath,
+      });
+    }
+
       // Handle schema migration
       const currentSchemaVersion = await getCurrentSchemaVersion();
       const expectedSchemaVersion = 4;
@@ -85,6 +112,7 @@ const BackupRestore = () => {
         await executeMigration();
         await updateSchemaVersion(expectedSchemaVersion);
       }
+
 
       // Refresh the app data
       const sheepData = await fetchAllSheep();
@@ -95,9 +123,42 @@ const BackupRestore = () => {
         setShowSnackbar({
           visible: true,
           error: false,
-          message: "Database restored successfully",
+          message: "Database restored successfully. The app will now reload.",
         })
       );
+  console.log('Attempting Updates.reloadAsync...');
+setTimeout(async () => {
+  try {
+    // Show a different message to indicate Updates is attempting
+    dispatch(
+      setShowSnackbar({
+        visible: true,
+        error: false,
+        message: "Attempting app reload...",
+      })
+    );
+    
+    await Updates.reloadAsync();
+    
+    // This line should never execute if reload works
+    dispatch(
+      setShowSnackbar({
+        visible: true,
+        error: true,
+        message: "Reload failed - please restart manually",
+      })
+    );
+    
+  } catch (error) {
+    dispatch(
+      setShowSnackbar({
+        visible: true,
+        error: true,
+        message: "App reload not available - please restart manually",
+      })
+    );
+  }
+}, 1500);
     } catch (error) {
       setLoading(false);
       dispatch(
@@ -107,7 +168,6 @@ const BackupRestore = () => {
           message: "Restore failed. Please try again",
         })
       );
-      console.log('Restore error:', error);
     }
   }
 
@@ -175,7 +235,7 @@ if (Platform.OS === 'android') {
         setShowSnackbar({
           visible: true,
           error: false,
-          message: "Database backed up to Downloads folder",
+          message: "Database backed up to the selected folder",
         })
       );
     } catch (error) {
@@ -187,7 +247,7 @@ if (Platform.OS === 'android') {
           message: "Backup failed. Please try again",
         })
       );
-      console.log('Backup error:', error);
+      console.error('Backup error:', error);
     }
   }
 

@@ -93,7 +93,14 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           dispatch(setMales(males));
         }
       } catch (error) {
-        console.log("!!!error", error);
+        console.error("Error loading data for form:", error);
+        dispatch(
+          setShowSnackbar({
+            visible: true,
+            error: true,
+            message: "Error loading data for form. Please try again.",
+          })
+        );
       }
     }
     loadDataToForm().then(() => setDataLoaded(true));
@@ -117,7 +124,6 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   }, [trigger, secondaryFormData]);
 
   const onSubmit = (data) => {
-console.log("Form submitted with data:", data);
     const formattedData = {
       ...data,
       value: data.medication || data.vaccination ? data.medication || data.vaccination :  convertUnitsSave(data.value, unitFormat),

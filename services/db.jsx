@@ -1,6 +1,5 @@
 import * as SQLite from 'expo-sqlite';
 import { picture1, picture2, picture3 } from "./base54pictures";
-console.log('=== SQLite module imported ===');
 
 // Global database variable
 let database = null;
@@ -8,13 +7,9 @@ let database = null;
 // Initialize database function
 export const initializeDatabase = async () => {
   try {
-    console.log('=== Opening database ===');
     database = await SQLite.openDatabaseAsync("sheep.db");
-    console.log('=== Database opened ===');
-
     // Enable foreign keys
     await database.execAsync("PRAGMA foreign_keys = ON;");
-    console.log("Foreign keys turned on");
 
     // Initialize tables and data
     await init();
@@ -156,17 +151,14 @@ export const setCurrentSchemaVersion = async (version) => {
   try {
     const db = getDatabase();
     await db.runAsync(`PRAGMA user_version = ${version};`);
-    console.log("Schema version set to:", version);
     return true;
   } catch (error) {
-    console.log("error setting schema version:", error);
     throw error;
   }
 };
 
 export async function insertMedList() {
   try {
-    console.log("Inserting medication list");
     const db = getDatabase();
     for (const medData of medicationData) {
       await db.runAsync(
@@ -174,7 +166,6 @@ export async function insertMedList() {
         [medData]
       );
     }
-    console.log("Medication list inserted successfully");
     return true;
   } catch (error) {
     console.error("Error inserting medication list:", error);
@@ -184,7 +175,6 @@ export async function insertMedList() {
 
 export async function insertVaxList() {
   try {
-    console.log("Inserting vaccine list");
     const db = getDatabase();
     for (const vaxData of vaccineData) {
       await db.runAsync(
@@ -192,7 +182,6 @@ export async function insertVaxList() {
         [vaxData]
       );
     }
-    console.log("Vaccine list inserted successfully");
     return true;
   } catch (error) {
     console.error("Error inserting vaccine list:", error);
@@ -203,46 +192,33 @@ export async function insertVaxList() {
 
 export const dropDbTablesAsync = async () => {
   try {
-    console.log("Dropping tables...");
     const db = getDatabase();
 
     await db.runAsync("DROP TABLE IF EXISTS sheep");
-    console.log("table sheep deleted");
 
     await db.runAsync("DROP TABLE IF EXISTS colors");
-    console.log("table colors deleted");
 
     await db.runAsync("DROP TABLE IF EXISTS markings");
-    console.log("table markings deleted");
 
     await db.runAsync("DROP TABLE IF EXISTS breeds");
-    console.log("table breeds deleted");
 
     await db.runAsync("DROP TABLE IF EXISTS medications");
-    console.log("table medications deleted");
 
     await db.runAsync("DROP TABLE IF EXISTS vaccines");
-    console.log("table vaccines deleted");
 
     await db.runAsync("DROP TABLE IF EXISTS sheep_meds");
-    console.log("table sheep_meds deleted");
 
     await db.runAsync("DROP TABLE IF EXISTS sheep_vax");
-    console.log("table sheep_vax deleted");
 
     await db.runAsync("DROP TABLE IF EXISTS sheep_weights");
-    console.log("table sheep_weights deleted");
 
-    console.log("All tables dropped successfully");
     return true;
   } catch (error) {
-    console.log("error dropping tables:", error);
     throw error;
   }
 };
 
 export const addMedicalData = async () => {
-  console.log("addmedicaldata runs");
   try {
     const db = getDatabase();
 
@@ -253,7 +229,6 @@ export const addMedicalData = async () => {
         entry VARCHAR(255) NOT NULL UNIQUE
       )
     `);
-    console.log("meds table created");
 
     // Create sheep_meds table
     await db.runAsync(`
@@ -265,8 +240,6 @@ export const addMedicalData = async () => {
         dosage VARCHAR(100)
       )
     `);
-    console.log("sheep_meds table created");
-
     // Create vaccines table
     await db.runAsync(`
       CREATE TABLE IF NOT EXISTS vaccines (
@@ -274,7 +247,6 @@ export const addMedicalData = async () => {
         entry VARCHAR(255) NOT NULL UNIQUE
       )
     `);
-    console.log("vax table created");
 
     // Create sheep_vax table
     await db.runAsync(`
@@ -285,7 +257,6 @@ export const addMedicalData = async () => {
         date VARCHAR(50) NOT NULL 
       )
     `);
-    console.log("sheep_vax table created");
 
     // Create sheep_weights table
     await db.runAsync(`
@@ -296,7 +267,6 @@ export const addMedicalData = async () => {
         date VARCHAR(50) NOT NULL
       )
     `);
-    console.log("weight table created");
 
     return true;
   } catch (error) {
@@ -306,7 +276,6 @@ export const addMedicalData = async () => {
 };
 
 export const addBasicData = async () => {
-  console.log("creating basic data");
 
   try {
     const db = getDatabase();
@@ -318,7 +287,6 @@ export const addBasicData = async () => {
         breed_name VARCHAR(255) NOT NULL UNIQUE
       )
     `);
-    console.log("breeds table created");
 
     // Create colors table  
     await db.runAsync(`
@@ -327,8 +295,6 @@ export const addBasicData = async () => {
         color_name VARCHAR(255) NOT NULL UNIQUE
       )
     `);
-    console.log("colors table created");
-
     // Create markings table
     await db.runAsync(`
       CREATE TABLE IF NOT EXISTS markings (
@@ -336,7 +302,6 @@ export const addBasicData = async () => {
         marking_name VARCHAR(255) NOT NULL UNIQUE
       )
     `);
-    console.log("markings table created");
 
     // Create sheep table
     await db.runAsync(`
@@ -363,8 +328,7 @@ export const addBasicData = async () => {
         last_location VARCHAR(255)
       )
     `);
-    console.log("sheep table created");
-
+ 
     return true;
   } catch (error) {
     console.error("Error creating tables:", error);
@@ -373,7 +337,6 @@ export const addBasicData = async () => {
 };
 
 export async function init() {
-  console.log("init db");
   try {
     // Create tables
     await addBasicData();
@@ -384,7 +347,6 @@ export async function init() {
     const breedCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM breeds');
 
     if (breedCount.count === 0) {
-      console.log('Inserting initial data...');
       await insertBreedData();
       await insertColorData();
       await insertMarkingData();
@@ -392,7 +354,6 @@ export async function init() {
       // await insertSheepData();
     }
 
-    console.log("Initialization executed successfully.");
     return true;
   } catch (error) {
     console.error("Initialization failed:", error);
@@ -409,7 +370,6 @@ export const insertBreedData = async () => {
         [breed]
       );
     }
-    console.log("Breed data inserted");
   } catch (error) {
     console.error("Error inserting breeds:", error);
     throw error;
@@ -425,7 +385,6 @@ export async function insertColorData() {
         [color]
       );
     }
-    console.log("Color data inserted");
   } catch (error) {
     console.error("Error inserting colors:", error);
     throw error;
@@ -441,7 +400,6 @@ export async function insertMarkingData() {
         [marking]
       );
     }
-    console.log("Marking data inserted");
   } catch (error) {
     console.error("Error inserting markings:", error);
     throw error;
@@ -450,7 +408,6 @@ export async function insertMarkingData() {
 
 // FETCH FUNCTIONS (converted to async)
 export async function fetchAllSheep() {
-  console.log("fetchAllSheep runs");
   try {
     const db = getDatabase();
     const result = await db.getAllAsync(`
@@ -491,7 +448,6 @@ export async function fetchAllSheep() {
       LEFT JOIN sheep dams ON children.dam = dams.sheep_id
       LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id
     `);
-    console.log("All sheep data fetched successfully");
     return result || [];
   } catch (error) {
     console.error("Error fetching sheep data:", error);
@@ -501,7 +457,6 @@ export async function fetchAllSheep() {
 
 export async function fetchSheep(id) {
   try {
-    console.log("fetchSheep runs with id:", id);
     const db = getDatabase();
     const result = await db.getFirstAsync(`
       SELECT 
@@ -542,7 +497,6 @@ export async function fetchSheep(id) {
       LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id
       WHERE children.sheep_id = ?
     `, [id]);
-    console.log("Sheep data fetched successfully for id:", id);
     return result;
   } catch (error) {
     console.error("Error fetching sheep:", error);
@@ -554,7 +508,6 @@ export async function fetchBreeds() {
   try {
     const db = getDatabase();
     const result = await db.getAllAsync('SELECT * FROM breeds');
-    console.log("Breeds fetched successfully");
     return result;
   } catch (error) {
     console.error("Error fetching breeds:", error);
@@ -566,7 +519,6 @@ export async function fetchColors() {
   try {
     const db = getDatabase();
     const result = await db.getAllAsync('SELECT * FROM colors');
-    console.log("Colors fetched successfully");
     return result;
   } catch (error) {
     console.error("Error fetching colors:", error);
@@ -578,7 +530,6 @@ export async function fetchMarkings() {
   try {
     const db = getDatabase();
     const result = await db.getAllAsync('SELECT * FROM markings');
-    console.log("Markings fetched successfully");
     return result;
   } catch (error) {
     console.error("Error fetching markings:", error);
@@ -590,7 +541,6 @@ export async function fetchMales() {
   try {
     const db = getDatabase();
     const result = await db.getAllAsync('SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?', ['m']);
-    console.log("Males fetched successfully");
     return result;
   } catch (error) {
     console.error("Error fetching males:", error);
@@ -602,7 +552,6 @@ export async function fetchFemales() {
   try {
     const db = getDatabase();
     const result = await db.getAllAsync('SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?', ['f']);
-    console.log("Females fetched successfully");
     return result;
   } catch (error) {
     console.error("Error fetching females:", error);
@@ -633,14 +582,12 @@ export async function addSheep(sheepData) {
       sheepData.color_id,
       sheepData.marking_id,
     ]);
-    console.log("Sheep added successfully");
     
     if (sheepData.weight_at_birth) {
       await db.runAsync(
         'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
         [result.lastInsertRowId, sheepData.weight_at_birth, sheepData.dob]
       );
-      console.log("Weight inserted successfully");
     }
     return result.lastInsertRowId;
   } catch (error) {
@@ -651,7 +598,6 @@ export async function addSheep(sheepData) {
 
 export async function editSheep(sheepData, id) {
   try {
-    console.log("Editing sheep:", id, sheepData);
     const db = getDatabase();
 
     // Generate the SQL query and parameters
@@ -663,7 +609,6 @@ export async function editSheep(sheepData, id) {
     const parameters = [...values, id];
 
     const result = await db.runAsync(sqlQuery, parameters);
-    console.log("Sheep updated successfully");
 
     // Handle weight insertion if needed
     if (sheepData.weight_at_birth) {
@@ -671,28 +616,23 @@ export async function editSheep(sheepData, id) {
         'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
         [id, sheepData.weight_at_birth, sheepData.dob]
       );
-      console.log("Weight inserted successfully");
     }
 
     return result;
   } catch (error) {
-    console.log("db error updating sheep:", error);
     throw error;
   }
 }
 
 export async function updateDateLastBred(data) {
   try {
-    console.log("Updating last bred date:", data);
     const db = getDatabase();
     const result = await db.runAsync(
       'UPDATE sheep SET date_last_bred = ?, last_bred_to = ? WHERE sheep_id = ?',
       [data.date, data.last_bred_to, data.sheep_id]
     );
-    console.log("Last bred date updated successfully");
     return result;
   } catch (error) {
-    console.log("db error updating sheep:", error);
     throw error;
   }
 }
@@ -700,46 +640,36 @@ export async function updateDateLastBred(data) {
 // FETCH FUNCTIONS  
 export async function findChildren(id) {
   try {
-    console.log("Finding children for sheep:", id);
     const db = getDatabase();
     const result = await db.getAllAsync('SELECT * FROM sheep WHERE sire = ? OR dam = ?', [id, id]);
-    console.log("Children found:", result.length);
     return result;
   } catch (error) {
-    console.log("db error finding children:", error);
     throw error;
   }
 }
 
 export async function fetchAllMedications() {
   try {
-    console.log("Fetching all medications");
     const db = getDatabase();
     const result = await db.getAllAsync('SELECT * FROM medications');
-    console.log("Medications fetched:", result.length);
     return result;
   } catch (error) {
-    console.log("db error getting medications:", error);
     throw error;
   }
 }
 
 export async function fetchAllVaccines() {
   try {
-    console.log("Fetching all vaccines");
     const db = getDatabase();
     const result = await db.getAllAsync('SELECT * FROM vaccines');
-    console.log("Vaccines fetched:", result.length);
     return result;
   } catch (error) {
-    console.log("db error getting vaccines:", error);
     throw error;
   }
 }
 
 export async function fetchSheepMeds(id) {
   try {
-    console.log("Fetching sheep medications for:", id);
     const db = getDatabase();
     const result = await db.getAllAsync(`
       SELECT sheep_meds.sheep_id, sheep_meds.entry_id, sheep_meds.id, sheep_meds.date, medications.entry, sheep_meds.dosage 
@@ -747,17 +677,14 @@ export async function fetchSheepMeds(id) {
       INNER JOIN medications ON sheep_meds.entry_id = medications.id 
       WHERE sheep_meds.sheep_id = ?
     `, [id]);
-    console.log("Sheep medications fetched:", result.length);
     return result;
   } catch (error) {
-    console.log("db error getting sheep meds:", error);
     throw error;
   }
 }
 
 export async function fetchSheepVax(id) {
   try {
-    console.log("Fetching sheep vaccinations for:", id);
     const db = getDatabase();
     const result = await db.getAllAsync(`
       SELECT sheep_vax.sheep_id, sheep_vax.entry_id, sheep_vax.id, sheep_vax.date, vaccines.entry 
@@ -765,23 +692,18 @@ export async function fetchSheepVax(id) {
       INNER JOIN vaccines ON sheep_vax.entry_id = vaccines.id 
       WHERE sheep_vax.sheep_id = ?
     `, [id]);
-    console.log("Sheep vaccinations fetched:", result.length);
     return result;
   } catch (error) {
-    console.log("db error getting sheep vax:", error);
     throw error;
   }
 }
 
 export async function fetchSheepWeight(id) {
   try {
-    console.log("Fetching sheep weights for:", id);
     const db = getDatabase();
     const result = await db.getAllAsync('SELECT * FROM sheep_weights WHERE sheep_id = ?', [id]);
-    console.log("Sheep weights fetched:", result.length);
     return result;
   } catch (error) {
-    console.log("db error getting sheep weight:", error);
     throw error;
   }
 }
@@ -789,80 +711,64 @@ export async function fetchSheepWeight(id) {
 // INSERT FUNCTIONS
 export async function addMedication(data) {
   try {
-    console.log("Adding medication:", data);
     const db = getDatabase();
     const result = await db.runAsync(
       'INSERT INTO sheep_meds (sheep_id, entry_id, date, dosage) VALUES (?, ?, ?, ?)',
       [data.sheep_id, data.value, data.date, data.dosage]
     );
-    console.log("Medication added successfully");
     return result.lastInsertRowId;
   } catch (error) {
-    console.log("db error inserting meds:", error);
     throw error;
   }
 }
 
 export async function addVaccination(data) {
   try {
-    console.log("Adding vaccination:", data);
     const db = getDatabase();
     const result = await db.runAsync(
       'INSERT INTO sheep_vax (sheep_id, entry_id, date) VALUES (?, ?, ?)',
       [data.sheep_id, data.value, data.date]
     );
-    console.log("Vaccination added successfully");
     return result.lastInsertRowId;
   } catch (error) {
-    console.log("db error inserting vaccine:", error);
     throw error;
   }
 }
 
 export async function addSheepWeight(data) {
   try {
-    console.log("Adding sheep weight:", data);
     const db = getDatabase();
     const result = await db.runAsync(
       'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
       [data.sheep_id, data.value, data.date]
     );
-    console.log("Weight added successfully");
     return result.lastInsertRowId;
   } catch (error) {
-    console.log("db error inserting weight:", error);
     throw error;
   }
 }
 
 export async function addNewMedication(med) {
   try {
-    console.log("Adding new medication:", med);
     const db = getDatabase();
     const result = await db.runAsync('INSERT INTO medications (entry) VALUES (?)', [med]);
-    console.log("New medication added successfully");
     return result.lastInsertRowId;
   } catch (error) {
-    console.log("db error inserting medication:", error);
     throw error;
   }
 }
 
 export async function addNewVaccine(val) {
   try {
-    console.log("Adding new vaccine:", val);
     const db = getDatabase();
     const result = await db.runAsync('INSERT INTO vaccines (entry) VALUES (?)', [val]);
-    console.log("New vaccine added successfully");
     return result.lastInsertRowId;
   } catch (error) {
-    console.log("db error inserting vaccine:", error);
     throw error;
   }
 }
 export async function addBreed(val) {
    try {
-    console.log("Adding new breed:", val);
     const db = getDatabase();
     const result = await db.runAsync(
         `INSERT INTO breeds (breed_name) 
@@ -871,29 +777,28 @@ export async function addBreed(val) {
     )
         return result.lastInsertRowId;
   } catch (error) {
-    console.log("db error inserting breed:", error);
+    console.error("Error adding breed:", error);
     throw error;
   }
 }
 
 export async function addColor(val) {
+  console.log("Adding color:", val);
  try {
-    console.log("Adding new color:", val);
     const db = getDatabase();
     const result = await db.runAsync(
-        `SELECT * FROM colors WHERE color_name = ?`,
+        `INSERT INTO colors (color_name) VALUES (?)`,
         [val],
         )
         return result.lastInsertRowId;
   } catch (error) {
-    console.log("db error inserting color:", error);
+    console.error("Error adding color:", error);
     throw error;
   }
 }
 
 export async function addMarking(val) {
   try {
-    console.log("Adding new marking:", val);
     const db = getDatabase();
     const result = await db.runAsync(
         `INSERT INTO markings (marking_name) 
@@ -902,7 +807,6 @@ export async function addMarking(val) {
         )
         return result.lastInsertRowId;
   } catch (error) {
-    console.log("db error inserting marking:", error);
     throw error;
   }
 }
@@ -918,7 +822,6 @@ export async function deleteMarking(val) {
         )
       return { changes: 1 }; // Simulate success response
   } catch (error) {
-    console.log("db error deleting marking:", error);
     throw error;
   }
 }
@@ -932,7 +835,6 @@ export async function deleteColor(val) {
         )
     return { changes: 1 }; // Simulate success response
   } catch (error) {
-    console.log("db error deleting color:", error);
     throw error;
   }
 }
@@ -946,7 +848,6 @@ export async function deleteBreed(val) {
         )
         return { changes: 1 }; // Simulate success response
   } catch (error) {
-    console.log("db error deleting breed:", error);
     throw error;
   }
 }
@@ -959,47 +860,37 @@ export async function deleteSheep(val) {
     )
     return { changes: 1 }; // Simulate success response
   } catch (error) {
-    console.log("db error deleting sheep:", error);
     throw error;
   }
 }
 export async function removeSheepMed(id) {
   try {
-    console.log("Removing sheep medication:", id);
     const db = getDatabase();
     
     // Use execAsync instead of runAsync
     await db.execAsync(`DELETE FROM sheep_meds WHERE id = ${id}`);
-    console.log("Sheep medication removed successfully");
     return { changes: 1 }; // Simulate success response
   } catch (error) {
-    console.log("db error deleting sheep med:", error);
     throw error;
   }
 }
 
 export async function removeSheepVax(id) {
   try {
-    console.log("Removing sheep vaccination:", id);
     const db = getDatabase();
     const result = await db.runAsync('DELETE FROM sheep_vax WHERE id = ?', [id]);
-    console.log("Sheep vaccination removed successfully");
     return result;
   } catch (error) {
-    console.log("db error deleting sheep vax:", error);
     throw error;
   }
 }
 
 export async function removeSheepWeight(id) {
   try {
-    console.log("Removing sheep weight:", id);
     const db = getDatabase();
     const result = await db.runAsync('DELETE FROM sheep_weights WHERE id = ?', [id]);
-    console.log("Sheep weight removed successfully");
     return result;
   } catch (error) {
-    console.log("db error deleting sheep weight:", error);
     throw error;
   }
 }

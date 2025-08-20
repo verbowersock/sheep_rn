@@ -133,7 +133,6 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }))
         );
       } catch (error) {
-        console.log("!!!error", error);
       }
     }
     loadDataToApp().then(() => setDataLoaded(true));
