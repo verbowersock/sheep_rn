@@ -229,17 +229,26 @@ const Details = ({ route }) => {
   };
 
   const getMostRecentNumberOfChildren = () => {
-    const mostRecentBirthdate = max(
-      sheepChildren.map((child) => parse(child.dob, "MM/dd/yyyy", new Date()))
-    );
-    const mostRecentBirthdateString = format(mostRecentBirthdate, "MM/dd/yyyy");
+  const mostRecentBirthdate = max(
+    sheepChildren
+      .map((child) => parse(child.dob, "MM/dd/yyyy", new Date()))
+      .filter(date => !isNaN(date))
+  );
+  if (!mostRecentBirthdate || isNaN(mostRecentBirthdate)) return "NA";
+   const mostRecentBirthdateString = format(mostRecentBirthdate, "MM/dd/yyyy");
+
+  const mostRecentBirthdateStringFormatted = dateDisplayFormatter(
+    format(mostRecentBirthdate, "MM/dd/yyyy"),
+    dateFormat,
+    monthFormat
+  );
     // Get the puppies in the most recent litter
     const mostRecentLambs = sheepChildren.filter(
       (child) => child.dob === mostRecentBirthdateString
     );
 
     // Get the number of lambs in the most recent litter
-    return `${mostRecentLambs.length} on ${mostRecentBirthdateString}`;
+    return `${mostRecentLambs.length} on ${mostRecentBirthdateStringFormatted}`;
   };
 
   const getAverageChildWeight = () => {
