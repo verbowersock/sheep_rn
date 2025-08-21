@@ -17,6 +17,18 @@ const ImagePickerComponent = ({ value, onChange }) => {
   const getPermissions = async () => {
     // Request camera permission
     await ImagePicker.requestCameraPermissionsAsync();
+    // // Request media library permission
+    // const { status } = await mediaLibrary.requestPermissionsAsync();
+    // if (status !== 'granted') {
+    //   console.warn('Media library permission not granted');
+    //   dispatch(
+    //     setShowSnackbar({
+    //       visible: true,
+    //       error: true,
+    //       message: "Media library permission not granted",
+    //     })
+    //   );
+    // }
   };
   
   getPermissions();
