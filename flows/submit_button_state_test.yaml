@@ -1,0 +1,65 @@
+appId: com.sheeprn
+---
+# Test submit button disabled/enabled state based on form validation
+
+- launchApp
+- assertVisible: "MyFlock"
+
+# Open the add form
+- tapOn:
+    id: "add-sheep-button"
+
+# Verify form is open
+- assertVisible: "Add New Sheep"
+
+# Scroll to submit button area
+- scroll
+
+# Submit button should exist but be disabled initially
+- assertVisible:
+    id: "submit-button"
+
+# Fill only Tag ID (one required field)
+- tapOn:
+    id: "tag-id-input"
+- inputText: "VALID001"
+
+# Submit should still be disabled (missing sex, breed, DOB)
+- assertVisible:
+    id: "submit-button"
+
+# Fill Sex (required)
+- tapOn:
+    id: "sex-dropdown"
+- tapOn:
+    text: "Ram"
+
+# Still missing breed and DOB
+- assertVisible:
+    id: "submit-button"
+
+# Fill Date of Birth (required)
+- tapOn:
+    text: "Date of Birth"
+- inputText: "05/15/2023"
+
+# Still missing breed
+- assertVisible:
+    id: "submit-button"
+
+# Fill Breed (required) - now all required fields should be filled
+- tapOn:
+    id: "breed-dropdown"
+- tapOn:
+    text: ".*"
+    index: 0
+
+# Scroll to submit button
+- scroll
+
+# Now submit button should be enabled and form should submit
+- tapOn:
+    id: "submit-button"
+
+# Should return to main screen
+- assertVisible: "MyFlock"

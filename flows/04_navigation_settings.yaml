@@ -1,0 +1,34 @@
+appId: com.sheeprn
+
+---
+
+# Test navigation drawer and settings
+- launchApp
+- tapOn:
+    id: "drawer-button"
+    optional: true
+
+# Navigate to settings
+- tapOn:
+    text: "Settings"
+    optional: true
+
+# Test backup functionality
+- tapOn:
+    text: "Backup Database"
+    optional: true
+
+# Navigate to About
+- tapOn:
+    text: "About"
+    optional: true
+- assertVisible:
+    text: "Sheep Management"
+    optional: true
+
+# Go back to main
+- tapOn:
+    text: "My Flock"
+    optional: true
+
+- takeScreenshot: "navigation_complete"

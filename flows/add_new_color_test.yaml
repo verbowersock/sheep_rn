@@ -1,0 +1,73 @@
+appId: com.sheeprn
+---
+# Test adding new Color
+
+- launchApp
+- assertVisible: "MyFlock"
+
+# Open the add form
+- tapOn:
+    id: "add-sheep-button"
+
+# Fill required fields first
+- tapOn:
+    id: "tag-id-input"
+- inputText: "COLORTEST001"
+
+- tapOn:
+    id: "sex-dropdown" 
+- tapOn:
+    text: "Ram"
+
+# Test Date of Birth
+- tapOn:
+    text: "Date of Birth"
+- inputText: "01/15/2023"
+
+# Test Breed dropdown
+- tapOn:
+    id: "breed-dropdown"
+- tapOn:
+    text: ".*"
+    index: 0
+
+# Test Color dropdown - add new color
+- tapOn:
+    id: "color-dropdown"
+
+# Search for a new color that doesn't exist
+- tapOn:
+    text: "Search.*"
+- inputText: "TestColor123"
+
+# Should show "Add new" button since color doesn't exist
+- assertVisible:
+    text: "Add new|not found"
+    optional: true
+
+# Click Add new button
+- tapOn:
+    id: "add-new-color-button"
+    optional: true
+
+# Verify we can now select the new color
+- tapOn:
+    text: "TestColor123"
+    optional: true
+
+# Close the dropdown
+- tapOn:
+    text: ".*"
+    containsChild:
+      text: "Color"
+    optional: true
+
+# Scroll down to submit button
+- scroll
+
+# Submit the form
+- tapOn:
+    id: "submit-button"
+
+# Verify success
+- assertVisible: "MyFlock"

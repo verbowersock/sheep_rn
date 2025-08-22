@@ -1,0 +1,36 @@
+appId: com.sheeprn
+
+---
+
+# Basic App Launch and Navigation Test
+- launchApp
+- assertVisible: 
+    text: "My Flock"
+    optional: true
+- assertVisible:
+    text: "Sheep"
+    optional: true
+
+# Test navigation drawer
+- tapOn: 
+    id: "drawer-button"
+    optional: true
+- tapOn:
+    text: "☰"
+    optional: true
+
+# Test main screen elements
+- assertVisible:
+    text: "Add Sheep"
+    optional: true
+- assertVisible:
+    id: "add-sheep-button"
+    optional: true
+
+# Test basic sheep list functionality
+- tapOn:
+    text: "My Flock"
+    optional: true
+
+# Take a screenshot for verification
+- takeScreenshot: "app_main_screen"

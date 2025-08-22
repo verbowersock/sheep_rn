@@ -1,0 +1,45 @@
+appId: com.sheeprn
+
+---
+
+# Explore the app UI to understand its structure
+- launchApp
+- takeScreenshot: "initial_launch"
+
+# Wait for app to fully load
+- waitForAnimationToEnd
+
+# Take another screenshot after loading
+- takeScreenshot: "app_loaded"
+
+# Try to find any clickable elements by text patterns
+- tapOn:
+    text: ".*[Mm]enu.*"
+    optional: true
+- takeScreenshot: "after_menu_attempt"
+
+- tapOn:
+    text: ".*[Ss]heep.*"
+    optional: true
+- takeScreenshot: "after_sheep_tap"
+
+- tapOn:
+    text: ".*[Aa]dd.*"
+    optional: true
+- takeScreenshot: "after_add_tap"
+
+# Try swiping to reveal drawer
+- swipe:
+    start: "5%, 50%"
+    end: "95%, 50%"
+    optional: true
+- takeScreenshot: "after_swipe_right"
+
+# Try tapping in top-left corner (common location for hamburger menu)
+- tapOn:
+    point: "10%, 10%"
+    optional: true
+- takeScreenshot: "after_top_left_tap"
+
+# Final screenshot
+- takeScreenshot: "exploration_complete"

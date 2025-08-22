@@ -1,0 +1,31 @@
+appId: com.sheeprn
+---
+- launchApp
+- assertVisible: "MyFlock"
+
+# Test add sheep functionality using testID
+- tapOn:
+    id: "add-sheep-button"
+
+# Test adding a sheep photo
+- tapOn:
+    id: "image-picker-fab"
+
+#Test taking a photo
+- tapOn:
+    id: "take-photo-button" 
+- wait: 2000  # Wait for camera to open
+- tapOn:
+    id: "camera-capture-button"
+- wait: 2000  # Wait for photo to be taken
+- tapOn:
+    id: "image-picker-done-button"
+- wait: 2000  # Wait for image to be processed        
+
+# Take a screenshot
+- takeScreenshot: "add_sheep_test.png"
+
+# Try to find and tap an add button
+- tapOn:
+    text: ".*"
+    optional: true

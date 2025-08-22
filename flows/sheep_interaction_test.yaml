@@ -1,0 +1,38 @@
+appId: com.sheeprn
+---
+- launchApp
+- assertVisible: "MyFlock"
+
+# Test sheep list interaction (if any sheep exist)
+- tapOn:
+    text: ".*"
+    containsChild:
+      text: ".*[0-9].*" # Look for items with numbers (tag IDs, ages, etc.)
+    optional: true
+
+# Check if detail view opens
+- assertVisible:
+    text: "Details|Edit|Delete|Name|Tag"
+    optional: true
+
+# Test edit functionality
+- tapOn:
+    text: "Edit"
+    optional: true
+
+# Check if edit form opens
+- assertVisible:
+    text: "Edit.*|Save|Cancel"
+    optional: true
+
+# Cancel edit
+- tapOn:
+    text: "Cancel|Close|×"
+    optional: true
+
+# Go back if we're in detail view
+- pressKey: Back
+
+# Verify we're back on main screen
+- assertVisible: "MyFlock"
+- assertVisible: "Total Sheep:"

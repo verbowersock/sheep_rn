@@ -7,6 +7,7 @@ const AddSheepBtn = ({ toggleModal, icon = "plus", style }) => {
   const styles = makeStyles(theme);
   return (
     <FAB
+      testID="add-sheep-button"
       icon={icon}
       style={[styles.fab, style]}
       onPress={toggleModal}

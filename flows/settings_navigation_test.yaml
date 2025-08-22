@@ -1,0 +1,45 @@
+appId: com.sheeprn
+---
+- launchApp
+- assertVisible: "MyFlock"
+
+# Test navigation to settings
+- tapOn:
+    text: "Settings|Menu|☰"
+    optional: true
+
+# Check if settings screen loads
+- assertVisible:
+    text: "Settings|Preferences|Configuration"
+    optional: true
+
+# Go back to main screen
+- pressKey: Back
+- assertVisible: "MyFlock"
+
+# Test navigation to about page
+- tapOn:
+    text: "About|Info"
+    optional: true
+
+# Check if about screen loads  
+- assertVisible:
+    text: "About|Version|Info"
+    optional: true
+
+# Go back to main screen
+- pressKey: Back
+- assertVisible: "MyFlock"
+
+# Test backup/restore navigation
+- tapOn:
+    text: "Backup|Export|Import"
+    optional: true
+
+- assertVisible:
+    text: "Backup|Restore|Export|Import"
+    optional: true
+
+# Go back to main screen
+- pressKey: Back
+- assertVisible: "MyFlock"

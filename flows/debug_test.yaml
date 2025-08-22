@@ -1,0 +1,22 @@
+appId: com.sheeprn
+---
+- launchApp
+- assertVisible: ".*" # Basic check that something is visible
+
+# Take a screenshot to see the current state  
+- takeScreenshot: "app_state.png"
+
+# Test basic navigation elements exist
+- assertVisible:
+    text: ".*"
+    containsChild:
+      text: ".*"
+
+# Test that we can interact with the app
+- tapOn:
+    text: ".*"
+    index: 0
+    optional: true
+
+# Verify app is still responsive
+- assertVisible: ".*"

@@ -64,6 +64,7 @@ const Item = ({ item, onPress, value, onLongPress }) => {
 };
 
 const MyDropdown = ({
+  testID,
   data,
   label,
   onChange,
@@ -360,6 +361,7 @@ const MyDropdown = ({
   return (
     <View style={styles.selectContainer}>
       <MyTextInput
+        testID={testID}
         error={error}
         ref={inputRef}
         label={label}
@@ -410,6 +412,7 @@ const MyDropdown = ({
               >
                 <IconButton
                   icon="close"
+                  testID="close-modal-button"
                   onPress={() => {
                     setModalOpen(false);
                   }}
@@ -422,6 +425,7 @@ const MyDropdown = ({
             )}
             {searchable && modalData.length > 0 && (
               <TextInput
+                testID={`${field}-search-input`}
                 accessible={true}
                 accessibilityLabel="Search"
                 ref={searchRef}
@@ -468,6 +472,7 @@ const MyDropdown = ({
                       to your {field}s.
                     </Text>
                     <Button
+                      testID={`add-new-${field}-button`}
                       buttonColor={theme.colors.primary}
                       loading={loading}
                       dark

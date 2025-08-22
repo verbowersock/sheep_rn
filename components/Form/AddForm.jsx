@@ -289,6 +289,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
+              testID="name-input"
               accessible={true}
               accessibilityLabel="Name input field"
               error={!!errors.name}
@@ -338,6 +339,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
+              testID="tag-id-input"
               accessible={true}
               accessibilityHint="Enter sheep Tag ID (required)"
               error={!!errors.tag_id}
@@ -379,6 +381,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
               accessible={true}
+              testID="scrapie-tag-id-input"
               accessibilityLabel="Scrapie Tag ID input field"
               error={!!errors.scrapie_id}
               label={"Scrapie Tag ID"}
@@ -407,6 +410,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              testID="sex-dropdown"
               accessible={true}
               accessibilityLabel="Sheep sex input field"
               error={!!errors.sex}
@@ -435,6 +439,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
               dateFormat={dateFormat}
+              testID="dob-input"
               accessible={true}
               accessibilityLabel="Date of Birth input field"
               error={!!errors.dob}
@@ -461,6 +466,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           render={({ field: { onChange, onBlur, value } }) => (
             <MyTextInput
               accessible={true}
+              testID="weight-input"
               accessibilityLabel="Weight input field"
               error={!!errors.weight_at_birth}
               label="Weight At Birth"
@@ -484,6 +490,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <DateTextInput
               dateFormat={dateFormat}
               accessible={true}
+              testID="dop-input"
               accessibilityLabel="Date of Purchase input field"
               error={!!errors.dop}
               label="Date of Purchase"
@@ -533,6 +540,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           render={({ field: { onChange, onBlur, value } }) => (
             <DateTextInput
               dateFormat={dateFormat}
+              testID="dod-input"
               accessible={true}
               accessibilityLabel="Date of Death field"
               error={!!errors.dod}
@@ -557,6 +565,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <MyDropdown
               accessible={true}
               accessibilityLabel="Sheep Sire"
+              testID="father-dropdown"
               error={!!errors.sire}
               data={males.filter((sheep) => sheep.id !== formData.sheep_id)}
               label="Father"
@@ -577,6 +586,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             <MyDropdown
               accessible={true}
               accessibilityLabel="Sheep Dam"
+              testID="mother-dropdown"
               error={!!errors.dam}
               data={females.filter((sheep) => sheep.id !== formData.sheep_id)}
               label={"Mother"}
@@ -600,6 +610,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              testID="breed-dropdown"
               accessible={true}
               accessibilityLabel="Breed Dropdown"
               error={!!errors.breed_id}
@@ -623,6 +634,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              testID="color-dropdown"
               accessible={true}
               accessibilityLabel="Color Dropdown"
               error={!!errors.color_id}
@@ -646,6 +658,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <MyDropdown
+              testID="marking-dropdown"
               accessible={true}
               accessibilityLabel="Marking Dropdown"
               error={!!errors.marking_id}
@@ -661,6 +674,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
 
         <View style={styles.buttonContainer}>
           <Button
+            testID="cancel-button"
             mode="outlined"
             outlineColor={theme.colors.primary}
             textColor={theme.colors.primary}
@@ -673,6 +687,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
             Cancel
           </Button>
           <Button
+            testID="submit-button"
             loading={loading}
             buttonColor={theme.colors.primary}
             dark
