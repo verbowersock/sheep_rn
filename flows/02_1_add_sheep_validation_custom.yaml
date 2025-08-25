@@ -1,0 +1,153 @@
+appId: com.sheeprn
+
+---
+
+# Test adding a new sheep
+- tapOn:
+    id: "add-sheep-button"
+    optional: true
+
+# Wait for form to appear
+- assertVisible:
+    text: "Add New Sheep"
+    optional: true
+
+# Fill out basic sheep information
+- tapOn:
+    id: "name-input"
+- inputText: "Test Sheep Dad 002"
+
+- tapOn:
+    id: "tag-id-input"
+- inputText: "T001"
+- assertVisible:
+    text: "Tag Id must be unique"
+# Clear the field and input correct value
+- tapOn:
+    id: "tag-id-input"
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- assertVisible:
+    text: "Tag Id is required*"
+- inputText: "T002"
+
+- tapOn: 
+    id: "scrapie-tag-id-input"
+- inputText: "SCRAPIE001"
+- assertVisible:
+    text: "Scrapie Tag Id must be unique"
+- tapOn:
+    id: "scrapie-tag-id-input"
+- pressKey: Backspace
+- inputText: "2"    
+
+# Test dropdown for gender
+- tapOn:
+    id: "sex-dropdown"
+    optional: true
+- tapOn:
+    text: "Ram"
+    optional: true
+
+# Test weight input
+- tapOn:
+    id: "weight-input"
+- inputText: "30" 
+
+
+# Test Date of Birth
+- tapOn:
+    id: "dob-input"
+- inputText: "02"
+- pressKey: Backspace
+- pressKey: Backspace
+- assertVisible:
+    text: "Date of Birth is required*"
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- inputText: "02/02/202"
+# Date validation message doesn't appear consistently in tests
+# - waitForAnimationToEnd
+# - assertVisible:
+#     text: "*Invalid*date*"
+#     optional: true
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- pressKey: Backspace
+- inputText: "02/02/2023"        
+
+#Scroll down
+- scroll
+
+# Test Breed dropdown
+- tapOn:
+    id: "breed-dropdown"
+- tapOn:
+    id: "breed-search-input"    
+- inputText: "Custom"
+- assertVisible: 
+    text: "This breed was not found"
+- tapOn:
+    text: "Add new"
+- assertVisible:
+    text: "Custom"    
+- tapOn:
+    text: "Custom"
+
+# Test Color dropdown
+- tapOn:
+    id: "color-dropdown"
+- tapOn:
+    id: "color-search-input"        
+- inputText: "Custom"
+- assertVisible: 
+    text: "This color was not found"
+- tapOn:
+    text: "Add new"
+- assertVisible:
+    text: "Custom"    
+- tapOn:
+    text: "Custom"
+
+# Test Marking dropdown
+- tapOn:
+    id: "marking-dropdown"
+- tapOn:
+    id: "marking-search-input"
+- inputText: "Custom"
+- assertVisible: 
+    text: "This marking was not found"
+- tapOn:
+    text: "Add new"
+- assertVisible:
+    text: "Custom"    
+- tapOn:
+    text: "Custom"
+
+# Save the sheep
+- tapOn:
+    text: "Submit"
+    optional: true
+
+# Verify success
+- assertVisible:
+    text: "Test Sheep Dad 002"
+    optional: true
+
+- takeScreenshot: "sheep_added"

@@ -39,6 +39,7 @@ const ImagePickerComponent = ({ value, onChange }) => {
       mediaTypes:  ['images'],
       quality: 1,
       base64: true,
+      allowsEditing: true
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const base64 = result.assets[0].base64;
@@ -53,6 +54,7 @@ const ImagePickerComponent = ({ value, onChange }) => {
     mediaTypes:  ['images'],
     quality: 1,
     base64: true,
+    allowsEditing: true
   });
   if (!result.canceled && result.assets && result.assets.length > 0) {
     const base64 = result.assets[0].base64;
