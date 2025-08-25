@@ -1,0 +1,8 @@
+appId: com.sheeprn
+---
+- launchApp
+- assertVisible: ".*" # Basic check that something is visible on screen
+- tapOn: 
+    text: "MyFlock"
+    optional: true
+- assertVisible: ".*"

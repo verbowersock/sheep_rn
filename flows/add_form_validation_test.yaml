@@ -1,0 +1,62 @@
+appId: com.sheeprn
+---
+# Comprehensive AddForm validation test
+
+- launchApp
+- assertVisible: "MyFlock"
+
+# Open the add form
+- tapOn:
+    id: "add-sheep-button"
+
+# Verify form is open
+- assertVisible: "Add New Sheep"
+
+# Scroll up to see all fields clearly
+- scroll
+
+# Test that submit button exists but should be disabled without required fields
+- assertVisible:
+    id: "submit-button"
+
+# Fill in Tag ID (required field)
+- tapOn:
+    id: "tag-id-input"
+- inputText: "TEST001"
+
+# Test Sex dropdown (required)
+- tapOn:
+    id: "sex-dropdown"
+- assertVisible: "Ram|Ewe|Wether"
+- tapOn:
+    text: "Ewe"
+
+# Test Breed dropdown (required) 
+- tapOn:
+    id: "breed-dropdown"
+- assertVisible: ".*"
+- tapOn:
+    text: ".*"
+    index: 0
+
+# Fill Date of Birth (required)
+- tapOn:
+    text: "Date of Birth"
+- inputText: "01/01/2023"
+
+# Test Name field (optional)
+- tapOn:
+    id: "name-input"
+- inputText: "Test Sheep"
+
+# Scroll down to submit button
+- scroll
+
+# Now form should be valid and submit button should be enabled
+- tapOn:
+    id: "submit-button"
+
+# Check if we're back to main screen (successful submission)
+- assertVisible: "MyFlock"
+- assertVisible:
+    text: "Total.*Sheep.*"

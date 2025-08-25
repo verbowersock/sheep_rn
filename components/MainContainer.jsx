@@ -212,6 +212,7 @@ const MainContainer = () => {
         >
           {!isDrawerOpen ? (
             <IconButton
+              testID="filter-menu-button"
               icon={() => (
                 <Entypo
                   name="sound-mix"
@@ -223,6 +224,7 @@ const MainContainer = () => {
             />
           ) : (
             <IconButton
+              testID="filter-menu-close-button"
               icon={() => (
                 <Entypo name="cross" size={24} color={theme.colors.secondary} />
               )}

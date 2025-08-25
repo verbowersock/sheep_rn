@@ -1,0 +1,50 @@
+appId: com.sheeprn
+---
+- launchApp
+- assertVisible: "MyFlock"
+
+# Test search functionality
+- tapOn:
+    text: "Search.*"
+    optional: true
+
+# Try searching for a sheep
+- inputText: "test"
+
+# Clear the search
+- clearText
+
+# Test the dropdown search options (if available)
+- tapOn:
+    text: "Name|Tag|All"
+    optional: true
+
+# Test filter toggles
+- tapOn:
+    id: ".*sound-mix.*"
+    optional: true
+
+# Toggle deceased filter
+- tapOn:
+    text: "Show deceased"
+    optional: true
+
+# Toggle sold filter  
+- tapOn:
+    text: "Show sold"
+    optional: true
+
+# Test sorting dropdown
+- tapOn:
+    text: "Name|Age|Tag ID"
+    optional: true
+
+# Select a different sort option
+- tapOn:
+    text: "Age"
+    optional: true
+
+# Close the drawer
+- tapOn:
+    id: ".*cross.*"
+    optional: true

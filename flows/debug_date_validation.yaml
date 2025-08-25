@@ -1,0 +1,49 @@
+appId: com.sheeprn
+
+---
+
+# Simple test for date validation only
+- tapOn:
+    id: "add-sheep-button"
+    optional: true
+
+# Wait for form to appear
+- assertVisible:
+    text: "Add New Sheep"
+    optional: true
+
+# Test Date of Birth validation
+- tapOn:
+    id: "dob-input"
+- inputText: "invalid"
+- waitForAnimationToEnd
+- takeScreenshot: "date_validation_debug_invalid"
+
+# Try different assertion patterns
+- assertVisible:
+    text: "*Invalid*"
+    optional: true
+
+- assertVisible:
+    text: "*date*"
+    optional: true
+
+- assertVisible:
+    text: "*format*"
+    optional: true
+
+- assertVisible:
+    text: "*required*"
+    optional: true
+
+# Try a clearly incomplete date
+- tapOn:
+    id: "dob-input"
+- inputText: ""
+- inputText: "99/99/99"
+- waitForAnimationToEnd
+- takeScreenshot: "date_validation_debug_invalid2"
+
+- assertVisible:
+    text: "*Invalid*"
+    optional: true

@@ -2,11 +2,12 @@ import { TextInput, useTheme } from "react-native-paper";
 import { StyleSheet } from "react-native";
 import { forwardRef } from "react";
 
-const MyTextInput = ({ ...rest }, ref) => {
+const MyTextInput = ({ testID, ...rest }, ref) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
   return (
     <TextInput
+      testID={testID}
       ref={ref}
       mode={"outlined"}
       outlineColor={theme.colors.primary}

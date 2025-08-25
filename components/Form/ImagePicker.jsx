@@ -78,6 +78,7 @@ const ImagePickerComponent = ({ value, onChange }) => {
 
       <FAB.Group
         open={open}
+        testID = "image-picker-fab"
         color={theme.colors.background}
         backgroundColor={theme.colors.secondary}
         fabStyle={{ backgroundColor: theme.colors.secondary }}
@@ -92,6 +93,7 @@ const ImagePickerComponent = ({ value, onChange }) => {
           {
             icon: "camera",
             color: "white",
+            testID: "take-photo-button",
             style: { 
               backgroundColor: theme.colors.secondary,
             },
@@ -102,6 +104,7 @@ const ImagePickerComponent = ({ value, onChange }) => {
           {
             icon: "folder-upload",
             color: "white",
+            testID: "upload-image-button",
             style: { 
               backgroundColor: theme.colors.secondary,
             },

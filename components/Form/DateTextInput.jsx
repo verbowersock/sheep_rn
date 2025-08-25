@@ -3,6 +3,7 @@ import { useTheme } from "react-native-paper";
 import MyTextInput from "./MyTextInput";
 
 const DateTextInput = ({
+  testID,
   label,
   field,
   onChangeText,
@@ -19,6 +20,7 @@ const DateTextInput = ({
 
   return (
     <MyTextInput
+      testID={testID}
       keyboardType="numeric"
       error={error}
       placeholder={label}

@@ -1,0 +1,19 @@
+appId: com.sheeprn
+---
+# Comprehensive test suite that runs basic smoke tests across the app
+
+- launchApp
+- assertVisible: "MyFlock"
+
+# 1. Verify main UI elements are present - use regex for flexibility
+- assertVisible: 
+    text: "Total.*Sheep.*|.*Sheep.*Total|[0-9]+"
+
+# 2. Test basic interactions work
+- scroll
+- scroll
+
+# 3. Verify app is still responsive
+- assertVisible: "MyFlock"
+
+# Test completed successfully if we reach this point

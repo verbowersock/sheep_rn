@@ -1,0 +1,62 @@
+appId: com.sheeprn
+---
+# Test adding new Breed
+
+- launchApp
+- assertVisible: "MyFlock"
+
+# Open the add form
+- tapOn:
+    id: "add-sheep-button"
+
+# Fill required fields first
+- tapOn:
+    id: "tag-id-input"
+- inputText: "BREEDTEST001"
+
+- tapOn:
+    id: "sex-dropdown"
+- tapOn:
+    text: "Ewe"
+
+# Test Date of Birth
+- tapOn:
+    text: "Date of Birth"
+- inputText: "02/01/2023"
+
+# Test Breed dropdown - add new breed
+- tapOn:
+    id: "breed-dropdown"
+
+# Search for a new breed that doesn't exist
+- tapOn:
+    text: "Search.*"
+- inputText: "TestBreed456"
+
+# Should show "Add new" button since breed doesn't exist
+- assertVisible:
+    text: "Add new|not found"
+    optional: true
+
+# Click Add new button
+- tapOn:
+    id: "add-new-breed-button"
+    optional: true
+
+# Verify we can now select the new breed
+- tapOn:
+    text: "TestBreed456"
+    optional: true
+
+# Close the dropdown
+- pressKey: Back
+
+# Scroll down to submit button
+- scroll
+
+# Submit the form
+- tapOn:
+    id: "submit-button"
+
+# Verify success
+- assertVisible: "MyFlock"

@@ -62,6 +62,7 @@ const SearchBar = ({ onQueryChange, onSearchTagChange }) => {
   return (
     <>
       <Searchbar
+        testID="search-bar"
         // mode="view"
         elevation={1}
         icon={() => CustomSearchIcon(theme.colors.secondary)}

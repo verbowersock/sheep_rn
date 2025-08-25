@@ -6,7 +6,11 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test:e2e": "maestro test flows/",
+    "test:e2e:android": "maestro test flows/",
+    "build:android": "expo run:android --variant release --no-install",
+    "install:android": "expo run:android --variant release --install-only"
   },
   "dependencies": {
     "@fortawesome/react-native-fontawesome": "^0.3.2",

@@ -1,0 +1,93 @@
+appId: com.sheeprn
+---
+# Comprehensive form field testing
+
+- launchApp
+- assertVisible: "MyFlock"
+
+# Open the add form
+- tapOn:
+    id: "add-sheep-button"
+
+# Test Name field (optional but with validation)
+- tapOn:
+    id: "name-input"
+- inputText: "   "  # Test whitespace validation
+- assertVisible:
+    text: "whitespace"
+    optional: true
+
+# Clear and enter valid name
+- tapOn:
+    id: "name-input"
+- inputText: ""
+- inputText: "Comprehensive Test Sheep"
+
+# Test Tag ID (required field)
+- tapOn:
+    id: "tag-id-input"
+- inputText: "COMP001"
+
+# Test Sex dropdown (required)
+- tapOn:
+    id: "sex-dropdown"
+- assertVisible: "Ram"
+- assertVisible: "Ewe" 
+- assertVisible: "Wether"
+- tapOn:
+    text: "Ewe"
+
+# Test Date of Birth (required)
+- tapOn:
+    text: "Date of Birth"
+- inputText: "invalid"  # Test invalid date
+- assertVisible:
+    text: "invalid|format"
+    optional: true
+
+# Enter valid date
+- tapOn:
+    text: "Date of Birth"
+- inputText: ""
+- inputText: "04/15/2023"
+
+# Test Weight field (optional)
+- tapOn:
+    text: "Weight"
+- inputText: "8.5"
+
+# Test Breed (required)
+- tapOn:
+    id: "breed-dropdown"
+- tapOn:
+    text: ".*"
+    index: 0
+
+# Test Color (optional)
+- tapOn:
+    id: "color-dropdown"
+- tapOn:
+    text: ".*"
+    index: 0
+    optional: true
+
+# Test Marking (optional)
+- tapOn:
+    id: "marking-dropdown" 
+- tapOn:
+    text: ".*"
+    index: 0
+    optional: true
+
+# Scroll down to submit button
+- scroll
+
+# Test form submission
+- tapOn:
+    id: "submit-button"
+
+# Verify success
+- assertVisible: "MyFlock"
+- assertVisible:
+    text: "successfully|added"
+    optional: true

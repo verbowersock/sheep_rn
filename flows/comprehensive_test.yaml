@@ -1,0 +1,49 @@
+appId: com.sheeprn
+---
+- launchApp
+- assertVisible: "MyFlock"
+
+# Test that total sheep count is visible
+- assertVisible: 
+    text: "Total.*Sheep.*|.*Sheep.*Total"
+
+# Test the filter/sort menu button using testID
+- tapOn:
+    id: "filter-menu-button"
+
+# Check if filter options appear
+- assertVisible:
+    text: "Show.*deceased|deceased"
+    optional: true
+
+- assertVisible:
+    text: "Show.*sold|sold"
+    optional: true
+
+# Close the menu using testID
+- tapOn:
+    id: "filter-menu-close-button"
+
+# Test search bar interaction using testID
+- tapOn:
+    id: "search-bar"
+
+# Input test search
+- inputText: "test"
+
+# Test add sheep functionality using testID
+- tapOn:
+    id: "add-sheep-button"
+
+# Scroll down and find the cancel button
+- scrollUntilVisible:
+    element:
+        text: "Cancel|Close|×"
+        optional: true
+
+- tapOn:
+    text: "Cancel|Close|×"
+
+
+# Verify we're back to main screen
+- assertVisible: "MyFlock"

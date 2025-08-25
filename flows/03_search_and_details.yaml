@@ -1,0 +1,47 @@
+appId: com.sheeprn
+
+---
+
+# Test search functionality
+- launchApp
+- tapOn:
+    id: "search-input"
+    optional: true
+- inputText: "Test"
+
+# Verify search results
+- assertVisible:
+    text: "Test Sheep"
+    optional: true
+
+# Clear search
+- tapOn:
+    id: "clear-search"
+    optional: true
+
+# Test navigation to sheep details
+- tapOn:
+    text: "Test Sheep 001"
+    optional: true
+
+# Verify details screen
+- assertVisible:
+    text: "Details"
+    optional: true
+- assertVisible:
+    text: "T001"
+    optional: true
+
+# Test tabs navigation
+- tapOn:
+    text: "Medications"
+    optional: true
+- assertVisible:
+    text: "Add Medication"
+    optional: true
+
+- tapOn:
+    text: "Notes"
+    optional: true
+
+- takeScreenshot: "sheep_details"

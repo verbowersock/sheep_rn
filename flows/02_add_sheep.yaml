@@ -1,0 +1,125 @@
+appId: com.sheeprn
+
+---
+
+# Test adding a new sheep
+- launchApp
+- tapOn:
+    id: "add-sheep-button"
+    optional: true
+
+# Wait for form to appear
+- assertVisible:
+    text: "Add New Sheep"
+    optional: true
+
+# Fill out basic sheep information
+- tapOn:
+    id: "name-input"
+- inputText: "Test Sheep Mom 001"
+
+- tapOn:
+    id: "tag-id-input"
+- inputText: "T001"
+
+- tapOn: 
+    id: "scrapie-tag-id-input"
+- inputText: "SCRAPIE001"
+
+# Test dropdown for gender
+- tapOn:
+    id: "sex-dropdown"
+    optional: true
+- tapOn:
+    text: "Ewe"
+    optional: true
+
+# Test weight input
+- tapOn:
+    id: "weight-input"
+- inputText: "50" 
+
+
+# Test Date of Birth
+- tapOn:
+    id: "dob-input"
+- inputText: "01/01/2023"    
+
+#Scroll down
+- scroll
+
+
+# Test Date of Purchase
+- tapOn:
+    id: "dop-input"
+- inputText: "02/01/2023"
+
+# Test Father input
+- tapOn:
+    id: "father-dropdown"
+- assertVisible: 
+    text: "No applicable.*|.*not found.*|.*no.*sires.*"
+    optional: true
+- tapOn: 
+    id: "close-modal-button"   
+- assertNotVisible:
+    text: "No applicable.*|.*not found.*|.*no.*sires.*"
+    optional: true    
+
+# Test Mother input
+- tapOn:
+    id: "mother-dropdown"
+- assertVisible: 
+    text: "No applicable.*|.*not found.*|.*no.*dams.*"
+    optional: true
+- tapOn: 
+    id: "close-modal-button"   
+- assertNotVisible:
+    text: "No applicable.*|.*not found.*|.*no.*dams.*"
+    optional: true    
+
+# Test Breed dropdown
+- tapOn:
+    id: "breed-dropdown"
+- tapOn:
+    id: "breed-search-input"    
+- inputText: "Shet"
+- assertVisible: "Shetland" 
+- tapOn:
+    text: "Shetland"
+    optional: true
+
+# Test Color dropdown
+- tapOn:
+    id: "color-dropdown"
+- tapOn:
+    id: "color-search-input"        
+- inputText: "Bl"
+- assertVisible: "Black"
+- tapOn:
+    text: "Black" 
+
+# Test Marking dropdown
+- tapOn:
+    id: "marking-dropdown"
+- tapOn:
+    id: "marking-search-input"
+- inputText: "Sol"
+- assertVisible: "Solid"
+- tapOn:
+    text: "Solid"
+    optional: true
+
+# Save the sheep
+- tapOn:
+    text: "Submit"
+    optional: true
+
+# Verify success
+- assertVisible:
+    text: "Test Sheep 001"
+    optional: true
+
+    
+
+- takeScreenshot: "sheep_added"
