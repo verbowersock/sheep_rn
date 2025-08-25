@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "sheep-rn",
+    "name": "My Flock - Sheep Management",
     "slug": "sheep-rn",
-    "version": "1.5.0",
+    "description": "Complete sheep management app for livestock tracking, breeding records, health monitoring, and flock database management.",
+    "version": "1.5.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
@@ -14,12 +15,11 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "keywords": [
+      "sheep", "livestock", "farm", "management", "breeding", "flock", "animal", "agriculture", "records", "tracking"
+    ],
     "android": {
       "package": "com.sheeprn",
-      "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ],
       "compileSdkVersion": 36,
       "targetSdkVersion": 36
     },

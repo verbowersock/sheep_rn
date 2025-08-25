@@ -816,11 +816,11 @@ export async function addMarking(val) {
 export async function deleteMarking(val) {
   try{
   const db = getDatabase();
-    await db.execAsync(
+    const result = await db.runAsync(
         `DELETE FROM markings WHERE id = ?`,
-        [val],
+        [val]
         )
-      return { changes: 1 }; // Simulate success response
+      return result;
   } catch (error) {
     throw error;
   }
@@ -829,11 +829,11 @@ export async function deleteMarking(val) {
 export async function deleteColor(val) {
   try{
   const db = getDatabase();
-    await db.execAsync(
+    const result = await db.runAsync(
         `DELETE FROM colors WHERE id = ?`,
-        [val],
+        [val]
         )
-    return { changes: 1 }; // Simulate success response
+    return result;
   } catch (error) {
     throw error;
   }
@@ -842,11 +842,11 @@ export async function deleteColor(val) {
 export async function deleteBreed(val) {
   try{
   const db = getDatabase();
-    await db.execAsync(
+    const result = await db.runAsync(
         `DELETE FROM breeds WHERE id = ?`,
-        [val],
+        [val]
         )
-        return { changes: 1 }; // Simulate success response
+        return result;
   } catch (error) {
     throw error;
   }
@@ -855,10 +855,11 @@ export async function deleteBreed(val) {
 export async function deleteSheep(val) {
   try{
   const db = getDatabase();
-    await db.execAsync(
-        `DELETE FROM sheep WHERE sheep_id = ?`,  [val]
+    const result = await db.runAsync(
+        `DELETE FROM sheep WHERE sheep_id = ?`,
+        [val]
     )
-    return { changes: 1 }; // Simulate success response
+    return result;
   } catch (error) {
     throw error;
   }
@@ -867,9 +868,8 @@ export async function removeSheepMed(id) {
   try {
     const db = getDatabase();
     
-    // Use execAsync instead of runAsync
-    await db.execAsync(`DELETE FROM sheep_meds WHERE id = ${id}`);
-    return { changes: 1 }; // Simulate success response
+    const result = await db.runAsync(`DELETE FROM sheep_meds WHERE id = ?`, [id]);
+    return result;
   } catch (error) {
     throw error;
   }
