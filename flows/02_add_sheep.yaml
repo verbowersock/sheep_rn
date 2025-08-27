@@ -117,7 +117,7 @@ appId: com.sheeprn
 
 # Verify success
 - assertVisible:
-    text: "Test Sheep 001"
+    text: "Test Sheep Mom 001"
     optional: true
 
     

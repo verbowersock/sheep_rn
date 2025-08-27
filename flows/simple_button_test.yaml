@@ -1,0 +1,14 @@
+appId: com.sheeprn
+
+---
+
+# Simple test to find and tap the add button
+- tapOn:
+    text: "Add Sheep"
+    optional: true
+
+- tapOn:
+    id: "fab"
+    optional: true
+
+- takeScreenshot: "current_screen"

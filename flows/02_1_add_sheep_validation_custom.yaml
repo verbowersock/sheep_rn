@@ -102,13 +102,14 @@ appId: com.sheeprn
     id: "breed-search-input"    
 - inputText: "Custom"
 - assertVisible: 
-    text: "This breed was not found"
+    text: ".*not found.*"
 - tapOn:
     text: "Add new"
 - assertVisible:
     text: "Custom"    
 - tapOn:
     text: "Custom"
+    index: 1
 
 # Test Color dropdown
 - tapOn:
@@ -117,13 +118,14 @@ appId: com.sheeprn
     id: "color-search-input"        
 - inputText: "Custom"
 - assertVisible: 
-    text: "This color was not found"
+    text: ".*not found.*"
 - tapOn:
     text: "Add new"
 - assertVisible:
     text: "Custom"    
 - tapOn:
     text: "Custom"
+    index: 1
 
 # Test Marking dropdown
 - tapOn:
@@ -132,13 +134,14 @@ appId: com.sheeprn
     id: "marking-search-input"
 - inputText: "Custom"
 - assertVisible: 
-    text: "This marking was not found"
+    text: ".*not found.*"
 - tapOn:
     text: "Add new"
 - assertVisible:
     text: "Custom"    
 - tapOn:
     text: "Custom"
+    index: 1
 
 # Save the sheep
 - tapOn:
