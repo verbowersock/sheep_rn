@@ -1,18 +1,14 @@
-import "react-native-gesture-handler";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SplashScreen from 'expo-splash-screen';
 
-import React, { useEffect } from "react";
-import { StyleSheet } from "react-native";
-
-import * as SplashScreen from "expo-splash-screen";
 import { useDispatch } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
 
 import {
-  addBasicData,
-  addMedicalData,
-  dropDbTablesAsync,
+  initializeDatabase, // Add this import
   fetchAllSheep,
-  init,
   insertBreedData,
   insertColorData,
   insertMarkingData,
@@ -35,19 +31,26 @@ import {
 
 export default function App() {
   const theme = useTheme();
-
   const dispatch = useDispatch();
+  const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState(null);
+
+
+  useEffect(() => {
+    console.log("isReady:", isReady);
+  }, [isReady]);
 
   async function initDb() {
     try {
-      await SplashScreen.preventAutoHideAsync();
-      await init(); // Initialize the database first
+
+      
+      // Initialize database FIRST
+      await initializeDatabase();
+      
       let currentSchemaVersion = await getCurrentSchemaVersion();
-      //const currentSchemaVersion = 2;
-      const expectedSchemaVersion = 4; // The version your app expects
+      const expectedSchemaVersion = 4;
 
       if (currentSchemaVersion === 0) {
-        // This is a new install, so set the schema version to the expected version
         await setCurrentSchemaVersion(expectedSchemaVersion);
         currentSchemaVersion = expectedSchemaVersion;
       }
@@ -56,44 +59,52 @@ export default function App() {
         await executeMigration();
         await updateSchemaVersion(expectedSchemaVersion);
       }
+
       try {
         await insertBreedData();
         await insertColorData();
         await insertMarkingData();
-        //await insertSheepData();
-
         await insertMedList();
         await insertVaxList();
-        //await insertMedData();
-        //await insertVaxData();
       } catch (e) {
-        console.log("!error", e);
+        SplashScreen.hide();
+        console.error("Error inserting initial data:", e);
       }
-      await fetchAllSheep()
-        .then((res) => {
-          dispatch(setSheep(res));
-        })
-        .then(() => SplashScreen.hideAsync());
+
+
+      const allSheep = await fetchAllSheep();
+      dispatch(setSheep(allSheep || []));
+      
+
+      setIsReady(true);
+      console.log("Database initialized and data inserted successfully.");
+      await SplashScreen.hideAsync();
+      console.log("Splash screen hidden successfully.");
     } catch (e) {
-      console.warn(e);
+      console.error("Database initialization error:", e);
+      setError(e.message);
+
+    setIsReady(true);
+          SplashScreen.hideAsync();
     }
   }
 
   useEffect(() => {
     initDb();
-  }, []);
+  }, []); 
 
-  return (
-    <NavigationContainer>
-      <DrawerNavigator />
-    </NavigationContainer>
-  );
+return (
+  <SafeAreaProvider>
+    {isReady ? (
+      <NavigationContainer>
+        <DrawerNavigator />
+      </NavigationContainer>
+    ) : (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        {error && <Text style={{ color: "red" }}>{error}</Text>}
+      </View>
+    )}
+  </SafeAreaProvider>
+);
 }
-
-const makeStyles = (theme) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-  });

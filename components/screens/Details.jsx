@@ -11,9 +11,7 @@ import {
   StyleSheet,
   Text,
   View,
-  Tag,
 } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { IconButton, SegmentedButtons, useTheme } from "react-native-paper";
 import { age } from "../utils/Age";
 import {
@@ -49,13 +47,16 @@ import {
   sheepDataSelector,
 } from "../../store/slices/sheep";
 import AddSheepBtn from "../AddSheepBtn";
-import RNHTMLtoPDF from "react-native-html-to-pdf";
-import RNFS from "react-native-fs";
-import FileViewer from "react-native-file-viewer";
 import { htmlContent } from "./HTMLforPDF";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Dimensions } from "react-native";
 import { settingsSelector } from "../../store/slices/settings";
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
+import * as WebBrowser from 'expo-web-browser';
+import * as Sharing from 'expo-sharing';
+import { printToFileAsync } from 'expo-print';
+import * as Print from 'expo-print';
 
 const Details = ({ route }) => {
   const theme = useTheme();
@@ -192,7 +193,7 @@ const Details = ({ route }) => {
           <ScrollView>
             {sheepChildren.map((child, index) => {
               return (
-                <TouchableOpacity
+                <Pressable
                   key={index}
                   onPress={() => {
                     navigation.navigate("Details", child);
@@ -204,7 +205,7 @@ const Details = ({ route }) => {
                   >
                     {child.name ? child.name : child.tag_id}
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               );
             })}
           </ScrollView>
@@ -228,17 +229,26 @@ const Details = ({ route }) => {
   };
 
   const getMostRecentNumberOfChildren = () => {
-    const mostRecentBirthdate = max(
-      sheepChildren.map((child) => parse(child.dob, "MM/dd/yyyy", new Date()))
-    );
-    const mostRecentBirthdateString = format(mostRecentBirthdate, "MM/dd/yyyy");
+  const mostRecentBirthdate = max(
+    sheepChildren
+      .map((child) => parse(child.dob, "MM/dd/yyyy", new Date()))
+      .filter(date => !isNaN(date))
+  );
+  if (!mostRecentBirthdate || isNaN(mostRecentBirthdate)) return "NA";
+   const mostRecentBirthdateString = format(mostRecentBirthdate, "MM/dd/yyyy");
+
+  const mostRecentBirthdateStringFormatted = dateDisplayFormatter(
+    format(mostRecentBirthdate, "MM/dd/yyyy"),
+    dateFormat,
+    monthFormat
+  );
     // Get the puppies in the most recent litter
     const mostRecentLambs = sheepChildren.filter(
       (child) => child.dob === mostRecentBirthdateString
     );
 
     // Get the number of lambs in the most recent litter
-    return `${mostRecentLambs.length} on ${mostRecentBirthdateString}`;
+    return `${mostRecentLambs.length} on ${mostRecentBirthdateStringFormatted}`;
   };
 
   const getAverageChildWeight = () => {
@@ -614,59 +624,38 @@ const Details = ({ route }) => {
 
   const pdfName = name ? name : tag_id;
 
-  async function checkPermissions() {
-    if (Platform.constants["Release"] >= 13) {
-      return true;
-    } else {
-      let granted;
-      try {
-        granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: "myFlock App Permission",
-            message: "This app needs permission to acess storage.",
-            buttonNeutral: "Ask Me Later",
-            buttonNegative: "Cancel",
-            buttonPositive: "OK",
-          }
-        );
-      } catch (err) {
-        console.warn(err);
-        alert("No permission to access storage");
-      }
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    }
-  }
-
   const createPDF = async () => {
-    let formattedSheepMeds = sheepMeds.map((item) => ({
-      ...item,
-      date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
-    }));
+    try {
+      // Format the data
+      let formattedSheepMeds = sheepMeds.map((item) => ({
+        ...item,
+        date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
+      }));
 
-    let formattedSheepVax = sheepVax.map((item) => ({
-      ...item,
-      date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
-    }));
-    let formattedLastWeight;
-    if (lastWeight.entry) {
-      formattedLastWeight = {
-        entry: `${lastWeight.entry}${unitFormat}`,
-        date: dateDisplayFormatter(lastWeight.date, dateFormat, monthFormat),
-      };
-    } else {
-      formattedLastWeight = lastWeight;
-    }
+      let formattedSheepVax = sheepVax.map((item) => ({
+        ...item,
+        date: dateDisplayFormatter(item.date, dateFormat, monthFormat),
+      }));
+      
+      let formattedLastWeight;
+      if (lastWeight.entry) {
+        formattedLastWeight = {
+          entry: `${lastWeight.entry}${unitFormat}`,
+          date: dateDisplayFormatter(lastWeight.date, dateFormat, monthFormat),
+        };
+      } else {
+        formattedLastWeight = lastWeight;
+      }
 
-    let formattedWeightAtBirth;
-    if (weight_at_birth) {
-      formattedWeightAtBirth = `${weight_at_birth}${unitFormat}`;
-    } else {
-      formattedWeightAtBirth = "NA";
-    }
+      let formattedWeightAtBirth;
+      if (weight_at_birth) {
+        formattedWeightAtBirth = `${weight_at_birth}${unitFormat}`;
+      } else {
+        formattedWeightAtBirth = "NA";
+      }
 
-    let options = {
-      html: htmlContent({
+      // Generate PDF using Expo Print
+      const htmlString = htmlContent({
         ...this_sheep,
         dod: dateDisplayFormatter(dod, dateFormat, monthFormat),
         dob: dateDisplayFormatter(dob, dateFormat, monthFormat),
@@ -685,45 +674,63 @@ const Details = ({ route }) => {
         formattedLastWeight,
         formattedSheepMeds,
         formattedSheepVax,
-      }),
-      fileName: pdfName,
-      directory: "Download",
-    };
+      });
+      
+      // Use Expo Print to generate PDF
+      const { uri } = await printToFileAsync({
+        html: htmlString,
+        width: 612,  // Letter size width in points
+        height: 792, // Letter size height in points
+        margins: {
+          left: 40,
+          top: 40,
+          right: 40,
+          bottom: 40,
+        },
+      });
 
-    let file = await RNHTMLtoPDF.convert(options);
-    if (await checkPermissions()) {
-      try {
-        const destPath = `${RNFS.DownloadDirectoryPath}/${options.fileName}.pdf`;
 
-        RNFS.moveFile(file.filePath, destPath)
-          .then(() => {
-            Alert.alert(
-              "File Saved",
-              "Your document is located in your downloads folder"
-            ),
-              // Open the file
-              FileViewer.open(destPath)
-                .then(() => {
-                  // success
-                })
-                .catch((error) => {
-                  // error
-                });
-          })
-          .catch((err) => {
-            alert("Something went wrong! Please try again");
-            console.log("Error moving file: ", err);
-          });
-      } catch (err) {
-        alert("Something went wrong! Please try again");
-        console.log("Error moving file: ", err);
-      }
+      // Create a permanent copy with custom filename
+      const finalFileName = `${pdfName}_${format(new Date(), 'dd_MM_yyyy_HHmmss')}.pdf`;
+      const permanentPath = `${FileSystem.cacheDirectory}${finalFileName}`;
+      
+      await FileSystem.copyAsync({
+        from: uri,
+        to: permanentPath,
+      });
+
+      // Simply offer to share the PDF
+      Alert.alert(
+        "PDF Created Successfully",
+        "Your sheep report is ready. Choose an option:",
+        [
+          {
+            text: 'Share PDF',
+            onPress: () => Sharing.shareAsync(permanentPath, { 
+              mimeType: 'application/pdf',
+              dialogTitle: `Share ${pdfName} Report`
+            }),
+          },
+          {
+            text: 'Print or Save',
+            onPress: () => Print.printAsync({ html: htmlString }),
+          },
+          {
+            text: 'Close',
+            style: 'cancel',
+          },
+        ]
+      );
+
+    } catch (error) {
+      console.error('Error with PDF:', error);
+      Alert.alert('Error', 'Failed to generate PDF report');
     }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      <Pressable
         style={{
           backgroundColor: theme.colors.secondary,
           padding: 7,
@@ -740,7 +747,7 @@ const Details = ({ route }) => {
           {"  "}
           Export data
         </Text>
-      </TouchableOpacity>
+      </Pressable>
       <View style={styles.imageContainer}>
         <Image
           source={
@@ -879,3 +886,4 @@ const makeStyles = (theme) =>
   });
 
 export default Details;
+

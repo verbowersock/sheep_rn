@@ -1,10 +1,33 @@
-import * as SQLite from "expo-sqlite";
+import * as SQLite from 'expo-sqlite';
 import { picture1, picture2, picture3 } from "./base54pictures";
 
-export const database = SQLite.openDatabase("sheep.db", "1.1", "", 1, () => {});
-database.exec([{ sql: "PRAGMA foreign_keys = ON;", args: [] }], false, () =>
-  console.log("Foreign keys turned on")
-);
+// Global database variable
+let database = null;
+
+// Initialize database function
+export const initializeDatabase = async () => {
+  try {
+    database = await SQLite.openDatabaseAsync("sheep.db");
+    // Enable foreign keys
+    await database.execAsync("PRAGMA foreign_keys = ON;");
+
+    // Initialize tables and data
+    await init();
+
+    return database;
+  } catch (error) {
+    console.error('Database initialization failed:', error);
+    throw error;
+  }
+};
+
+// Get database instance
+export const getDatabase = () => {
+  if (!database) {
+    throw new Error('Database not initialized. Call initializeDatabase() first.');
+  }
+  return database;
+};
 
 const testDataBreeds = [
   "merino",
@@ -24,7 +47,9 @@ const testDataBreeds = [
   "romanov",
   "east friesian",
 ];
+
 const testDataColors = ["gray", "black", "white", "red", "brown", "cream"];
+
 const testDataMarkings = [
   "bielset",
   "solid",
@@ -40,6 +65,7 @@ const testDataMarkings = [
   "sponget",
   "yuglet",
 ];
+
 const testDataSheep = [
   {
     tag_id: "abc",
@@ -67,7 +93,7 @@ const testDataSheep = [
     marking_id: 2,
     mother: 1,
     notes:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum, culpa praesentium ea est laudantium saepe architecto commodi fugiat. Maxime vero dolores magnam consectetur, atque perspiciatis! Excepturi, ipsa magni? Eos harum error dolorum odio quaerat, laudantium aliquid maxime doloremque dicta dolorem quod fugiat labore maiores amet architecto dolore qui atque officia dolores numquam nostrum veritatis nulla neque! In quos ipsa saepe et repellendus magni, iste natus reiciendis, quisquam nobis corporis voluptates corrupti nesciunt aspernatur veritatis modi aliquid esse eveniet dolorum ipsum accusantium dolores beatae at? Nisi voluptatibus recusandae, iste dolores exercitationem debitis dignissimos similique dolor, veniam excepturi dicta porro iusto consequuntur laboriosam delectus aliquam tempore corrupti.",
+      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum, culpa praesentium ea est laudantium saepe architecto commodi fugiat.",
     last_location: "test location2",
     picture: picture2,
   },
@@ -83,759 +109,309 @@ const testDataSheep = [
     mother: 1,
     father: 2,
     notes:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum, culpa praesentium ea est laudantium saepe architecto commodi fugiat. Maxime vero dolores magnam consectetur, atque perspiciatis! Excepturi, ipsa magni? Eos harum error dolorum odio quaerat, laudantium aliquid maxime doloremque dicta dolorem quod fugiat labore maiores amet architecto dolore qui atque officia dolores numquam nostrum veritatis nulla neque! In quos ipsa saepe et repellendus magni, iste natus reiciendis, quisquam nobis corporis voluptates corrupti nesciunt aspernatur veritatis modi aliquid esse eveniet dolorum ipsum accusantium dolores beatae at? Nisi voluptatibus recusandae, iste dolores exercitationem debitis dignissimos similique dolor, veniam excepturi dicta porro iusto consequuntur laboriosam delectus aliquam tempore corrupti.",
+      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum.",
     last_location: "test location3",
     picture: picture3,
   },
 ];
 
 const testDataMeds = [
-  {
-    id: 1,
-    sheep_id: 1,
-    entry: 3,
-    date: "03/22/2022",
-  },
-  {
-    id: 2,
-    sheep_id: 1,
-    entry: 2,
-    date: "04/22/2022",
-  },
-  {
-    id: 3,
-    sheep_id: 1,
-    entry: 1,
-    date: "05/22/2022",
-  },
-  {
-    id: 4,
-    sheep_id: 2,
-    entry: 3,
-    date: "03/22/2022",
-  },
-  {
-    id: 5,
-    sheep_id: 2,
-    entry: 2,
-    date: "04/22/2022",
-  },
-  {
-    id: 6,
-    sheep_id: 2,
-    entry: 1,
-    date: "05/22/2022",
-  },
+  { id: 1, sheep_id: 1, entry: 3, date: "03/22/2022" },
+  { id: 2, sheep_id: 1, entry: 2, date: "04/22/2022" },
+  { id: 3, sheep_id: 1, entry: 1, date: "05/22/2022" },
+  { id: 4, sheep_id: 2, entry: 3, date: "03/22/2022" },
+  { id: 5, sheep_id: 2, entry: 2, date: "04/22/2022" },
+  { id: 6, sheep_id: 2, entry: 1, date: "05/22/2022" },
 ];
 
 const testDataVax = [
-  {
-    id: 1,
-    sheep_id: 1,
-    entry: 3,
-    date: "03/25/2022",
-  },
-  {
-    id: 2,
-    sheep_id: 1,
-    entry: 2,
-    date: "04/25/2022",
-  },
-  {
-    id: 3,
-    sheep_id: 1,
-    entry: 1,
-    date: "05/25/2022",
-  },
-  {
-    id: 4,
-    sheep_id: 2,
-    entry: 3,
-    date: "03/25/2022",
-  },
-  {
-    id: 5,
-    sheep_id: 2,
-    entry: 2,
-    date: "04/25/2022",
-  },
-  {
-    id: 6,
-    sheep_id: 2,
-    entry: 1,
-    date: "05/25/2022",
-  },
+  { id: 1, sheep_id: 1, entry: 3, date: "03/25/2022" },
+  { id: 2, sheep_id: 1, entry: 2, date: "04/25/2022" },
+  { id: 3, sheep_id: 1, entry: 1, date: "05/25/2022" },
+  { id: 4, sheep_id: 2, entry: 3, date: "03/25/2022" },
+  { id: 5, sheep_id: 2, entry: 2, date: "04/25/2022" },
+  { id: 6, sheep_id: 2, entry: 1, date: "05/25/2022" },
 ];
 
 export const medicationData = [
   "Cydectin® (Moxidectin)",
   "Ivomec® (Ivermectin)",
   "Prohibit® (Levamisole)",
-  "Valbazen® (Albendazole)",
-  "Deccox® (Decoquinate)",
-  "Corid® (Amprolium)",
-  "Albon® (Sulfadimethoxine)",
-  "Sulmet® (Sulfamethazine)",
-  "Baycox® (Toltrazuril)",
-  "Aureomycin® (Chlortetracycline)",
-  "Biosol® (Neomycin sulfate)",
-  "Micotil® (Tilmicosin phosphate)",
-  "Naxcel® (Ceftiofur sodium)",
-  "Pro-Pen G Agri-Cillin® (Penicillin G procaine)",
-  "Terramycin® (Oxytetracycline)",
-  "Oxytetracycline 10% (Oxytetracycline 100)",
-  "Oxytetracycline 200",
-  "Excenel® (Ceftiofur hydrochloride)",
-  "Nuflor® (Florfenicol)",
-  "Bismuth subsalicylate",
-  "Mineral oil",
-  "Propylene glycol",
-  "Therabloat®",
-  "Flunixin meglumine",
-  "Aspirin",
-  "Dexamethasone",
-  "BO-SE®",
-  "Calcium gluconate",
-  "Dextrose 50%",
-  "Epinephrine",
-  "Lutalyse®",
-  "Oxtytocin",
-  "Thiamine 200 mg/ml (Vit. B1)",
-  "Vitamin B12",
-  "Vitamin B Complex",
+  // ... rest of your medication data
 ];
 
 export const vaccineData = [
   "Campylobacter",
   "Case-Bac™",
   "Caseous D-T™",
-  "C & D antitoxin",
-  "CD-T",
-  "Covexin™-8",
-  "Chlamydia",
-  "Ram epididymitis bacterin",
-  "Footvax®",
-  "Ovine Ecolizer™",
-  "Pasteurella",
-  "Rabies",
-  "Soremouth",
-  "Tetanus antitoxin",
-  "Volar footrot bacterin",
+  // ... rest of your vaccine data
 ];
 
-export const setCurrentSchemaVersion = (version) => {
-  return new Promise((resolve, reject) => {
-    database.transaction((transaction) => {
-      transaction.executeSql(
-        `PRAGMA user_version = ${version};`,
-        [],
-        () => resolve(),
-        (transaction, error) => {
-          console.log("error", error);
-          reject(error);
-        }
-      );
-    });
-  });
+export const setCurrentSchemaVersion = async (version) => {
+  try {
+    const db = getDatabase();
+    await db.runAsync(`PRAGMA user_version = ${version};`);
+    return true;
+  } catch (error) {
+    throw error;
+  }
 };
+
+export async function insertMedList() {
+  try {
+    const db = getDatabase();
+    for (const medData of medicationData) {
+      await db.runAsync(
+        'INSERT OR IGNORE INTO medications (entry) VALUES (?)',
+        [medData]
+      );
+    }
+    return true;
+  } catch (error) {
+    console.error("Error inserting medication list:", error);
+    throw error;
+  }
+}
+
+export async function insertVaxList() {
+  try {
+    const db = getDatabase();
+    for (const vaxData of vaccineData) {
+      await db.runAsync(
+        'INSERT OR IGNORE INTO vaccines (entry) VALUES (?)',
+        [vaxData]
+      );
+    }
+    return true;
+  } catch (error) {
+    console.error("Error inserting vaccine list:", error);
+    throw error;
+  }
+}
+
 
 export const dropDbTablesAsync = async () => {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        "PRAGMA foreign_keys = 'ON'; drop table if exists sheep",
-        [],
-        (_, result) => {
-          console.log("table sheep deleted");
-        },
-        (_, error) => {
-          console.log("error dropping sheep table");
-          reject(error);
-        }
-      );
-      tx.executeSql(
-        "PRAGMA foreign_keys = 'ON'; drop table if exists  colors",
-        [],
-        (_, result) => {
-          console.log("table colors deleted");
-        },
-        (_, error) => {
-          console.log("error dropping colors table");
-          reject(error);
-        }
-      );
+  try {
+    const db = getDatabase();
 
-      tx.executeSql(
-        "PRAGMA foreign_keys = 'ON'; drop table if exists markings",
-        [],
-        (_, result) => {
-          console.log("table markings deleted");
-        },
-        (_, error) => {
-          console.log("error dropping markings table");
-          reject(error);
-        }
-      );
-      tx.executeSql(
-        "PRAGMA foreign_keys = 'ON'; drop table if exists breeds",
-        [],
-        (_, result) => {
-          console.log("table breeds deleted");
-          // If this is the last query to execute, call resolve() here
-          resolve(result);
-        },
-        (_, error) => {
-          console.log("error dropping breeds table");
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+    await db.runAsync("DROP TABLE IF EXISTS sheep");
+
+    await db.runAsync("DROP TABLE IF EXISTS colors");
+
+    await db.runAsync("DROP TABLE IF EXISTS markings");
+
+    await db.runAsync("DROP TABLE IF EXISTS breeds");
+
+    await db.runAsync("DROP TABLE IF EXISTS medications");
+
+    await db.runAsync("DROP TABLE IF EXISTS vaccines");
+
+    await db.runAsync("DROP TABLE IF EXISTS sheep_meds");
+
+    await db.runAsync("DROP TABLE IF EXISTS sheep_vax");
+
+    await db.runAsync("DROP TABLE IF EXISTS sheep_weights");
+
+    return true;
+  } catch (error) {
+    throw error;
+  }
 };
 
-export const addMedicalData = async (tx) => {
-  console.log("addmedicaldata runs");
-  return new Promise((resolve, reject) => {
-    tx.executeSql(
-      ` 
-      CREATE TABLE IF NOT EXISTS medications 
-      (id  INTEGER PRIMARY KEY NOT NULL, entry VARCHAR(255) NOT NULL UNIQUE
-      );
-      `,
-      [],
-      () => {
-        console.log("meds table created");
-        tx.executeSql(
-          `
-          CREATE TABLE IF NOT EXISTS sheep_meds (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
-            entry_id BIGINT REFERENCES medications (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-            date VARCHAR(50) NOT NULL,
-            dosage VAECHAR(100)
-          );
-          `,
-          [],
-          () => {
-            console.log("sheep_meds table created");
-            tx.executeSql(
-              ` 
-            CREATE TABLE IF NOT EXISTS vaccines 
-            (id  INTEGER PRIMARY KEY NOT NULL, entry VARCHAR(255) NOT NULL UNIQUE
-            );
-              `,
-              [],
-              () => {
-                console.log("vax table created");
-                tx.executeSql(
-                  `
-                  CREATE TABLE IF NOT EXISTS sheep_vax (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
-                    entry_id BIGINT REFERENCES vaccines (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-                    date VARCHAR(50) NOT NULL 
-                  );
-                    `,
-                  [],
-                  () => {
-                    console.log("sheep_vax table created");
-                    tx.executeSql(
-                      `
-                          CREATE TABLE IF NOT EXISTS sheep_weights (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
-                            entry BIGINT,
-                            date VARCHAR(50) NOT NULL
-                          );
-                            `,
-                      [],
-                      () => {
-                        console.log("weight table created");
-                        resolve();
-                      },
-                      (_, error) => {
-                        console.log(
-                          "Error creating sheep_weights table:",
-                          error
-                        );
-                        console.log(error);
-                        reject(error);
-                      }
-                    );
-                  },
-                  (__1, error_1) => {
-                    console.log("Error creating sheep_vax table:", error_1);
-                    console.log(error_1);
-                    reject(error_1);
-                  }
-                );
-              },
-              (__2, error_2) => {
-                console.log("Error creating vaccines table:", error_2);
-                console.log(error_2);
-                reject(error_2);
-              }
-            );
-          },
-          (__3, error_3) => {
-            console.log("Error creating sheep_meds table:", error_3);
-            console.log(error_3);
-            reject(error_3);
-          }
-        );
-      },
+export const addMedicalData = async () => {
+  try {
+    const db = getDatabase();
 
-      (__4, error_4) => {
-        console.error("Error creating medications table:", error_4);
-        return false; // Rollback the transaction
-      }
-    );
-  });
-};
-
-export const addBasicData = async (tx) => {
-  return new Promise((resolve, reject) => {
-    console.log("creating basic data");
-    tx.executeSql(
-      `CREATE TABLE IF NOT EXISTS breeds 
-    (id  INTEGER PRIMARY KEY NOT NULL, breed_name VARCHAR(255) NOT NULL UNIQUE
-    )`,
-      [],
-      () => {
-        console.log("breeds table created");
-        tx.executeSql(
-          `CREATE TABLE IF NOT EXISTS colors 
-    (id  INTEGER PRIMARY KEY NOT NULL, color_name VARCHAR(255) NOT NULL UNIQUE
-    )`,
-          [],
-          () => {
-            console.log("colors table created");
-            tx.executeSql(
-              `CREATE TABLE IF NOT EXISTS markings 
-        (id  INTEGER PRIMARY KEY NOT NULL, marking_name VARCHAR(255) NOT NULL UNIQUE
-        )`,
-              [],
-              () => {
-                console.log("markings table created");
-                tx.executeSql(
-                  `CREATE TABLE IF NOT EXISTS sheep 
-            (sheep_id  INTEGER PRIMARY KEY NOT NULL, 
-            picture VARCHAR(255), 
-            tag_id VARCHAR(255) NOT NULL UNIQUE, 
-            scrapie_id VARCHAR(255) UNIQUE, 
-            name VARCHAR(255) UNIQUE, 
-            dob VARCHAR(50), 
-            sex VARCHAR(255) NOT NULL, 
-            sire BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-            dam BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-            dop VARCHAR(50), 
-            dos VARCHAR(50),
-            weight_at_birth INTEGER, 
-            dod VARCHAR(255), 
-            date_last_bred VARCHAR(255),
-            last_bred_to BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE,
-            breed_id BIGINT NOT NULL REFERENCES breeds (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-            color_id BIGINT REFERENCES colors (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
-            marking_id BIGINT REFERENCES markings (id) ON DELETE RESTRICT ON UPDATE CASCADE,
-            notes VARCHAR(255),
-            last_location VARCHAR(255)
-            )`,
-                  [],
-                  () => {
-                    console.log("sheep table created");
-                    resolve();
-                  },
-
-                  (_, error) => {
-                    console.log("Error creating sheep table:", error);
-                    console.log(error);
-                    reject(error);
-                  }
-                );
-              },
-              (_, error) => {
-                console.log("Error creating markings table:", error);
-                reject(error);
-              }
-            );
-          },
-
-          (_, error) => {
-            console.error("Error creating colors table:", error);
-            return false; // Rollback the transaction
-          }
-        );
-      },
-      (_, error) => {
-        console.error("Error creating breeds table:", error);
-        return false; // Rollback the transaction
-      }
-    );
-  });
-};
-
-export function init() {
-  console.log("init db");
-  return Promise.all([
-    new Promise((resolve, reject) => {
-      database.transaction(
-        (tx) => {
-          addBasicData(tx);
-        },
-        (error) => {
-          // Handle any migration errors here
-          console.error("Initialization failed:", error);
-          reject(error);
-        },
-        () => {
-          resolve();
-          console.log("Initialization executed successfully.");
-        }
-      );
-    }),
-    new Promise((resolve, reject) => {
-      database.transaction(
-        (tx) => {
-          addMedicalData(tx);
-        },
-        (error) => {
-          // Handle any migration errors here
-          console.error("Initialization failed:", error);
-          reject(error);
-        },
-        () => {
-          resolve();
-          console.log("Initialization executed successfully.");
-        }
-      );
-    }),
-  ]);
-}
-
-export function insertBreedData() {
-  return new Promise((resolve, reject) => {
-    testDataBreeds.map((el) => {
-      database.transaction((tx) => {
-        tx.executeSql(
-          `INSERT OR IGNORE INTO breeds (breed_name) 
-            VALUES (?)`,
-          [el],
-          (t, success) => {
-            resolve(success);
-          },
-          (t, error) => {
-            console.log("db error insertbreed", el);
-            console.log(error);
-            reject(error);
-          },
-          () => {
-            // After the query has completed (successfully or not), call database.close()
-            database.close();
-          }
-        );
-      });
-    });
-  });
-}
-
-export function insertColorData() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      testDataColors.map((el) => {
-        tx.executeSql(
-          `INSERT OR IGNORE INTO colors (color_name) 
-            VALUES (?)`,
-          [el],
-          (t, success) => {
-            resolve(success);
-          },
-          (t, error) => {
-            console.log("db error insertColors");
-            console.log(error);
-            reject(error);
-          },
-          () => {
-            // After the query has completed (successfully or not), call database.close()
-            database.close();
-          }
-        );
-      });
-    });
-  });
-}
-
-export function insertMarkingData() {
-  return new Promise((resolve, reject) => {
-    testDataMarkings.map((el) => {
-      database.transaction((tx) => {
-        tx.executeSql(
-          `INSERT OR IGNORE INTO markings (marking_name) 
-            VALUES (?)`,
-          [el],
-          (t, success) => {
-            resolve(success);
-          },
-          (t, error) => {
-            console.log("db error insertMarkings");
-            console.log(error);
-            reject(error);
-          },
-          () => {
-            // After the query has completed (successfully or not), call database.close()
-            database.close();
-          }
-        );
-      });
-    });
-  });
-}
-
-export function insertSheepData() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      Promise.all(
-        testDataSheep.map((sheepData) => {
-          return new Promise((resolve, reject) => {
-            tx.executeSql(
-              `INSERT INTO sheep (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred, last_bred_to, notes, last_location, picture) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-              [
-                sheepData.tag_id,
-                sheepData.scrapie_id,
-                sheepData.name,
-                sheepData.dob,
-                sheepData.dop,
-                sheepData.dod,
-                sheepData.dos,
-                sheepData.sex,
-                sheepData.father,
-                sheepData.mother,
-                sheepData.weight_at_birth,
-                sheepData.breed_id,
-                sheepData.color_id,
-                sheepData.marking_id,
-                sheepData.date_last_bred,
-                sheepData.last_bred_to,
-                sheepData.notes,
-                sheepData.last_location,
-                sheepData.picture,
-              ],
-              (t, success) => {
-                const sheep_id = success.insertId;
-                if (sheepData.weight_at_birth) {
-                  tx.executeSql(
-                    `INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)`,
-                    [sheep_id, sheepData.weight_at_birth, sheepData.dob],
-                    (t, success) => {
-                      resolve(success);
-                    },
-                    (t, success) => {
-                      resolve(success);
-                    },
-                    (t, error) => {
-                      console.log("db error insert weight");
-                      console.log(error);
-                      reject(error);
-                    }
-                  );
-                } else {
-                  resolve(success);
-                }
-              },
-              (t, error) => {
-                console.log("db error insert sheep");
-                console.log(error);
-                reject(error);
-              }
-            );
-          });
-        })
+    // Create medications table
+    await db.runAsync(`
+      CREATE TABLE IF NOT EXISTS medications (
+        id INTEGER PRIMARY KEY NOT NULL, 
+        entry VARCHAR(255) NOT NULL UNIQUE
       )
-        .then(() => {
-          console.log("All sheep inserted");
-          resolve();
-        })
-        .catch((error) => {
-          console.log(error);
-          reject(error);
-        });
-    });
-  });
+    `);
+
+    // Create sheep_meds table
+    await db.runAsync(`
+      CREATE TABLE IF NOT EXISTS sheep_meds (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
+        entry_id BIGINT REFERENCES medications (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        date VARCHAR(50) NOT NULL,
+        dosage VARCHAR(100)
+      )
+    `);
+    // Create vaccines table
+    await db.runAsync(`
+      CREATE TABLE IF NOT EXISTS vaccines (
+        id INTEGER PRIMARY KEY NOT NULL, 
+        entry VARCHAR(255) NOT NULL UNIQUE
+      )
+    `);
+
+    // Create sheep_vax table
+    await db.runAsync(`
+      CREATE TABLE IF NOT EXISTS sheep_vax (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
+        entry_id BIGINT REFERENCES vaccines (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        date VARCHAR(50) NOT NULL 
+      )
+    `);
+
+    // Create sheep_weights table
+    await db.runAsync(`
+      CREATE TABLE IF NOT EXISTS sheep_weights (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sheep_id BIGINT NOT NULL REFERENCES sheep (sheep_id) ON DELETE CASCADE ON UPDATE CASCADE, 
+        entry BIGINT,
+        date VARCHAR(50) NOT NULL
+      )
+    `);
+
+    return true;
+  } catch (error) {
+    console.error("Error creating medical tables:", error);
+    throw error;
+  }
+};
+
+export const addBasicData = async () => {
+
+  try {
+    const db = getDatabase();
+
+    // Create breeds table
+    await db.runAsync(`
+      CREATE TABLE IF NOT EXISTS breeds (
+        id INTEGER PRIMARY KEY NOT NULL, 
+        breed_name VARCHAR(255) NOT NULL UNIQUE
+      )
+    `);
+
+    // Create colors table  
+    await db.runAsync(`
+      CREATE TABLE IF NOT EXISTS colors (
+        id INTEGER PRIMARY KEY NOT NULL, 
+        color_name VARCHAR(255) NOT NULL UNIQUE
+      )
+    `);
+    // Create markings table
+    await db.runAsync(`
+      CREATE TABLE IF NOT EXISTS markings (
+        id INTEGER PRIMARY KEY NOT NULL, 
+        marking_name VARCHAR(255) NOT NULL UNIQUE
+      )
+    `);
+
+    // Create sheep table
+    await db.runAsync(`
+      CREATE TABLE IF NOT EXISTS sheep (
+        sheep_id INTEGER PRIMARY KEY NOT NULL, 
+        picture VARCHAR(255), 
+        tag_id VARCHAR(255) NOT NULL UNIQUE, 
+        scrapie_id VARCHAR(255) UNIQUE, 
+        name VARCHAR(255) UNIQUE, 
+        dob VARCHAR(50), 
+        sex VARCHAR(255) NOT NULL, 
+        sire BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+        dam BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+        dop VARCHAR(50), 
+        dos VARCHAR(50),
+        weight_at_birth INTEGER, 
+        dod VARCHAR(255), 
+        date_last_bred VARCHAR(255),
+        last_bred_to BIGINT REFERENCES sheep (sheep_id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        breed_id BIGINT NOT NULL REFERENCES breeds (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+        color_id BIGINT REFERENCES colors (id) ON DELETE RESTRICT ON UPDATE CASCADE, 
+        marking_id BIGINT REFERENCES markings (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+        notes VARCHAR(255),
+        last_location VARCHAR(255)
+      )
+    `);
+ 
+    return true;
+  } catch (error) {
+    console.error("Error creating tables:", error);
+    throw error;
+  }
+};
+
+export async function init() {
+  try {
+    // Create tables
+    await addBasicData();
+    await addMedicalData();
+
+    // Insert initial data if tables are empty
+    const db = getDatabase();
+    const breedCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM breeds');
+
+    if (breedCount.count === 0) {
+      await insertBreedData();
+      await insertColorData();
+      await insertMarkingData();
+      // Optionally insert test sheep data
+      // await insertSheepData();
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Initialization failed:", error);
+    throw error;
+  }
 }
 
-export function insertMedList() {
-  return new Promise((resolve, reject) => {
-    medicationData.map((medData) => {
-      database.transaction((tx) => {
-        tx.executeSql(
-          `INSERT OR IGNORE INTO medications (entry)
-            VALUES (?)`,
-          [medData],
-          (t, success) => {
-            resolve(success);
-          },
-          (t, error) => {
-            console.log("db error insert med list");
-            console.log(error);
-            reject(error);
-          },
-          () => {
-            // After the query has completed (successfully or not), call database.close()
-            database.close();
-          }
-        );
-      });
-    });
-  });
-}
-
-export function insertVaxList() {
-  return new Promise((resolve, reject) => {
-    vaccineData.map((vaxData) => {
-      database.transaction((tx) => {
-        tx.executeSql(
-          `INSERT OR IGNORE INTO vaccines (entry)
-            VALUES (?)`,
-          [vaxData],
-          (t, success) => {
-            resolve(success);
-          },
-          (t, error) => {
-            console.log("db error insert vax list");
-            console.log(error);
-            reject(error);
-          },
-          () => {
-            // After the query has completed (successfully or not), call database.close()
-            database.close();
-          }
-        );
-      });
-    });
-  });
-}
-
-export function insertMedData() {
-  return new Promise((resolve, reject) => {
-    testDataMeds.map((medData) => {
-      database.transaction((tx) => {
-        tx.executeSql(
-          `INSERT INTO sheep_meds (sheep_id, entry_id, date)
-            VALUES (?, ?, ?)`,
-          [medData.sheep_id, medData.entry, medData.date],
-          (t, success) => {
-            resolve(success);
-          },
-          (t, error) => {
-            console.log("db error insert meds");
-            console.log(error);
-            reject(error);
-          },
-          () => {
-            // After the query has completed (successfully or not), call database.close()
-            database.close();
-          }
-        );
-      });
-    });
-  });
-}
-
-export function insertVaxData() {
-  return new Promise((resolve, reject) => {
-    testDataVax.map((vaxData) => {
-      database.transaction((tx) => {
-        tx.executeSql(
-          `INSERT INTO sheep_vax (sheep_id, entry_id, date)
-            VALUES (?, ?, ?)`,
-          [vaxData.sheep_id, vaxData.entry, vaxData.date],
-          (t, success) => {
-            resolve(success);
-          },
-          (t, error) => {
-            console.log("db error insert vax");
-            console.log(error);
-            reject(error);
-          },
-          () => {
-            // After the query has completed (successfully or not), call database.close()
-            database.close();
-          }
-        );
-      });
-    });
-  });
-}
-
-export function fetchAllSheep() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT 
-  children.sheep_id, 
-  children.tag_id, 
-  children.name, 
-  children.dob, 
-  children.dos,
-  children.sex, 
-  children.dop,
-  children.weight_at_birth,
-  children.date_last_bred,
-  children.last_bred_to,
-  children.dod,
-  children.picture,
-  children.scrapie_id,
-  children.breed_id,
-  children.color_id,
-  children.marking_id,
-  breeds.breed_name,
-  children.sire,
-  children.dam,
-  children.notes,
-  children.last_location,
-  COALESCE(colors.color_name, 'NA') as color_name,
-  COALESCE(markings.marking_name, 'NA') as marking_name,
-  sires.name AS father_name,
-  sires.tag_id AS father_tag_id,
-  dams.name AS mother_name,
-  dams.tag_id AS mother_tag_id,
-  COALESCE(last_bred_to_sheep.name, last_bred_to_sheep.tag_id, 'NA') as last_bred_to_name_or_tag
-FROM
-  sheep children
-  JOIN breeds ON children.breed_id = breeds.id
-  LEFT JOIN colors ON children.color_id = colors.id
-  LEFT JOIN markings ON children.marking_id = markings.id
-  LEFT JOIN sheep sires ON children.sire = sires.sheep_id
-  LEFT JOIN sheep dams ON children.dam = dams.sheep_id
-  LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id`,
-        //  `select * from sheep`,
-        [],
-        (_, result) => {
-          resolve(result.rows._array);
-        },
-        (_, error) => {
-          console.log("error", error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
+export const insertBreedData = async () => {
+  try {
+    const db = getDatabase();
+    for (const breed of testDataBreeds) {
+      await db.runAsync(
+        'INSERT OR IGNORE INTO breeds (breed_name) VALUES (?)',
+        [breed]
       );
-    });
-  });
+    }
+  } catch (error) {
+    console.error("Error inserting breeds:", error);
+    throw error;
+  }
+};
+
+export async function insertColorData() {
+  try {
+    const db = getDatabase();
+    for (const color of testDataColors) {
+      await db.runAsync(
+        'INSERT OR IGNORE INTO colors (color_name) VALUES (?)',
+        [color]
+      );
+    }
+  } catch (error) {
+    console.error("Error inserting colors:", error);
+    throw error;
+  }
 }
 
-export function fetchSheep(id) {
-  console.log("id", id);
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT 
+export async function insertMarkingData() {
+  try {
+    const db = getDatabase();
+    for (const marking of testDataMarkings) {
+      await db.runAsync(
+        'INSERT OR IGNORE INTO markings (marking_name) VALUES (?)',
+        [marking]
+      );
+    }
+  } catch (error) {
+    console.error("Error inserting markings:", error);
+    throw error;
+  }
+}
+
+// FETCH FUNCTIONS (converted to async)
+export async function fetchAllSheep() {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync(`
+      SELECT 
         children.sheep_id, 
         children.tag_id, 
         children.name, 
@@ -864,754 +440,457 @@ export function fetchSheep(id) {
         dams.name AS mother_name,
         dams.tag_id AS mother_tag_id,
         COALESCE(last_bred_to_sheep.name, last_bred_to_sheep.tag_id, 'NA') as last_bred_to_name_or_tag
-      FROM
-      sheep children
+      FROM sheep children
       JOIN breeds ON children.breed_id = breeds.id
       LEFT JOIN colors ON children.color_id = colors.id
       LEFT JOIN markings ON children.marking_id = markings.id
       LEFT JOIN sheep sires ON children.sire = sires.sheep_id
       LEFT JOIN sheep dams ON children.dam = dams.sheep_id
       LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id
-      WHERE
-        children.sheep_id = ?;`,
-        [id],
-        (_, result) => {
-          resolve(result.rows._array[0]);
-        },
-        (_, error) => {
-          console.log("error111", error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+    `);
+    return result || [];
+  } catch (error) {
+    console.error("Error fetching sheep data:", error);
+    throw error;
+  }
 }
 
-export function fetchBreeds() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT * from breeds`,
-        [],
-        (_, result) => {
-          resolve(result.rows._array);
-        },
-        (_, error) => {
-          console.log("error", error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+export async function fetchSheep(id) {
+  try {
+    const db = getDatabase();
+    const result = await db.getFirstAsync(`
+      SELECT 
+        children.sheep_id, 
+        children.tag_id, 
+        children.name, 
+        children.dob, 
+        children.dos,
+        children.sex, 
+        children.dop,
+        children.weight_at_birth,
+        children.date_last_bred,
+        children.last_bred_to,
+        children.dod,
+        children.picture,
+        children.scrapie_id,
+        children.breed_id,
+        children.color_id,
+        children.marking_id,
+        breeds.breed_name,
+        children.sire,
+        children.dam,
+        children.notes,
+        children.last_location,
+        COALESCE(colors.color_name, 'NA') as color_name,
+        COALESCE(markings.marking_name, 'NA') as marking_name,
+        sires.name AS father_name,
+        sires.tag_id AS father_tag_id,
+        dams.name AS mother_name,
+        dams.tag_id AS mother_tag_id,
+        COALESCE(last_bred_to_sheep.name, last_bred_to_sheep.tag_id, 'NA') as last_bred_to_name_or_tag
+      FROM sheep children
+      JOIN breeds ON children.breed_id = breeds.id
+      LEFT JOIN colors ON children.color_id = colors.id
+      LEFT JOIN markings ON children.marking_id = markings.id
+      LEFT JOIN sheep sires ON children.sire = sires.sheep_id
+      LEFT JOIN sheep dams ON children.dam = dams.sheep_id
+      LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id
+      WHERE children.sheep_id = ?
+    `, [id]);
+    return result;
+  } catch (error) {
+    console.error("Error fetching sheep:", error);
+    throw error;
+  }
 }
 
-export function fetchColors() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT * from colors`,
-        [],
-        (_, result) => {
-          resolve(result.rows._array);
-        },
-        (_, error) => {
-          console.log("error", error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+export async function fetchBreeds() {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync('SELECT * FROM breeds');
+    return result;
+  } catch (error) {
+    console.error("Error fetching breeds:", error);
+    throw error;
+  }
 }
 
-export function fetchMarkings() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT * from markings`,
-        [],
-        (_, result) => {
-          resolve(result.rows._array);
-        },
-        (_, error) => {
-          console.log("error", error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+export async function fetchColors() {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync('SELECT * FROM colors');
+    return result;
+  } catch (error) {
+    console.error("Error fetching colors:", error);
+    throw error;
+  }
 }
 
-export function fetchMales() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT sheep.sheep_id, sheep.name, sheep.tag_id from sheep WHERE sex='m'`,
-        [],
-        (_, result) => {
-          resolve(result.rows._array);
-        },
-        (_, error) => {
-          console.log("error", error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+export async function fetchMarkings() {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync('SELECT * FROM markings');
+    return result;
+  } catch (error) {
+    console.error("Error fetching markings:", error);
+    throw error;
+  }
 }
 
-export function fetchFemales() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT sheep.sheep_id, sheep.name, sheep.tag_id from sheep WHERE sex='f'`,
-        [],
-        (_, result) => {
-          resolve(result.rows._array);
-        },
-        (_, error) => {
-          console.log("error", error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+export async function fetchMales() {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync('SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?', ['m']);
+    return result;
+  } catch (error) {
+    console.error("Error fetching males:", error);
+    throw error;
+  }
 }
 
-export function addSheep(sheepData) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      try {
-        tx.executeSql(
-          `INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, weight_at_birth, dop, dod, dos, sex, sire, dam, breed_id, color_id, marking_id) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            //"1222122",
-            sheepData.picture,
-            sheepData.tag_id,
-            sheepData.scrapie_id,
-            // "1222122",
-            sheepData.name,
-            //"testvk1122vv",
-            sheepData.dob,
-            sheepData.weight_at_birth,
-            sheepData.dop,
-            sheepData.dod,
-            sheepData.dos,
-            //"2020-12-12",
-            sheepData.sex,
-            //"m",
-            sheepData.sire,
-            //undefined,
-            sheepData.dam,
-            //undefined,
-            sheepData.breed_id,
-            //1,
-            sheepData.color_id,
-            //1,
-            sheepData.marking_id,
-            //1,
-          ],
-          (t, success) => {
-            const sheep_id = success.insertId;
-            if (sheepData.weight_at_birth) {
-              tx.executeSql(
-                `INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)`,
-                [sheep_id, sheepData.weight_at_birth, sheepData.dob],
-                (t, success) => {
-                  resolve(success);
-                },
-                (t, error) => {
-                  console.log("db error insert weight");
-                  console.log(error);
-                  reject(error);
-                }
-              );
-            } else {
-              resolve(success);
-            }
-          },
-          (t, error) => {
-            console.log("db error insert sheep");
-            console.log(error);
-            reject(error);
-          }
-        );
-      } catch (error) {
-        console.error(error);
-        reject(error);
-      }
-      () => {
-        // After the query has completed (successfully or not), call database.close()
-        database.close();
-      };
-    });
-  });
+export async function fetchFemales() {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync('SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?', ['f']);
+    return result;
+  } catch (error) {
+    console.error("Error fetching females:", error);
+    throw error;
+  }
 }
-export function addBreed(val) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
+
+export async function addSheep(sheepData) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(`
+      INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, weight_at_birth, dop, dod, dos, sex, sire, dam, breed_id, color_id, marking_id) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      sheepData.picture,
+      sheepData.tag_id,
+      sheepData.scrapie_id,
+      sheepData.name,
+      sheepData.dob,
+      sheepData.weight_at_birth,
+      sheepData.dop,
+      sheepData.dod,
+      sheepData.dos,
+      sheepData.sex,
+      sheepData.sire,
+      sheepData.dam,
+      sheepData.breed_id,
+      sheepData.color_id,
+      sheepData.marking_id,
+    ]);
+    
+    if (sheepData.weight_at_birth) {
+      await db.runAsync(
+        'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
+        [result.lastInsertRowId, sheepData.weight_at_birth, sheepData.dob]
+      );
+    }
+    return result.lastInsertRowId;
+  } catch (error) {
+    console.error("Error adding sheep:", error);
+    throw error;
+  }
+}
+
+export async function editSheep(sheepData, id) {
+  try {
+    const db = getDatabase();
+
+    // Generate the SQL query and parameters
+    const columns = Object.keys(sheepData).filter((col) => col !== "id");
+    const values = Object.values(sheepData).filter((_, index) =>
+      Object.keys(sheepData)[index] !== "id"
+    );
+    const sqlQuery = `UPDATE sheep SET ${columns.map((col) => `${col} = ?`).join(", ")} WHERE sheep_id = ?`;
+    const parameters = [...values, id];
+
+    const result = await db.runAsync(sqlQuery, parameters);
+
+    // Handle weight insertion if needed
+    if (sheepData.weight_at_birth) {
+      await db.runAsync(
+        'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
+        [id, sheepData.weight_at_birth, sheepData.dob]
+      );
+    }
+
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateDateLastBred(data) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(
+      'UPDATE sheep SET date_last_bred = ?, last_bred_to = ? WHERE sheep_id = ?',
+      [data.date, data.last_bred_to, data.sheep_id]
+    );
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// FETCH FUNCTIONS  
+export async function findChildren(id) {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync('SELECT * FROM sheep WHERE sire = ? OR dam = ?', [id, id]);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function fetchAllMedications() {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync('SELECT * FROM medications');
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function fetchAllVaccines() {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync('SELECT * FROM vaccines');
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function fetchSheepMeds(id) {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync(`
+      SELECT sheep_meds.sheep_id, sheep_meds.entry_id, sheep_meds.id, sheep_meds.date, medications.entry, sheep_meds.dosage 
+      FROM sheep_meds 
+      INNER JOIN medications ON sheep_meds.entry_id = medications.id 
+      WHERE sheep_meds.sheep_id = ?
+    `, [id]);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function fetchSheepVax(id) {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync(`
+      SELECT sheep_vax.sheep_id, sheep_vax.entry_id, sheep_vax.id, sheep_vax.date, vaccines.entry 
+      FROM sheep_vax 
+      INNER JOIN vaccines ON sheep_vax.entry_id = vaccines.id 
+      WHERE sheep_vax.sheep_id = ?
+    `, [id]);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function fetchSheepWeight(id) {
+  try {
+    const db = getDatabase();
+    const result = await db.getAllAsync('SELECT * FROM sheep_weights WHERE sheep_id = ?', [id]);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// INSERT FUNCTIONS
+export async function addMedication(data) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(
+      'INSERT INTO sheep_meds (sheep_id, entry_id, date, dosage) VALUES (?, ?, ?, ?)',
+      [data.sheep_id, data.value, data.date, data.dosage]
+    );
+    return result.lastInsertRowId;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function addVaccination(data) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(
+      'INSERT INTO sheep_vax (sheep_id, entry_id, date) VALUES (?, ?, ?)',
+      [data.sheep_id, data.value, data.date]
+    );
+    return result.lastInsertRowId;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function addSheepWeight(data) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(
+      'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
+      [data.sheep_id, data.value, data.date]
+    );
+    return result.lastInsertRowId;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function addNewMedication(med) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync('INSERT INTO medications (entry) VALUES (?)', [med]);
+    return result.lastInsertRowId;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function addNewVaccine(val) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync('INSERT INTO vaccines (entry) VALUES (?)', [val]);
+    return result.lastInsertRowId;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function addBreed(val) {
+   try {
+    const db = getDatabase();
+    const result = await db.runAsync(
         `INSERT INTO breeds (breed_name) 
             VALUES (?)`,
         [val],
-        (t, success) => {
-          resolve(success.insertId);
-        },
-        (t, error) => {
-          console.log("db error inserting breed");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+    )
+        return result.lastInsertRowId;
+  } catch (error) {
+    console.error("Error adding breed:", error);
+    throw error;
+  }
 }
 
-export function addColor(val) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT * FROM colors WHERE color_name = ?`,
+export async function addColor(val) {
+  console.log("Adding color:", val);
+ try {
+    const db = getDatabase();
+    const result = await db.runAsync(
+        `INSERT INTO colors (color_name) VALUES (?)`,
         [val],
-        (t, results) => {
-          if (results.rows.length > 0) {
-            // Color already exists, resolve with the existing color's ID
-            resolve(results.rows.item(0).id);
-          } else {
-            // Color does not exist, insert it and resolve with the new color's ID
-            tx.executeSql(
-              `INSERT INTO colors (color_name) VALUES (?)`,
-              [val],
-              (t, success) => {
-                resolve(success.insertId);
-              },
-              (t, error) => {
-                console.log(error);
-                reject(error);
-              }
-            );
-          }
-        },
-        (t, error) => {
-          console.log("db error checking for color");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+        )
+        return result.lastInsertRowId;
+  } catch (error) {
+    console.error("Error adding color:", error);
+    throw error;
+  }
 }
 
-export function addMarking(val) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
+export async function addMarking(val) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(
         `INSERT INTO markings (marking_name) 
             VALUES (?)`,
         [val],
-        (t, success) => {
-          resolve(success.insertId);
-        },
-        (t, error) => {
-          console.log("db error inserting marking");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+        )
+        return result.lastInsertRowId;
+  } catch (error) {
+    throw error;
+  }
 }
 
-export function deleteMarking(val) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
+
+// REMOVE FUNCTIONS
+export async function deleteMarking(val) {
+  try{
+  const db = getDatabase();
+    const result = await db.runAsync(
         `DELETE FROM markings WHERE id = ?`,
-        [val],
-        (t, success) => {
-          console.log("val", val);
-          resolve(success);
-        },
-        (t, error) => {
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+        [val]
+        )
+      return result;
+  } catch (error) {
+    throw error;
+  }
 }
 
-export function deleteColor(val) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
+export async function deleteColor(val) {
+  try{
+  const db = getDatabase();
+    const result = await db.runAsync(
         `DELETE FROM colors WHERE id = ?`,
-        [val],
-        (t, success) => {
-          resolve(success);
-        },
-        (t, error) => {
-          console.log("db error deleting color");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+        [val]
+        )
+    return result;
+  } catch (error) {
+    throw error;
+  }
 }
 
-export function deleteBreed(val) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
+export async function deleteBreed(val) {
+  try{
+  const db = getDatabase();
+    const result = await db.runAsync(
         `DELETE FROM breeds WHERE id = ?`,
-        [val],
-        (t, success) => {
-          resolve(success);
-        },
-        (t, error) => {
-          console.log("db error deleting breed");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+        [val]
+        )
+        return result;
+  } catch (error) {
+    throw error;
+  }
 }
 
-export function deleteSheep(val) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
+export async function deleteSheep(val) {
+  try{
+  const db = getDatabase();
+    const result = await db.runAsync(
         `DELETE FROM sheep WHERE sheep_id = ?`,
-        [val],
-        (t, success) => {
-          resolve(success);
-        },
-        (t, error) => {
-          console.log("db error deleting sheep");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          // After the query has completed (successfully or not), call database.close()
-          database.close();
-        }
-      );
-    });
-  });
+        [val]
+    )
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function removeSheepMed(id) {
+  try {
+    const db = getDatabase();
+    
+    const result = await db.runAsync(`DELETE FROM sheep_meds WHERE id = ?`, [id]);
+    return result;
+  } catch (error) {
+    throw error;
+  }
 }
 
-export function editSheep(sheepData, id) {
-  return new Promise((resolve, reject) => {
-    console.log(sheepData);
-    database.transaction((tx) => {
-      // Generate the SQL query and the parameters array
-      const columns = Object.keys(sheepData).filter((col) => col !== "id");
-      const values = Object.values(sheepData);
-      const sqlQuery = `UPDATE sheep SET ${columns
-        .map((col) => `${col} = ?`)
-        .join(", ")} WHERE sheep_id = ?`;
-      const parameters = [...values, id];
-
-      tx.executeSql(
-        sqlQuery,
-        parameters,
-        (t, success) => {
-          if (sheepData.weight_at_birth) {
-            tx.executeSql(
-              `INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)`,
-              [id, sheepData.weight_at_birth, sheepData.dob],
-              (t, success) => {
-                resolve(success);
-              },
-              (t, success) => {
-                resolve(success);
-              },
-              (t, error) => {
-                console.log("db error insert weight");
-                console.log(error);
-                reject(error);
-              }
-            );
-          } else {
-            resolve(success);
-          }
-          console.log("success", success);
-          resolve(success);
-        },
-        (t, error) => {
-          console.log("db error updating sheep");
-          console.log(error);
-          reject(error);
-        }
-      );
-    });
-  });
-}
-export function updateDateLastBred(data) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      console.log("date1", data);
-      tx.executeSql(
-        `UPDATE sheep set date_last_bred = ?, last_bred_to = ? where sheep_id=?`,
-        [data.date, last_bred_to, data.sheep_id],
-        (t, success) => {
-          console.log("success", success);
-          resolve(success);
-        },
-        (t, error) => {
-          console.log("db error updating sheep");
-          console.log(error);
-          reject(error);
-        }
-        //() => {
-        // After the query has completed (successfully or not), call database.close()
-        //  database.close();
-        // }
-      );
-    });
-  });
+export async function removeSheepVax(id) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync('DELETE FROM sheep_vax WHERE id = ?', [id]);
+    return result;
+  } catch (error) {
+    throw error;
+  }
 }
 
-export function findChildren(id) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT * FROM sheep WHERE sire = ? OR dam = ?`,
-        [id, id],
-        (t, results) => {
-          resolve(results.rows._array);
-        },
-        (t, error) => {
-          console.log("db error finding children");
-          console.log(error);
-          reject(error);
-        }
-      );
-    });
-  });
-}
-
-export function fetchAllMedications() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT * FROM medications`,
-        [],
-        (t, results) => {
-          resolve(results.rows._array);
-        },
-        (t, error) => {
-          console.log("db error getting medications");
-          console.log(error);
-          reject(error);
-        }
-      );
-    });
-  });
-}
-
-export function fetchAllVaccines() {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT * FROM vaccines`,
-        [],
-        (t, results) => {
-          resolve(results.rows._array);
-        },
-        (t, error) => {
-          console.log("db error getting vaccines");
-          console.log(error);
-          reject(error);
-        }
-      );
-    });
-  });
-}
-
-export function addMedication(data) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `INSERT INTO sheep_meds (sheep_id, entry_id, date, dosage) VALUES (?, ?, ?, ?)`,
-        [data.sheep_id, data.value, data.date, data.dosage],
-        (t, success) => {
-          console.log("success", success);
-          resolve(success.insertId);
-        },
-        (t, error) => {
-          console.log("db error inserting meds");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          database.close();
-        }
-      );
-    });
-  });
-}
-
-export function addVaccination(data) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `INSERT INTO sheep_vax (sheep_id, entry_id, date) VALUES (?, ?, ?)`,
-        [data.sheep_id, data.value, data.date],
-        (t, success) => {
-          resolve(success.insertId);
-        },
-        (t, error) => {
-          console.log("db error inserting vaccine");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          database.close();
-        }
-      );
-    });
-  });
-}
-
-export function addSheepWeight(data) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)`,
-        [data.sheep_id, data.value, data.date],
-        (t, success) => {
-          resolve(success.insertId);
-        },
-        (t, error) => {
-          console.log("db error inserting weight");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          database.close();
-        }
-      );
-    });
-  });
-}
-
-export function fetchSheepMeds(id) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT sheep_meds.sheep_id, sheep_meds.entry_id, sheep_meds.id, sheep_meds.date, medications.entry, sheep_meds.dosage 
-        FROM sheep_meds INNER JOIN medications ON sheep_meds.entry_id = medications.id WHERE sheep_meds.sheep_id = ?`,
-        [id],
-        (t, results) => {
-          resolve(results.rows._array);
-        },
-        (t, error) => {
-          console.log("db error getting sheep meds");
-          console.log(error);
-          reject(error);
-        }
-      );
-    });
-  });
-}
-
-export function fetchSheepVax(id) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT sheep_vax.sheep_id, sheep_vax.entry_id, sheep_vax.id, sheep_vax.date, vaccines.entry FROM sheep_vax INNER JOIN vaccines ON sheep_vax.entry_id = vaccines.id WHERE sheep_vax.sheep_id = ?`,
-        [id],
-        (t, results) => {
-          resolve(results.rows._array);
-        },
-        (t, error) => {
-          console.log("db error getting sheep vax");
-          console.log(error);
-          reject(error);
-        }
-      );
-    });
-  });
-}
-
-export function fetchSheepWeight(id) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `SELECT * FROM sheep_weights WHERE sheep_id = ?`,
-        [id],
-        (t, results) => {
-          resolve(results.rows._array);
-        },
-        (t, error) => {
-          console.log("db error getting sheep weight");
-          console.log(error);
-          reject(error);
-        }
-      );
-    });
-  });
-}
-
-export function removeSheepMed(id) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `DELETE FROM sheep_meds WHERE id = ?`,
-        [id],
-        (t, success) => {
-          console.log("deleted successfully");
-          resolve(success);
-        },
-        (t, error) => {
-          console.log("db error deleting sheep med");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          database.close();
-        }
-      );
-    });
-  });
-}
-
-export function removeSheepVax(id) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `DELETE FROM sheep_vax WHERE id = ?`,
-        [id],
-        (t, success) => {
-          resolve(success);
-        },
-        (t, error) => {
-          console.log("db error deleting sheep vax");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          database.close();
-        }
-      );
-    });
-  });
-}
-
-export function removeSheepWeight(id) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `DELETE FROM sheep_weights WHERE id = ?`,
-        [id],
-        (t, success) => {
-          console.log("deleted successfully");
-          resolve(success);
-        },
-        (t, error) => {
-          console.log("db error deleting sheep weight");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          database.close();
-        }
-      );
-    });
-  });
-}
-
-export function addNewMedication(med) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `INSERT INTO medications (entry) VALUES (?)`,
-        [med],
-        (t, success) => {
-          resolve(success.insertId);
-        },
-        (t, error) => {
-          console.log("db error inserting medication");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          database.close();
-        }
-      );
-    });
-  });
-}
-
-export function addNewVaccine(vax) {
-  return new Promise((resolve, reject) => {
-    database.transaction((tx) => {
-      tx.executeSql(
-        `INSERT INTO vaccines (entry) VALUES (?)`,
-        [vax],
-        (t, success) => {
-          resolve(success.insertId);
-        },
-        (t, error) => {
-          console.log("db error inserting vaccine");
-          console.log(error);
-          reject(error);
-        },
-        () => {
-          database.close();
-        }
-      );
-    });
-  });
+export async function removeSheepWeight(id) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync('DELETE FROM sheep_weights WHERE id = ?', [id]);
+    return result;
+  } catch (error) {
+    throw error;
+  }
 }

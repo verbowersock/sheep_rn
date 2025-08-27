@@ -37,7 +37,6 @@ import {
   uiSelector,
 } from "../../store/slices/ui";
 import { forms } from "../../Constants";
-import { onChange } from "react-native-reanimated";
 import {
   setSheep,
   setSheepMeds,
@@ -47,6 +46,7 @@ import {
 } from "../../store/slices/sheep";
 import { dateSaveFormatter, validateDate } from "../utils/SharedFunctions";
 import { settingsSelector } from "../../store/slices/settings";
+import { convertUnitsSave } from "../utils/SharedFunctions";
 
 const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const theme = useTheme();
@@ -58,7 +58,8 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const { secondaryFormData } = useSelector(uiSelector);
   const { title, type, errorText } = secondaryFormData.type;
   const { defaultData } = secondaryFormData;
-  const { dateFormat } = useSelector(settingsSelector);
+  const { dateFormat, unitFormat } = useSelector(settingsSelector);
+
 
   const [loading, setLoading] = useState(false);
 
@@ -92,7 +93,14 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
           dispatch(setMales(males));
         }
       } catch (error) {
-        console.log("!!!error", error);
+        console.error("Error loading data for form:", error);
+        dispatch(
+          setShowSnackbar({
+            visible: true,
+            error: true,
+            message: "Error loading data for form. Please try again.",
+          })
+        );
       }
     }
     loadDataToForm().then(() => setDataLoaded(true));
@@ -118,9 +126,10 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
   const onSubmit = (data) => {
     const formattedData = {
       ...data,
-      value: data.medication || data.vaccination,
+      value: data.medication || data.vaccination ? data.medication || data.vaccination :  convertUnitsSave(data.value, unitFormat),
       date: dateSaveFormatter(data.date, dateFormat),
     };
+
 
     setLoading(true);
     switch (type) {
@@ -200,7 +209,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
         break;
       case BREEDING.type:
         editSheep(
-          { date_last_bred: data.date, last_bred_to: data.last_bred_to },
+          { date_last_bred: dateSaveFormatter(data.date, dateFormat), last_bred_to: data.last_bred_to },
           data.sheep_id
         )
           .then(() => {
@@ -463,7 +472,7 @@ const SecondaryForm = ({ isModalVisible, toggleModal }) => {
                   field="value"
                   onChangeText={onChange}
                   value={value && value.toString()}
-                  right={<TextInput.Affix text="lb" />}
+                  right={<TextInput.Affix text={unitFormat} />}
                 />
               )}
               name="value"

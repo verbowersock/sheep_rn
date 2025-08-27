@@ -31,6 +31,7 @@ const makeStyles = (theme) =>
       flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: theme.colors.background,
     },
     errorTitle: {
       fontSize: 30,

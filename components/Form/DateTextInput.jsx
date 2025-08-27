@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import { Masks, useMaskedInputProps } from "react-native-mask-input";
 import { useTheme } from "react-native-paper";
 import MyTextInput from "./MyTextInput";

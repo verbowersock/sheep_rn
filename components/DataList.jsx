@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FAB, IconButton, Text, useTheme } from "react-native-paper";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { ScrollView, View } from "react-native";
+import { Pressable } from "react-native";
 import { forms } from "../Constants";
 import {
   removeSheepMed,
@@ -21,7 +21,7 @@ import sheep, {
   updateSheepVax,
   updateSheepWeight,
 } from "../store/slices/sheep";
-import { dateDisplayFormatter } from "./utils/SharedFunctions";
+import { convertUnitsDisplay, dateDisplayFormatter } from "./utils/SharedFunctions";
 import { settingsSelector } from "../store/slices/settings";
 
 const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
@@ -41,7 +41,12 @@ const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
       setListData(sheepVax);
     } else if (header === forms.WEIGHT.listHeader) {
       setType(forms.WEIGHT.type);
-      setListData(sheepWeights);
+      const weights = []
+      for (const weight of sheepWeights) {
+        convertedWeight = convertUnitsDisplay(weight.entry, unitFormat);
+        weights.push({entry: convertedWeight, date: weight.date, id: weight.id});
+      }
+      setListData(weights);
     }
   }, [header, sheepMeds, sheepVax, sheepWeights]);
 
@@ -146,7 +151,7 @@ const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
         <Text style={{ fontSize: 16, alignSelf: "center" }}>No data found</Text>
       ) : (
         listData.map((item, index) => (
-          <TouchableOpacity
+          <Pressable
             onLongPress={() => handleDeleteItem(item)}
             key={index}
             style={{
@@ -191,7 +196,7 @@ const DataList = ({ header, onDismiss, dateFormat, unitFormat }) => {
                 {dateDisplayFormatter(item.date, dateFormat, monthFormat)}
               </Text>
             </View>
-          </TouchableOpacity>
+          </Pressable>
         ))
       )}
       <ConfirmationDialog onConfirm={async (id) => await deleteValue(id)} />

@@ -3,12 +3,12 @@ import {
   View,
   Text,
   ScrollView,
-  PermissionsAndroid,
   Platform,
 } from "react-native";
 import { Button, useTheme } from "react-native-paper";
-import DocPicker from "react-native-document-picker";
-import RNFS from "react-native-fs";
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import * as MediaLibrary from 'expo-media-library';
 import { format } from "date-fns";
 import { useDispatch } from "react-redux";
 import ConfirmationSnackbar from "../ConfirmationSnackbar";
@@ -21,6 +21,10 @@ import {
   getCurrentSchemaVersion,
   updateSchemaVersion,
 } from "../../services/migration";
+import { StorageAccessFramework } from 'expo-file-system';
+import * as Updates from 'expo-updates';
+
+
 
 const BackupRestore = () => {
   const theme = useTheme();
@@ -29,125 +33,221 @@ const BackupRestore = () => {
   const [loading, setLoading] = useState(false);
 
   async function checkPermissions() {
-    if (Platform.constants["Release"] >= 13) {
-      return true;
-    } else {
-      let granted;
-      try {
-        granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: "myFlock App Permission",
-            message: "This app needs permission to acess storage.",
-            buttonNeutral: "Ask Me Later",
-            buttonNegative: "Cancel",
-            buttonPositive: "OK",
-          }
-        );
-      } catch (err) {
-        console.warn(err);
-        dispatch(
-          setShowSnackbar({
-            visible: true,
-            error: true,
-            message: "Something went wrong. Please try again",
-          })
-        );
-      }
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      return status === 'granted';
+    } catch (error) {
+      console.warn('Permission error:', error);
+      dispatch(
+        setShowSnackbar({
+          visible: true,
+          error: true,
+          message: "Permission request failed. Please try again",
+        })
+      );
+      return false;
     }
   }
 
   async function restoreDB() {
     setLoading(true);
-    if (checkPermissions()) {
-      try {
-        const rsPicker = await DocPicker.pickSingle();
-        const filePath = rsPicker.uri;
-        await RNFS.copyFile(
-          filePath,
-          "/data/user/0/com.sheeprn/files/SQLite/sheep.db"
-        );
-        const currentSchemaVersion = await getCurrentSchemaVersion();
-        const expectedSchemaVersion = 4; // The version your app expects
+    try {
+      // Pick database file
+      const result = await DocumentPicker.getDocumentAsync({
+        type: '*/*',
+        copyToCacheDirectory: true,
+      });
 
-        if (currentSchemaVersion !== expectedSchemaVersion) {
-          await executeMigration();
-          await updateSchemaVersion(expectedSchemaVersion);
-        }
-        await fetchAllSheep().then((res) => {
-          dispatch(setSheep(res));
-        });
+      if (result.canceled) {
         setLoading(false);
-        dispatch(
-          setShowSnackbar({
-            visible: true,
-            error: false,
-            message: "Database restored successfully",
-          })
-        );
-      } catch (e) {
-        setLoading(false);
-        dispatch(
-          setShowSnackbar({
-            visible: true,
-            error: true,
-            message: "Something went wrong. Please try again",
-          })
-        );
-        console.log(e);
+        return;
       }
-    } else {
+
+      // Get the source file URI
+      const sourceUri = result.assets[0].uri;
+      
+      // Define destination path for the database
+      const destPath = `${FileSystem.documentDirectory}SQLite/sheep.db`;
+
+      
+      
+      // Ensure the SQLite directory exists
+      await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}SQLite/`, { 
+        intermediates: true 
+      });
+      
+      // Copy the file
+      await FileSystem.copyAsync({
+        from: sourceUri,
+        to: destPath,
+      });
+
+        if (Platform.OS === 'android') {
+      // The copied file might be read-only, we need to make it writable
+      // Unfortunately FileSystem doesn't have chmod, so we need to recreate it
+      const tempPath = `${FileSystem.documentDirectory}SQLite/temp_sheep.db`;
+      
+      // Read the content and write it again (this sets proper permissions)
+      const dbContent = await FileSystem.readAsStringAsync(destPath, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      await FileSystem.writeAsStringAsync(tempPath, dbContent, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      // Replace the original with the properly permissioned file
+      await FileSystem.deleteAsync(destPath);
+      await FileSystem.moveAsync({
+        from: tempPath,
+        to: destPath,
+      });
+    }
+
+      // Handle schema migration
+      const currentSchemaVersion = await getCurrentSchemaVersion();
+      const expectedSchemaVersion = 4;
+
+      if (currentSchemaVersion !== expectedSchemaVersion) {
+        await executeMigration();
+        await updateSchemaVersion(expectedSchemaVersion);
+      }
+
+
+      // Refresh the app data
+      const sheepData = await fetchAllSheep();
+      dispatch(setSheep(sheepData));
+      
+      setLoading(false);
+      dispatch(
+        setShowSnackbar({
+          visible: true,
+          error: false,
+          message: "Database restored successfully. The app will now reload.",
+        })
+      );
+  console.log('Attempting Updates.reloadAsync...');
+setTimeout(async () => {
+  try {
+    // Show a different message to indicate Updates is attempting
+    dispatch(
+      setShowSnackbar({
+        visible: true,
+        error: false,
+        message: "Attempting app reload...",
+      })
+    );
+    
+    await Updates.reloadAsync();
+    
+    // This line should never execute if reload works
+    dispatch(
+      setShowSnackbar({
+        visible: true,
+        error: true,
+        message: "Reload failed - please restart manually",
+      })
+    );
+    
+  } catch (error) {
+    dispatch(
+      setShowSnackbar({
+        visible: true,
+        error: true,
+        message: "App reload not available - please restart manually",
+      })
+    );
+  }
+}, 1500);
+    } catch (error) {
+      setLoading(false);
       dispatch(
         setShowSnackbar({
           visible: true,
           error: true,
-          message: "Storage Permission denied",
+          message: "Restore failed. Please try again",
         })
       );
-      return false;
     }
   }
 
   async function backupDB() {
     setLoading(true);
-    if (await checkPermissions()) {
-      try {
-        const currDate = format(new Date(), "dd_MM_yyyy_HHmmss");
-        const destPath =
-          RNFS.DownloadDirectoryPath + "/myFlockDB_" + currDate + ".db";
-        await RNFS.copyFile(
-          "/data/user/0/com.sheeprn/files/SQLite/sheep.db",
-          destPath
-        );
-        setLoading(false);
-        dispatch(
-          setShowSnackbar({
-            visible: true,
-            error: false,
-            message: "Database saved to Downloads folder",
-          })
-        );
-      } catch (e) {
-        setLoading(false);
-        dispatch(
-          setShowSnackbar({
-            visible: true,
-            error: true,
-            message: "Something went wrong. Please try again",
-          })
-        );
-        console.log(e);
-      }
-    } else {
+    
+    if (!(await checkPermissions())) {
+      setLoading(false);
       dispatch(
         setShowSnackbar({
           visible: true,
           error: true,
-          message: "Storage Permission denied",
+          message: "Storage permission denied",
         })
       );
-      return false;
+      return;
+    }
+
+    try {
+      const currDate = format(new Date(), "dd_MM_yyyy_HHmmss");
+      const fileName = `myFlockDB_${currDate}.db`;
+      
+      // Source database path
+      const sourcePath = `${FileSystem.documentDirectory}SQLite/sheep.db`;
+      
+      // Create backup in cache first
+      const tempBackupPath = `${FileSystem.cacheDirectory}${fileName}`;
+      
+      // Copy database to cache
+      await FileSystem.copyAsync({
+        from: sourcePath,
+        to: tempBackupPath,
+      });
+
+if (Platform.OS === 'android') {
+  const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync(FileSystem.documentDirectory);
+  if (permissions.granted) {
+    const fileUri = await StorageAccessFramework.createFileAsync(
+      permissions.directoryUri,
+      fileName,
+      'application/octet-stream'
+    );
+    const dbContent = await FileSystem.readAsStringAsync(tempBackupPath, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    await FileSystem.writeAsStringAsync(fileUri, dbContent, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+  }
+} else {
+  const asset = await MediaLibrary.createAssetAsync(tempBackupPath);
+  const album = await MediaLibrary.getAlbumAsync('Documents');
+  
+  if (album == null) {
+    await MediaLibrary.createAlbumAsync('Documents', asset, false);
+  } else {
+    await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+  }
+}
+      // Clean up temp file
+      await FileSystem.deleteAsync(tempBackupPath, { idempotent: true });
+      
+      setLoading(false);
+      dispatch(
+        setShowSnackbar({
+          visible: true,
+          error: false,
+          message: "Database backed up to the selected folder",
+        })
+      );
+    } catch (error) {
+      setLoading(false);
+      dispatch(
+        setShowSnackbar({
+          visible: true,
+          error: true,
+          message: "Backup failed. Please try again",
+        })
+      );
+      console.error('Backup error:', error);
     }
   }
 
@@ -160,9 +260,7 @@ const BackupRestore = () => {
         dark
         style={{ width: "40%", marginTop: 25, marginBottom: 25 }}
         mode="contained"
-        onPress={() => {
-          backupDB();
-        }}
+        onPress={backupDB}
       >
         Backup
       </Button>
@@ -173,9 +271,7 @@ const BackupRestore = () => {
         dark
         style={{ width: "40%", marginTop: 15 }}
         mode="contained"
-        onPress={() => {
-          restoreDB();
-        }}
+        onPress={restoreDB}
       >
         Restore
       </Button>

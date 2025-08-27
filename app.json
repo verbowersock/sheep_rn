@@ -1,13 +1,38 @@
 {
   "expo": {
-    "name": "sheep-rn",
+    "name": "My Flock - Sheep Management",
     "slug": "sheep-rn",
-    "version": "1.1.0",
-    "assetBundlePatterns": ["**/*"],
+    "description": "Complete sheep management app for livestock tracking, breeding records, health monitoring, and flock database management.",
+    "version": "1.5.1",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-screen.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0079C2"
+      "backgroundColor": "#4d8744"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "keywords": [
+      "sheep", "livestock", "farm", "management", "breeding", "flock", "animal", "agriculture", "records", "tracking"
+    ],
+    "android": {
+      "package": "com.sheeprn",
+      "compileSdkVersion": 36,
+      "targetSdkVersion": 36
+    },
+    "ios": {
+      "bundleIdentifier": "com.sheeprn",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "This app needs access to save database backups"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4d38e588-9de2-4bda-82f4-738515b85b4e"
+      }
     }
   }
 }

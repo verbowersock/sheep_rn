@@ -14,14 +14,6 @@ export const toggleSecondaryFormModal = async (
   dateFormat,
   dispatch
 ) => {
-  console.log(
-    "togglesecondarymodal",
-    type,
-    sheep_id,
-    isSecondaryFormDialogVisible,
-    dateFormat,
-    dispatch
-  );
   const today = new Date();
 
   const df = dateFormat === "mdy" ? "MM/dd/yyyy" : "dd/MM/yyyy";

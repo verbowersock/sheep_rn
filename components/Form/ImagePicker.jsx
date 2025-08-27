@@ -17,6 +17,18 @@ const ImagePickerComponent = ({ value, onChange }) => {
   const getPermissions = async () => {
     // Request camera permission
     await ImagePicker.requestCameraPermissionsAsync();
+    // // Request media library permission
+    // const { status } = await mediaLibrary.requestPermissionsAsync();
+    // if (status !== 'granted') {
+    //   console.warn('Media library permission not granted');
+    //   dispatch(
+    //     setShowSnackbar({
+    //       visible: true,
+    //       error: true,
+    //       message: "Media library permission not granted",
+    //     })
+    //   );
+    // }
   };
   
   getPermissions();
@@ -24,9 +36,10 @@ const ImagePickerComponent = ({ value, onChange }) => {
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes:  ['images'],
       quality: 1,
       base64: true,
+      allowsEditing: true
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const base64 = result.assets[0].base64;
@@ -38,9 +51,10 @@ const ImagePickerComponent = ({ value, onChange }) => {
 
   const takePhoto = async () => {
   let result = await ImagePicker.launchCameraAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes:  ['images'],
     quality: 1,
     base64: true,
+    allowsEditing: true
   });
   if (!result.canceled && result.assets && result.assets.length > 0) {
     const base64 = result.assets[0].base64;
@@ -78,7 +92,9 @@ const ImagePickerComponent = ({ value, onChange }) => {
           {
             icon: "camera",
             color: "white",
-            style: { backgroundColor: theme.colors.secondary },
+            style: { 
+              backgroundColor: theme.colors.secondary,
+            },
             label: "Open Camera",
             labelStyle: { color: "white" },
             onPress: takePhoto,
@@ -86,18 +102,15 @@ const ImagePickerComponent = ({ value, onChange }) => {
           {
             icon: "folder-upload",
             color: "white",
-            style: { backgroundColor: theme.colors.secondary },
+            style: { 
+              backgroundColor: theme.colors.secondary,
+            },
             label: "Upload Image",
             labelStyle: { color: "white" },
             onPress: pickImage,
           },
         ]}
         onStateChange={onFABStateChange}
-        onPress={() => {
-          if (open) {
-            // do something if the speed dial is open
-          }
-        }}
       />
     </View>
   );
@@ -113,6 +126,7 @@ const makeStyles = (theme) =>
       borderWidth: 1,
       borderColor: theme.colors.primary,
       justifyContent: "center",
+      padding: 11,
     },
     titleText: {
       fontSize: 22,

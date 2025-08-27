@@ -1,141 +1,69 @@
-import { addMedicalData, database, insertMedList, insertVaxList } from "./db";
+import { getDatabase, insertMedList, insertVaxList } from "./db";
 
-export const getCurrentSchemaVersion = () => {
-  return new Promise((resolve, reject) => {
-    database.transaction((transaction) => {
-      transaction.executeSql(
-        "PRAGMA user_version;",
-        [],
-        (transaction, result) => {
-          if (result.rows.length > 0) {
-            const version = result.rows.item(0).user_version;
-            resolve(version);
-          } else {
-            reject(new Error("No rows returned."));
-          }
-        },
-        (transaction, error) => {
-          console.log("error", error);
-          reject(error);
-        }
-      );
-    });
-  });
+export const getCurrentSchemaVersion = async () => {
+  try {
+    const db = getDatabase();
+    const result = await db.getFirstAsync("PRAGMA user_version;");
+    const version = result ? result.user_version : 0;
+    return version;
+  } catch (error) {
+    return 0; // Default to 0 if error
+  }
 };
 
-export const updateSchemaVersion = (newVersion) => {
-  return new Promise((resolve, reject) => {
-    database.transaction((transaction) => {
-      transaction.executeSql(
-        `PRAGMA user_version = ${newVersion};`,
-        [],
-        () => {
-          console.log(`Schema version updated to ${newVersion}`);
-          resolve();
-        },
-        (transaction, error) => {
-          console.log("Error updating schema version:", error);
-          reject(error);
-        }
-      );
-    });
-  });
+export const updateSchemaVersion = async (newVersion) => {
+  try {
+    const db = getDatabase();
+    await db.runAsync(`PRAGMA user_version = ${newVersion};`);
+    return true;
+  } catch (error) {
+    throw error;
+  }
 };
 
-const migrationScript = (transaction) => {
-  insertMedList();
-  insertVaxList();
-  return new Promise((resolve, reject) => {
-    database.transaction(
-      (transaction) => {
-        transaction.executeSql(
-          `ALTER TABLE sheep_meds add COLUMN dosage VARCHAR(100);`,
-          [],
-          null,
-          (transaction, error) => {
-            console.error(
-              "Error adding dosage column to sheep_meds table:",
-              error
-            );
-            reject(
-              new Error(
-                "Error adding dosage column to sheep_meds table: " +
-                  error.message
-              )
-            );
-          }
-        );
-      },
-      reject,
-      () => {
-        database.transaction(
-          (transaction) => {
-            transaction.executeSql(
-              `PRAGMA table_info(sheep);`,
-              [],
-              (transaction, resultSet) => {
-                let columnExists = false;
-
-                for (let i = 0; i < resultSet.rows.length; i++) {
-                  if (resultSet.rows.item(i).name === "last_bred_to") {
-                    columnExists = true;
-                    break;
-                  }
-                }
-
-                if (!columnExists) {
-                  transaction.executeSql(
-                    `ALTER TABLE sheep ADD COLUMN last_bred_to VARCHAR(200);`,
-                    [],
-                    null,
-                    (transaction, error) => {
-                      console.error(
-                        "Error adding last_bred_to column to sheep table:",
-                        error
-                      );
-                      reject(
-                        new Error(
-                          "Error adding last_bred_to column to sheep table: " +
-                            error.message
-                        )
-                      );
-                    }
-                  );
-                }
-              },
-              (transaction, error) => {
-                console.error("Error executing PRAGMA table_info:", error);
-                reject(
-                  new Error(
-                    "Error executing PRAGMA table_info: " + error.message
-                  )
-                );
-              }
-            );
-          },
-          reject,
-          resolve
-        );
+const migrationScript = async () => {
+  try {
+    const db = getDatabase();
+    
+    // Insert medication and vaccine lists
+    await insertMedList();
+    await insertVaxList();
+    
+    // Add dosage column to sheep_meds table if it doesn't exist
+    try {
+      await db.runAsync(`ALTER TABLE sheep_meds ADD COLUMN dosage VARCHAR(100);`);
+    } catch (error) {
+      // Column might already exist, check if it's a "duplicate column" error
+      if (error.message.includes("duplicate column") || error.message.includes("already exists")) {
+      } else {
+        console.error("Error adding dosage column to sheep_meds table:", error);
+        throw error;
       }
-    );
-  });
+    }
+    
+    // Check if last_bred_to column exists in sheep table
+    const tableInfo = await db.getAllAsync(`PRAGMA table_info(sheep);`);
+    const columnExists = tableInfo.some(column => column.name === "last_bred_to");
+    
+    if (!columnExists) {
+      await db.runAsync(`ALTER TABLE sheep ADD COLUMN last_bred_to VARCHAR(200);`);
+    } else {
+    }
+    
+    return true;
+    
+  } catch (error) {
+    console.error("Migration script failed:", error);
+    throw error;
+  }
 };
 
-export const executeMigration = () => {
-  return new Promise((resolve, reject) => {
-    database.transaction(
-      (transaction) => {
-        migrationScript(transaction);
-      },
-      (error) => {
-        // Handle any migration errors here
-        console.error("Migration failed:", error);
-        reject(error);
-      },
-      () => {
-        resolve();
-        console.log("Migration executed successfully.");
-      }
-    );
-  });
+export const executeMigration = async () => {
+  try {
+    await migrationScript();
+    return true;
+  } catch (error) {
+    console.error("Migration failed:", error);
+    throw error;
+  }
 };
