@@ -37,3 +37,4 @@ android/gradle.properties
 
 # typescript
 *.tsbuildinfo
+android/gradle.properties
