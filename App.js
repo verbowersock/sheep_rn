@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import * as SplashScreen from 'expo-splash-screen';
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import * as SplashScreen from "expo-splash-screen";
 
 import { useDispatch } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
@@ -35,18 +35,15 @@ export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
     console.log("isReady:", isReady);
   }, [isReady]);
 
   async function initDb() {
     try {
-
-      
       // Initialize database FIRST
       await initializeDatabase();
-      
+
       let currentSchemaVersion = await getCurrentSchemaVersion();
       const expectedSchemaVersion = 4;
 
@@ -71,10 +68,8 @@ export default function App() {
         console.error("Error inserting initial data:", e);
       }
 
-
       const allSheep = await fetchAllSheep();
       dispatch(setSheep(allSheep || []));
-      
 
       setIsReady(true);
       console.log("Database initialized and data inserted successfully.");
@@ -84,27 +79,29 @@ export default function App() {
       console.error("Database initialization error:", e);
       setError(e.message);
 
-    setIsReady(true);
-          SplashScreen.hideAsync();
+      setIsReady(true);
+      SplashScreen.hideAsync();
     }
   }
 
   useEffect(() => {
     initDb();
-  }, []); 
+  }, []);
 
-return (
-  <SafeAreaProvider>
-    {isReady ? (
-      <NavigationContainer>
-        <DrawerNavigator />
-      </NavigationContainer>
-    ) : (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-        {error && <Text style={{ color: "red" }}>{error}</Text>}
-      </View>
-    )}
-  </SafeAreaProvider>
-);
+  return (
+    <SafeAreaProvider>
+      {isReady ? (
+        <NavigationContainer>
+          <DrawerNavigator />
+        </NavigationContainer>
+      ) : (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          {error && <Text style={{ color: "red" }}>{error}</Text>}
+        </View>
+      )}
+    </SafeAreaProvider>
+  );
 }

@@ -1,4 +1,4 @@
-import * as SQLite from 'expo-sqlite';
+import * as SQLite from "expo-sqlite";
 import { picture1, picture2, picture3 } from "./base54pictures";
 
 // Global database variable
@@ -16,7 +16,7 @@ export const initializeDatabase = async () => {
 
     return database;
   } catch (error) {
-    console.error('Database initialization failed:', error);
+    console.error("Database initialization failed:", error);
     throw error;
   }
 };
@@ -24,7 +24,9 @@ export const initializeDatabase = async () => {
 // Get database instance
 export const getDatabase = () => {
   if (!database) {
-    throw new Error('Database not initialized. Call initializeDatabase() first.');
+    throw new Error(
+      "Database not initialized. Call initializeDatabase() first."
+    );
   }
   return database;
 };
@@ -137,14 +139,56 @@ export const medicationData = [
   "Cydectin® (Moxidectin)",
   "Ivomec® (Ivermectin)",
   "Prohibit® (Levamisole)",
-  // ... rest of your medication data
+  "Valbazen® (Albendazole)",
+  "Deccox® (Decoquinate)",
+  "Corid® (Amprolium)",
+  "Albon® (Sulfadimethoxine)",
+  "Sulmet® (Sulfamethazine)",
+  "Baycox® (Toltrazuril)",
+  "Aureomycin® (Chlortetracycline)",
+  "Biosol® (Neomycin sulfate)",
+  "Micotil® (Tilmicosin phosphate)",
+  "Naxcel® (Ceftiofur sodium)",
+  "Pro-Pen G Agri-Cillin® (Penicillin G procaine)",
+  "Terramycin® (Oxytetracycline)",
+  "Oxytetracycline 10% (Oxytetracycline 100)",
+  "Oxytetracycline 200",
+  "Excenel® (Ceftiofur hydrochloride)",
+  "Nuflor® (Florfenicol)",
+  "Bismuth subsalicylate",
+  "Mineral oil",
+  "Propylene glycol",
+  "Therabloat®",
+  "Flunixin meglumine",
+  "Aspirin",
+  "Dexamethasone",
+  "BO-SE®",
+  "Calcium gluconate",
+  "Dextrose 50%",
+  "Epinephrine",
+  "Lutalyse®",
+  "Oxtytocin",
+  "Thiamine 200 mg/ml (Vit. B1)",
+  "Vitamin B12",
+  "Vitamin B Complex",
 ];
 
 export const vaccineData = [
   "Campylobacter",
   "Case-Bac™",
   "Caseous D-T™",
-  // ... rest of your vaccine data
+  "C & D antitoxin",
+  "CD-T",
+  "Covexin™-8",
+  "Chlamydia",
+  "Ram epididymitis bacterin",
+  "Footvax®",
+  "Ovine Ecolizer™",
+  "Pasteurella",
+  "Rabies",
+  "Soremouth",
+  "Tetanus antitoxin",
+  "Volar footrot bacterin",
 ];
 
 export const setCurrentSchemaVersion = async (version) => {
@@ -162,7 +206,7 @@ export async function insertMedList() {
     const db = getDatabase();
     for (const medData of medicationData) {
       await db.runAsync(
-        'INSERT OR IGNORE INTO medications (entry) VALUES (?)',
+        "INSERT OR IGNORE INTO medications (entry) VALUES (?)",
         [medData]
       );
     }
@@ -177,10 +221,9 @@ export async function insertVaxList() {
   try {
     const db = getDatabase();
     for (const vaxData of vaccineData) {
-      await db.runAsync(
-        'INSERT OR IGNORE INTO vaccines (entry) VALUES (?)',
-        [vaxData]
-      );
+      await db.runAsync("INSERT OR IGNORE INTO vaccines (entry) VALUES (?)", [
+        vaxData,
+      ]);
     }
     return true;
   } catch (error) {
@@ -188,7 +231,6 @@ export async function insertVaxList() {
     throw error;
   }
 }
-
 
 export const dropDbTablesAsync = async () => {
   try {
@@ -276,7 +318,6 @@ export const addMedicalData = async () => {
 };
 
 export const addBasicData = async () => {
-
   try {
     const db = getDatabase();
 
@@ -288,7 +329,7 @@ export const addBasicData = async () => {
       )
     `);
 
-    // Create colors table  
+    // Create colors table
     await db.runAsync(`
       CREATE TABLE IF NOT EXISTS colors (
         id INTEGER PRIMARY KEY NOT NULL, 
@@ -328,7 +369,7 @@ export const addBasicData = async () => {
         last_location VARCHAR(255)
       )
     `);
- 
+
     return true;
   } catch (error) {
     console.error("Error creating tables:", error);
@@ -344,7 +385,9 @@ export async function init() {
 
     // Insert initial data if tables are empty
     const db = getDatabase();
-    const breedCount = await db.getFirstAsync('SELECT COUNT(*) as count FROM breeds');
+    const breedCount = await db.getFirstAsync(
+      "SELECT COUNT(*) as count FROM breeds"
+    );
 
     if (breedCount.count === 0) {
       await insertBreedData();
@@ -366,7 +409,7 @@ export const insertBreedData = async () => {
     const db = getDatabase();
     for (const breed of testDataBreeds) {
       await db.runAsync(
-        'INSERT OR IGNORE INTO breeds (breed_name) VALUES (?)',
+        "INSERT OR IGNORE INTO breeds (breed_name) VALUES (?)",
         [breed]
       );
     }
@@ -381,7 +424,7 @@ export async function insertColorData() {
     const db = getDatabase();
     for (const color of testDataColors) {
       await db.runAsync(
-        'INSERT OR IGNORE INTO colors (color_name) VALUES (?)',
+        "INSERT OR IGNORE INTO colors (color_name) VALUES (?)",
         [color]
       );
     }
@@ -396,7 +439,7 @@ export async function insertMarkingData() {
     const db = getDatabase();
     for (const marking of testDataMarkings) {
       await db.runAsync(
-        'INSERT OR IGNORE INTO markings (marking_name) VALUES (?)',
+        "INSERT OR IGNORE INTO markings (marking_name) VALUES (?)",
         [marking]
       );
     }
@@ -458,7 +501,8 @@ export async function fetchAllSheep() {
 export async function fetchSheep(id) {
   try {
     const db = getDatabase();
-    const result = await db.getFirstAsync(`
+    const result = await db.getFirstAsync(
+      `
       SELECT 
         children.sheep_id, 
         children.tag_id, 
@@ -496,7 +540,9 @@ export async function fetchSheep(id) {
       LEFT JOIN sheep dams ON children.dam = dams.sheep_id
       LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id
       WHERE children.sheep_id = ?
-    `, [id]);
+    `,
+      [id]
+    );
     return result;
   } catch (error) {
     console.error("Error fetching sheep:", error);
@@ -507,7 +553,7 @@ export async function fetchSheep(id) {
 export async function fetchBreeds() {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync('SELECT * FROM breeds');
+    const result = await db.getAllAsync("SELECT * FROM breeds");
     return result;
   } catch (error) {
     console.error("Error fetching breeds:", error);
@@ -518,7 +564,7 @@ export async function fetchBreeds() {
 export async function fetchColors() {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync('SELECT * FROM colors');
+    const result = await db.getAllAsync("SELECT * FROM colors");
     return result;
   } catch (error) {
     console.error("Error fetching colors:", error);
@@ -529,7 +575,7 @@ export async function fetchColors() {
 export async function fetchMarkings() {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync('SELECT * FROM markings');
+    const result = await db.getAllAsync("SELECT * FROM markings");
     return result;
   } catch (error) {
     console.error("Error fetching markings:", error);
@@ -540,7 +586,10 @@ export async function fetchMarkings() {
 export async function fetchMales() {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync('SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?', ['m']);
+    const result = await db.getAllAsync(
+      "SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?",
+      ["m"]
+    );
     return result;
   } catch (error) {
     console.error("Error fetching males:", error);
@@ -551,7 +600,10 @@ export async function fetchMales() {
 export async function fetchFemales() {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync('SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?', ['f']);
+    const result = await db.getAllAsync(
+      "SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?",
+      ["f"]
+    );
     return result;
   } catch (error) {
     console.error("Error fetching females:", error);
@@ -562,30 +614,33 @@ export async function fetchFemales() {
 export async function addSheep(sheepData) {
   try {
     const db = getDatabase();
-    const result = await db.runAsync(`
+    const result = await db.runAsync(
+      `
       INSERT INTO sheep (picture, tag_id, scrapie_id, name, dob, weight_at_birth, dop, dod, dos, sex, sire, dam, breed_id, color_id, marking_id) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      sheepData.picture,
-      sheepData.tag_id,
-      sheepData.scrapie_id,
-      sheepData.name,
-      sheepData.dob,
-      sheepData.weight_at_birth,
-      sheepData.dop,
-      sheepData.dod,
-      sheepData.dos,
-      sheepData.sex,
-      sheepData.sire,
-      sheepData.dam,
-      sheepData.breed_id,
-      sheepData.color_id,
-      sheepData.marking_id,
-    ]);
-    
+    `,
+      [
+        sheepData.picture,
+        sheepData.tag_id,
+        sheepData.scrapie_id,
+        sheepData.name,
+        sheepData.dob,
+        sheepData.weight_at_birth,
+        sheepData.dop,
+        sheepData.dod,
+        sheepData.dos,
+        sheepData.sex,
+        sheepData.sire,
+        sheepData.dam,
+        sheepData.breed_id,
+        sheepData.color_id,
+        sheepData.marking_id,
+      ]
+    );
+
     if (sheepData.weight_at_birth) {
       await db.runAsync(
-        'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
+        "INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)",
         [result.lastInsertRowId, sheepData.weight_at_birth, sheepData.dob]
       );
     }
@@ -602,10 +657,12 @@ export async function editSheep(sheepData, id) {
 
     // Generate the SQL query and parameters
     const columns = Object.keys(sheepData).filter((col) => col !== "id");
-    const values = Object.values(sheepData).filter((_, index) =>
-      Object.keys(sheepData)[index] !== "id"
+    const values = Object.values(sheepData).filter(
+      (_, index) => Object.keys(sheepData)[index] !== "id"
     );
-    const sqlQuery = `UPDATE sheep SET ${columns.map((col) => `${col} = ?`).join(", ")} WHERE sheep_id = ?`;
+    const sqlQuery = `UPDATE sheep SET ${columns
+      .map((col) => `${col} = ?`)
+      .join(", ")} WHERE sheep_id = ?`;
     const parameters = [...values, id];
 
     const result = await db.runAsync(sqlQuery, parameters);
@@ -613,7 +670,7 @@ export async function editSheep(sheepData, id) {
     // Handle weight insertion if needed
     if (sheepData.weight_at_birth) {
       await db.runAsync(
-        'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
+        "INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)",
         [id, sheepData.weight_at_birth, sheepData.dob]
       );
     }
@@ -628,7 +685,7 @@ export async function updateDateLastBred(data) {
   try {
     const db = getDatabase();
     const result = await db.runAsync(
-      'UPDATE sheep SET date_last_bred = ?, last_bred_to = ? WHERE sheep_id = ?',
+      "UPDATE sheep SET date_last_bred = ?, last_bred_to = ? WHERE sheep_id = ?",
       [data.date, data.last_bred_to, data.sheep_id]
     );
     return result;
@@ -637,11 +694,14 @@ export async function updateDateLastBred(data) {
   }
 }
 
-// FETCH FUNCTIONS  
+// FETCH FUNCTIONS
 export async function findChildren(id) {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync('SELECT * FROM sheep WHERE sire = ? OR dam = ?', [id, id]);
+    const result = await db.getAllAsync(
+      "SELECT * FROM sheep WHERE sire = ? OR dam = ?",
+      [id, id]
+    );
     return result;
   } catch (error) {
     throw error;
@@ -651,7 +711,7 @@ export async function findChildren(id) {
 export async function fetchAllMedications() {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync('SELECT * FROM medications');
+    const result = await db.getAllAsync("SELECT * FROM medications");
     return result;
   } catch (error) {
     throw error;
@@ -661,7 +721,7 @@ export async function fetchAllMedications() {
 export async function fetchAllVaccines() {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync('SELECT * FROM vaccines');
+    const result = await db.getAllAsync("SELECT * FROM vaccines");
     return result;
   } catch (error) {
     throw error;
@@ -671,12 +731,15 @@ export async function fetchAllVaccines() {
 export async function fetchSheepMeds(id) {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync(`
+    const result = await db.getAllAsync(
+      `
       SELECT sheep_meds.sheep_id, sheep_meds.entry_id, sheep_meds.id, sheep_meds.date, medications.entry, sheep_meds.dosage 
       FROM sheep_meds 
       INNER JOIN medications ON sheep_meds.entry_id = medications.id 
       WHERE sheep_meds.sheep_id = ?
-    `, [id]);
+    `,
+      [id]
+    );
     return result;
   } catch (error) {
     throw error;
@@ -686,12 +749,15 @@ export async function fetchSheepMeds(id) {
 export async function fetchSheepVax(id) {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync(`
+    const result = await db.getAllAsync(
+      `
       SELECT sheep_vax.sheep_id, sheep_vax.entry_id, sheep_vax.id, sheep_vax.date, vaccines.entry 
       FROM sheep_vax 
       INNER JOIN vaccines ON sheep_vax.entry_id = vaccines.id 
       WHERE sheep_vax.sheep_id = ?
-    `, [id]);
+    `,
+      [id]
+    );
     return result;
   } catch (error) {
     throw error;
@@ -701,7 +767,10 @@ export async function fetchSheepVax(id) {
 export async function fetchSheepWeight(id) {
   try {
     const db = getDatabase();
-    const result = await db.getAllAsync('SELECT * FROM sheep_weights WHERE sheep_id = ?', [id]);
+    const result = await db.getAllAsync(
+      "SELECT * FROM sheep_weights WHERE sheep_id = ?",
+      [id]
+    );
     return result;
   } catch (error) {
     throw error;
@@ -713,7 +782,7 @@ export async function addMedication(data) {
   try {
     const db = getDatabase();
     const result = await db.runAsync(
-      'INSERT INTO sheep_meds (sheep_id, entry_id, date, dosage) VALUES (?, ?, ?, ?)',
+      "INSERT INTO sheep_meds (sheep_id, entry_id, date, dosage) VALUES (?, ?, ?, ?)",
       [data.sheep_id, data.value, data.date, data.dosage]
     );
     return result.lastInsertRowId;
@@ -726,7 +795,7 @@ export async function addVaccination(data) {
   try {
     const db = getDatabase();
     const result = await db.runAsync(
-      'INSERT INTO sheep_vax (sheep_id, entry_id, date) VALUES (?, ?, ?)',
+      "INSERT INTO sheep_vax (sheep_id, entry_id, date) VALUES (?, ?, ?)",
       [data.sheep_id, data.value, data.date]
     );
     return result.lastInsertRowId;
@@ -739,7 +808,7 @@ export async function addSheepWeight(data) {
   try {
     const db = getDatabase();
     const result = await db.runAsync(
-      'INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)',
+      "INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)",
       [data.sheep_id, data.value, data.date]
     );
     return result.lastInsertRowId;
@@ -751,7 +820,10 @@ export async function addSheepWeight(data) {
 export async function addNewMedication(med) {
   try {
     const db = getDatabase();
-    const result = await db.runAsync('INSERT INTO medications (entry) VALUES (?)', [med]);
+    const result = await db.runAsync(
+      "INSERT INTO medications (entry) VALUES (?)",
+      [med]
+    );
     return result.lastInsertRowId;
   } catch (error) {
     throw error;
@@ -761,21 +833,24 @@ export async function addNewMedication(med) {
 export async function addNewVaccine(val) {
   try {
     const db = getDatabase();
-    const result = await db.runAsync('INSERT INTO vaccines (entry) VALUES (?)', [val]);
+    const result = await db.runAsync(
+      "INSERT INTO vaccines (entry) VALUES (?)",
+      [val]
+    );
     return result.lastInsertRowId;
   } catch (error) {
     throw error;
   }
 }
 export async function addBreed(val) {
-   try {
+  try {
     const db = getDatabase();
     const result = await db.runAsync(
-        `INSERT INTO breeds (breed_name) 
+      `INSERT INTO breeds (breed_name) 
             VALUES (?)`,
-        [val],
-    )
-        return result.lastInsertRowId;
+      [val]
+    );
+    return result.lastInsertRowId;
   } catch (error) {
     console.error("Error adding breed:", error);
     throw error;
@@ -784,13 +859,13 @@ export async function addBreed(val) {
 
 export async function addColor(val) {
   console.log("Adding color:", val);
- try {
+  try {
     const db = getDatabase();
     const result = await db.runAsync(
-        `INSERT INTO colors (color_name) VALUES (?)`,
-        [val],
-        )
-        return result.lastInsertRowId;
+      `INSERT INTO colors (color_name) VALUES (?)`,
+      [val]
+    );
+    return result.lastInsertRowId;
   } catch (error) {
     console.error("Error adding color:", error);
     throw error;
@@ -801,38 +876,33 @@ export async function addMarking(val) {
   try {
     const db = getDatabase();
     const result = await db.runAsync(
-        `INSERT INTO markings (marking_name) 
+      `INSERT INTO markings (marking_name) 
             VALUES (?)`,
-        [val],
-        )
-        return result.lastInsertRowId;
+      [val]
+    );
+    return result.lastInsertRowId;
   } catch (error) {
     throw error;
   }
 }
 
-
 // REMOVE FUNCTIONS
 export async function deleteMarking(val) {
-  try{
-  const db = getDatabase();
-    const result = await db.runAsync(
-        `DELETE FROM markings WHERE id = ?`,
-        [val]
-        )
-      return result;
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(`DELETE FROM markings WHERE id = ?`, [
+      val,
+    ]);
+    return result;
   } catch (error) {
     throw error;
   }
 }
 
 export async function deleteColor(val) {
-  try{
-  const db = getDatabase();
-    const result = await db.runAsync(
-        `DELETE FROM colors WHERE id = ?`,
-        [val]
-        )
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(`DELETE FROM colors WHERE id = ?`, [val]);
     return result;
   } catch (error) {
     throw error;
@@ -840,25 +910,21 @@ export async function deleteColor(val) {
 }
 
 export async function deleteBreed(val) {
-  try{
-  const db = getDatabase();
-    const result = await db.runAsync(
-        `DELETE FROM breeds WHERE id = ?`,
-        [val]
-        )
-        return result;
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(`DELETE FROM breeds WHERE id = ?`, [val]);
+    return result;
   } catch (error) {
     throw error;
   }
 }
 
 export async function deleteSheep(val) {
-  try{
-  const db = getDatabase();
-    const result = await db.runAsync(
-        `DELETE FROM sheep WHERE sheep_id = ?`,
-        [val]
-    )
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(`DELETE FROM sheep WHERE sheep_id = ?`, [
+      val,
+    ]);
     return result;
   } catch (error) {
     throw error;
@@ -867,8 +933,10 @@ export async function deleteSheep(val) {
 export async function removeSheepMed(id) {
   try {
     const db = getDatabase();
-    
-    const result = await db.runAsync(`DELETE FROM sheep_meds WHERE id = ?`, [id]);
+
+    const result = await db.runAsync(`DELETE FROM sheep_meds WHERE id = ?`, [
+      id,
+    ]);
     return result;
   } catch (error) {
     throw error;
@@ -878,7 +946,9 @@ export async function removeSheepMed(id) {
 export async function removeSheepVax(id) {
   try {
     const db = getDatabase();
-    const result = await db.runAsync('DELETE FROM sheep_vax WHERE id = ?', [id]);
+    const result = await db.runAsync("DELETE FROM sheep_vax WHERE id = ?", [
+      id,
+    ]);
     return result;
   } catch (error) {
     throw error;
@@ -888,7 +958,9 @@ export async function removeSheepVax(id) {
 export async function removeSheepWeight(id) {
   try {
     const db = getDatabase();
-    const result = await db.runAsync('DELETE FROM sheep_weights WHERE id = ?', [id]);
+    const result = await db.runAsync("DELETE FROM sheep_weights WHERE id = ?", [
+      id,
+    ]);
     return result;
   } catch (error) {
     throw error;
