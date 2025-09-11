@@ -13,7 +13,7 @@ import expo.modules.ReactActivityDelegateWrapper
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     // Set the theme to AppTheme BEFORE onCreate
-    super.onCreate(savedInstanceState)
+    super.onCreate(null)
   }
 
   /**
