@@ -20,6 +20,14 @@ def reactNativeAndroidDir = new File(
   "../android"
 )
 
+ext {
+  compileSdkVersion = 37
+  ndkVersion = "27.0.12077973"
+  buildToolsVersion = "35.0.0"
+  minSdkVersion = 24
+  targetSdkVersion = 37
+}
+
 allprojects {
   repositories {
     maven {

@@ -1,5 +1,14 @@
 import * as SQLite from "expo-sqlite";
-import { picture1, picture2, picture3 } from "./base54pictures";
+import {
+  testDataBreeds,
+  testDataColors,
+  testDataMarkings,
+  testDataSheep,
+  testDataMeds,
+  testDataVax,
+  medicationData,
+  vaccineData,
+} from "./testData";
 
 // Global database variable
 let database = null;
@@ -25,171 +34,11 @@ export const initializeDatabase = async () => {
 export const getDatabase = () => {
   if (!database) {
     throw new Error(
-      "Database not initialized. Call initializeDatabase() first."
+      "Database not initialized. Call initializeDatabase() first.",
     );
   }
   return database;
 };
-
-const testDataBreeds = [
-  "merino",
-  "rambouillet",
-  "suffolk",
-  "hampshire",
-  "katahdin",
-  "dorper",
-  "dorset",
-  "southdown",
-  "karakul",
-  "lincoln",
-  "icelandic",
-  "navajo churro",
-  "leicester longwool",
-  "shetland",
-  "romanov",
-  "east friesian",
-];
-
-const testDataColors = ["gray", "black", "white", "red", "brown", "cream"];
-
-const testDataMarkings = [
-  "bielset",
-  "solid",
-  "blaget",
-  "bleset",
-  "flecket",
-  "fronet",
-  "iset",
-  "katmoget",
-  "mirkface",
-  "smirslet",
-  "sokket",
-  "sponget",
-  "yuglet",
-];
-
-const testDataSheep = [
-  {
-    tag_id: "abc",
-    scrapie_id: "abc1245",
-    name: "Daisy",
-    dob: "02/09/2022",
-    sex: "f",
-    purchase_date: "03/09/2022",
-    breed_id: 1,
-    color_id: 2,
-    marking_id: 1,
-    notes: "test notes",
-    last_location: "test location1",
-    picture: picture1,
-    weight_at_birth: 10,
-  },
-  {
-    tag_id: "def",
-    scrapie_id: "def1245",
-    name: "Luke",
-    dob: "02/10/2022",
-    sex: "m",
-    breed_id: 2,
-    color_id: 3,
-    marking_id: 2,
-    mother: 1,
-    notes:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum, culpa praesentium ea est laudantium saepe architecto commodi fugiat.",
-    last_location: "test location2",
-    picture: picture2,
-  },
-  {
-    tag_id: "hij",
-    scrapie_id: "defhij",
-    name: "Baby",
-    dob: "02/10/2023",
-    sex: "f",
-    breed_id: 2,
-    color_id: 3,
-    marking_id: 2,
-    mother: 1,
-    father: 2,
-    notes:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. In itaque iure tempore beatae illo dignissimos cum soluta deserunt vel optio velit vero voluptatibus voluptatem temporibus perspiciatis voluptatum.",
-    last_location: "test location3",
-    picture: picture3,
-  },
-];
-
-const testDataMeds = [
-  { id: 1, sheep_id: 1, entry: 3, date: "03/22/2022" },
-  { id: 2, sheep_id: 1, entry: 2, date: "04/22/2022" },
-  { id: 3, sheep_id: 1, entry: 1, date: "05/22/2022" },
-  { id: 4, sheep_id: 2, entry: 3, date: "03/22/2022" },
-  { id: 5, sheep_id: 2, entry: 2, date: "04/22/2022" },
-  { id: 6, sheep_id: 2, entry: 1, date: "05/22/2022" },
-];
-
-const testDataVax = [
-  { id: 1, sheep_id: 1, entry: 3, date: "03/25/2022" },
-  { id: 2, sheep_id: 1, entry: 2, date: "04/25/2022" },
-  { id: 3, sheep_id: 1, entry: 1, date: "05/25/2022" },
-  { id: 4, sheep_id: 2, entry: 3, date: "03/25/2022" },
-  { id: 5, sheep_id: 2, entry: 2, date: "04/25/2022" },
-  { id: 6, sheep_id: 2, entry: 1, date: "05/25/2022" },
-];
-
-export const medicationData = [
-  "Cydectin® (Moxidectin)",
-  "Ivomec® (Ivermectin)",
-  "Prohibit® (Levamisole)",
-  "Valbazen® (Albendazole)",
-  "Deccox® (Decoquinate)",
-  "Corid® (Amprolium)",
-  "Albon® (Sulfadimethoxine)",
-  "Sulmet® (Sulfamethazine)",
-  "Baycox® (Toltrazuril)",
-  "Aureomycin® (Chlortetracycline)",
-  "Biosol® (Neomycin sulfate)",
-  "Micotil® (Tilmicosin phosphate)",
-  "Naxcel® (Ceftiofur sodium)",
-  "Pro-Pen G Agri-Cillin® (Penicillin G procaine)",
-  "Terramycin® (Oxytetracycline)",
-  "Oxytetracycline 10% (Oxytetracycline 100)",
-  "Oxytetracycline 200",
-  "Excenel® (Ceftiofur hydrochloride)",
-  "Nuflor® (Florfenicol)",
-  "Bismuth subsalicylate",
-  "Mineral oil",
-  "Propylene glycol",
-  "Therabloat®",
-  "Flunixin meglumine",
-  "Aspirin",
-  "Dexamethasone",
-  "BO-SE®",
-  "Calcium gluconate",
-  "Dextrose 50%",
-  "Epinephrine",
-  "Lutalyse®",
-  "Oxtytocin",
-  "Thiamine 200 mg/ml (Vit. B1)",
-  "Vitamin B12",
-  "Vitamin B Complex",
-];
-
-export const vaccineData = [
-  "Campylobacter",
-  "Case-Bac™",
-  "Caseous D-T™",
-  "C & D antitoxin",
-  "CD-T",
-  "Covexin™-8",
-  "Chlamydia",
-  "Ram epididymitis bacterin",
-  "Footvax®",
-  "Ovine Ecolizer™",
-  "Pasteurella",
-  "Rabies",
-  "Soremouth",
-  "Tetanus antitoxin",
-  "Volar footrot bacterin",
-];
 
 export const setCurrentSchemaVersion = async (version) => {
   try {
@@ -207,7 +56,7 @@ export async function insertMedList() {
     for (const medData of medicationData) {
       await db.runAsync(
         "INSERT OR IGNORE INTO medications (entry) VALUES (?)",
-        [medData]
+        [medData],
       );
     }
     return true;
@@ -386,15 +235,23 @@ export async function init() {
     // Insert initial data if tables are empty
     const db = getDatabase();
     const breedCount = await db.getFirstAsync(
-      "SELECT COUNT(*) as count FROM breeds"
+      "SELECT COUNT(*) as count FROM breeds",
     );
 
     if (breedCount.count === 0) {
       await insertBreedData();
       await insertColorData();
       await insertMarkingData();
-      // Optionally insert test sheep data
+      // // Optionally insert test sheep data
       // await insertSheepData();
+      // // Log out the inserted sheep for debugging
+      // const db = getDatabase();
+      // const insertedSheep = await db.getAllAsync(
+      //   "SELECT sheep_id, name FROM sheep"
+      // );
+      // console.log("Inserted sheep:", insertedSheep);
+      // await insertMedData();
+      // // await insertVaxData();
     }
 
     return true;
@@ -404,13 +261,92 @@ export async function init() {
   }
 }
 
+export const insertSheepData = async () => {
+  try {
+    const db = getDatabase();
+    for (const sheepData of testDataSheep) {
+      const result = await db.runAsync(
+        `
+        INSERT OR IGNORE INTO sheep 
+        (tag_id, scrapie_id, name, dob, dop, dod, dos, sex, sire, dam, weight_at_birth, breed_id, color_id, marking_id, date_last_bred, last_bred_to, notes, last_location, picture)  
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+        [
+          sheepData.tag_id,
+          sheepData.scrapie_id,
+          sheepData.name,
+          sheepData.dob,
+          sheepData.dop,
+          sheepData.dod,
+          sheepData.dos,
+          sheepData.sex,
+          sheepData.father,
+          sheepData.mother,
+          sheepData.weight_at_birth,
+          sheepData.breed_id,
+          sheepData.color_id,
+          sheepData.marking_id,
+          sheepData.date_last_bred,
+          sheepData.last_bred_to,
+          sheepData.notes,
+          sheepData.last_location,
+          sheepData.picture,
+        ],
+      );
+
+      // If weight_at_birth is provided, insert it into sheep_weights
+      if (sheepData.weight_at_birth) {
+        await db.runAsync(
+          "INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)",
+          [result.lastInsertRowId, sheepData.weight_at_birth, sheepData.dob],
+        );
+      }
+    }
+    return true;
+  } catch (error) {
+    console.error("Error inserting sheep data:", error);
+    throw error;
+  }
+};
+
+export const insertMedData = async () => {
+  try {
+    const db = getDatabase();
+    for (const medData of testDataMeds) {
+      await db.runAsync(
+        "INSERT OR IGNORE INTO sheep_meds (id, sheep_id, entry_id, date) VALUES (?, ?, ?, ?)",
+        [medData.id, medData.sheep_id, medData.entry, medData.date],
+      );
+    }
+    return true;
+  } catch (error) {
+    console.error("Error inserting medication data:", error);
+    throw error;
+  }
+};
+export const insertVaxData = async () => {
+  try {
+    const db = getDatabase();
+    for (const vaxData of testDataVax) {
+      await db.runAsync(
+        "INSERT OR IGNORE INTO sheep_vax (id, sheep_id, entry_id, date) VALUES (?, ?, ?, ?)",
+        [vaxData.id, vaxData.sheep_id, vaxData.entry, vaxData.date],
+      );
+    }
+    return true;
+  } catch (error) {
+    console.error("Error inserting vaccination data:", error);
+    throw error;
+  }
+};
+
 export const insertBreedData = async () => {
   try {
     const db = getDatabase();
     for (const breed of testDataBreeds) {
       await db.runAsync(
         "INSERT OR IGNORE INTO breeds (breed_name) VALUES (?)",
-        [breed]
+        [breed],
       );
     }
   } catch (error) {
@@ -425,7 +361,7 @@ export async function insertColorData() {
     for (const color of testDataColors) {
       await db.runAsync(
         "INSERT OR IGNORE INTO colors (color_name) VALUES (?)",
-        [color]
+        [color],
       );
     }
   } catch (error) {
@@ -440,7 +376,7 @@ export async function insertMarkingData() {
     for (const marking of testDataMarkings) {
       await db.runAsync(
         "INSERT OR IGNORE INTO markings (marking_name) VALUES (?)",
-        [marking]
+        [marking],
       );
     }
   } catch (error) {
@@ -541,7 +477,7 @@ export async function fetchSheep(id) {
       LEFT JOIN sheep last_bred_to_sheep ON children.last_bred_to = last_bred_to_sheep.sheep_id
       WHERE children.sheep_id = ?
     `,
-      [id]
+      [id],
     );
     return result;
   } catch (error) {
@@ -588,7 +524,7 @@ export async function fetchMales() {
     const db = getDatabase();
     const result = await db.getAllAsync(
       "SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?",
-      ["m"]
+      ["m"],
     );
     return result;
   } catch (error) {
@@ -602,7 +538,7 @@ export async function fetchFemales() {
     const db = getDatabase();
     const result = await db.getAllAsync(
       "SELECT sheep_id, name, tag_id FROM sheep WHERE sex = ?",
-      ["f"]
+      ["f"],
     );
     return result;
   } catch (error) {
@@ -635,13 +571,13 @@ export async function addSheep(sheepData) {
         sheepData.breed_id,
         sheepData.color_id,
         sheepData.marking_id,
-      ]
+      ],
     );
 
     if (sheepData.weight_at_birth) {
       await db.runAsync(
         "INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)",
-        [result.lastInsertRowId, sheepData.weight_at_birth, sheepData.dob]
+        [result.lastInsertRowId, sheepData.weight_at_birth, sheepData.dob],
       );
     }
     return result.lastInsertRowId;
@@ -658,7 +594,7 @@ export async function editSheep(sheepData, id) {
     // Generate the SQL query and parameters
     const columns = Object.keys(sheepData).filter((col) => col !== "id");
     const values = Object.values(sheepData).filter(
-      (_, index) => Object.keys(sheepData)[index] !== "id"
+      (_, index) => Object.keys(sheepData)[index] !== "id",
     );
     const sqlQuery = `UPDATE sheep SET ${columns
       .map((col) => `${col} = ?`)
@@ -671,7 +607,7 @@ export async function editSheep(sheepData, id) {
     if (sheepData.weight_at_birth) {
       await db.runAsync(
         "INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)",
-        [id, sheepData.weight_at_birth, sheepData.dob]
+        [id, sheepData.weight_at_birth, sheepData.dob],
       );
     }
 
@@ -686,7 +622,7 @@ export async function updateDateLastBred(data) {
     const db = getDatabase();
     const result = await db.runAsync(
       "UPDATE sheep SET date_last_bred = ?, last_bred_to = ? WHERE sheep_id = ?",
-      [data.date, data.last_bred_to, data.sheep_id]
+      [data.date, data.last_bred_to, data.sheep_id],
     );
     return result;
   } catch (error) {
@@ -700,7 +636,7 @@ export async function findChildren(id) {
     const db = getDatabase();
     const result = await db.getAllAsync(
       "SELECT * FROM sheep WHERE sire = ? OR dam = ?",
-      [id, id]
+      [id, id],
     );
     return result;
   } catch (error) {
@@ -738,7 +674,7 @@ export async function fetchSheepMeds(id) {
       INNER JOIN medications ON sheep_meds.entry_id = medications.id 
       WHERE sheep_meds.sheep_id = ?
     `,
-      [id]
+      [id],
     );
     return result;
   } catch (error) {
@@ -756,7 +692,7 @@ export async function fetchSheepVax(id) {
       INNER JOIN vaccines ON sheep_vax.entry_id = vaccines.id 
       WHERE sheep_vax.sheep_id = ?
     `,
-      [id]
+      [id],
     );
     return result;
   } catch (error) {
@@ -769,7 +705,7 @@ export async function fetchSheepWeight(id) {
     const db = getDatabase();
     const result = await db.getAllAsync(
       "SELECT * FROM sheep_weights WHERE sheep_id = ?",
-      [id]
+      [id],
     );
     return result;
   } catch (error) {
@@ -783,7 +719,7 @@ export async function addMedication(data) {
     const db = getDatabase();
     const result = await db.runAsync(
       "INSERT INTO sheep_meds (sheep_id, entry_id, date, dosage) VALUES (?, ?, ?, ?)",
-      [data.sheep_id, data.value, data.date, data.dosage]
+      [data.sheep_id, data.value, data.date, data.dosage],
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -796,7 +732,7 @@ export async function addVaccination(data) {
     const db = getDatabase();
     const result = await db.runAsync(
       "INSERT INTO sheep_vax (sheep_id, entry_id, date) VALUES (?, ?, ?)",
-      [data.sheep_id, data.value, data.date]
+      [data.sheep_id, data.value, data.date],
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -809,7 +745,7 @@ export async function addSheepWeight(data) {
     const db = getDatabase();
     const result = await db.runAsync(
       "INSERT INTO sheep_weights (sheep_id, entry, date) VALUES (?, ?, ?)",
-      [data.sheep_id, data.value, data.date]
+      [data.sheep_id, data.value, data.date],
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -822,7 +758,7 @@ export async function addNewMedication(med) {
     const db = getDatabase();
     const result = await db.runAsync(
       "INSERT INTO medications (entry) VALUES (?)",
-      [med]
+      [med],
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -835,7 +771,7 @@ export async function addNewVaccine(val) {
     const db = getDatabase();
     const result = await db.runAsync(
       "INSERT INTO vaccines (entry) VALUES (?)",
-      [val]
+      [val],
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -848,7 +784,7 @@ export async function addBreed(val) {
     const result = await db.runAsync(
       `INSERT INTO breeds (breed_name) 
             VALUES (?)`,
-      [val]
+      [val],
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -863,7 +799,7 @@ export async function addColor(val) {
     const db = getDatabase();
     const result = await db.runAsync(
       `INSERT INTO colors (color_name) VALUES (?)`,
-      [val]
+      [val],
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -878,7 +814,7 @@ export async function addMarking(val) {
     const result = await db.runAsync(
       `INSERT INTO markings (marking_name) 
             VALUES (?)`,
-      [val]
+      [val],
     );
     return result.lastInsertRowId;
   } catch (error) {
@@ -961,6 +897,19 @@ export async function removeSheepWeight(id) {
     const result = await db.runAsync("DELETE FROM sheep_weights WHERE id = ?", [
       id,
     ]);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function clearSheepImage(sheepId) {
+  try {
+    const db = getDatabase();
+    const result = await db.runAsync(
+      "UPDATE sheep SET picture = NULL, image_compressed = 0 WHERE sheep_id = ?",
+      [sheepId],
+    );
     return result;
   } catch (error) {
     throw error;

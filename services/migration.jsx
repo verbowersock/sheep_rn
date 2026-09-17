@@ -23,35 +23,78 @@ export const updateSchemaVersion = async (newVersion) => {
 
 const migrationScript = async () => {
   try {
+    console.log("🔄 Starting migration script...");
     const db = getDatabase();
-    
+
     // Insert medication and vaccine lists
     await insertMedList();
     await insertVaxList();
-    
+
     // Add dosage column to sheep_meds table if it doesn't exist
     try {
-      await db.runAsync(`ALTER TABLE sheep_meds ADD COLUMN dosage VARCHAR(100);`);
+      console.log("➕ Adding dosage column to sheep_meds...");
+      await db.runAsync(
+        `ALTER TABLE sheep_meds ADD COLUMN dosage VARCHAR(100);`,
+      );
+      console.log("✅ Dosage column added");
     } catch (error) {
       // Column might already exist, check if it's a "duplicate column" error
-      if (error.message.includes("duplicate column") || error.message.includes("already exists")) {
+      if (
+        error.message.includes("duplicate column") ||
+        error.message.includes("already exists")
+      ) {
+        console.log("⏭️  Dosage column already exists");
       } else {
         console.error("Error adding dosage column to sheep_meds table:", error);
         throw error;
       }
     }
-    
+
     // Check if last_bred_to column exists in sheep table
+    console.log("🔍 Checking for last_bred_to column...");
     const tableInfo = await db.getAllAsync(`PRAGMA table_info(sheep);`);
-    const columnExists = tableInfo.some(column => column.name === "last_bred_to");
-    
-    if (!columnExists) {
-      await db.runAsync(`ALTER TABLE sheep ADD COLUMN last_bred_to VARCHAR(200);`);
+    const lastBredToExists = tableInfo.some(
+      (column) => column.name === "last_bred_to",
+    );
+
+    if (!lastBredToExists) {
+      console.log("➕ Adding last_bred_to column to sheep...");
+      await db.runAsync(
+        `ALTER TABLE sheep ADD COLUMN last_bred_to VARCHAR(200);`,
+      );
+      console.log("✅ last_bred_to column added");
     } else {
+      console.log("⏭️  last_bred_to column already exists");
     }
-    
+
+    // Add image_compressed flag to sheep table if it doesn't exist
+    console.log("🔍 Checking for image_compressed column...");
+    const imageCompressedExists = tableInfo.some(
+      (column) => column.name === "image_compressed",
+    );
+
+    if (!imageCompressedExists) {
+      try {
+        console.log("➕ Adding image_compressed column to sheep...");
+        await db.runAsync(
+          `ALTER TABLE sheep ADD COLUMN image_compressed INTEGER DEFAULT 0;`,
+        );
+        console.log("✅ image_compressed column added");
+      } catch (error) {
+        if (
+          !error.message.includes("duplicate column") &&
+          !error.message.includes("already exists")
+        ) {
+          console.error("Error adding image_compressed column:", error);
+          throw error;
+        }
+      }
+    } else {
+      console.log("⏭️  image_compressed column already exists");
+    }
+
+    console.log("✅ Migration script completed successfully");
     return true;
-    
   } catch (error) {
     console.error("Migration script failed:", error);
     throw error;

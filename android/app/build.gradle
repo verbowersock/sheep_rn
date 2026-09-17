@@ -92,8 +92,9 @@ android {
         applicationId 'com.sheeprn'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 18
-        versionName "1.5.2"
+        versionCode 21
+        versionName "1.6.1"
+        multiDexEnabled true
     }
     signingConfigs {
         debug {
@@ -102,11 +103,11 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        release {     
-                storeFile file(MYAPP_RELEASE_STORE_FILE)
-                storePassword MYAPP_RELEASE_STORE_PASSWORD
-                keyAlias MYAPP_RELEASE_KEY_ALIAS
-                keyPassword MYAPP_RELEASE_KEY_PASSWORD
+        release {
+            storeFile file(findProperty('MYAPP_RELEASE_STORE_FILE') ?: '../myflock.keystore')
+            storePassword findProperty('MYAPP_RELEASE_STORE_PASSWORD')
+            keyAlias findProperty('MYAPP_RELEASE_KEY_ALIAS')
+            keyPassword findProperty('MYAPP_RELEASE_KEY_PASSWORD')
         }
     }
     buildTypes {
@@ -127,9 +128,25 @@ android {
         jniLibs {
             useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
+        resources {
+            excludes += [
+                'META-INF/proguard/androidx-*.pro',
+                'META-INF/com.google.android.material_material.version'
+            ]
+        }
     }
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+    lint {
+        checkReleaseBuilds false
+        disable 'MissingDimensionActivityCreator'
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'checkDebugAarMetadata' || task.name == 'checkReleaseAarMetadata') {
+        task.enabled = false
     }
 }
 

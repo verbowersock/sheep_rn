@@ -81,16 +81,17 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
     if (newObj.weight_at_birth) {
       newObj.weight_at_birth = convertUnitsDisplay(
         newObj.weight_at_birth,
-        unitFormat
+        unitFormat,
       ).toString();
     }
 
     return newObj;
   }
 
-  const correctedData = useMemo(() => 
-    formatDatesUnitsInObject(formData, dateFields, dateFormat, unitFormat),
-    [formData, dateFormat, unitFormat]
+  const correctedData = useMemo(
+    () =>
+      formatDatesUnitsInObject(formData, dateFields, dateFormat, unitFormat),
+    [formData, dateFormat, unitFormat],
   );
 
   useEffect(() => {
@@ -123,17 +124,16 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
           males.map(({ sheep_id, name, tag_id }) => ({
             title: tag_id ? `${tag_id} - ${name}` : tag_id,
             id: sheep_id,
-          }))
+          })),
         );
         const females = await fetchFemales();
         setFemales(
           females.map(({ sheep_id, name, tag_id }) => ({
             title: `${tag_id} - ${name ? name : "no name"}`,
             id: sheep_id,
-          }))
+          })),
         );
-      } catch (error) {
-      }
+      } catch (error) {}
     }
     loadDataToApp().then(() => setDataLoaded(true));
   }, []);
@@ -196,7 +196,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               visible: true,
               error: false,
               message: `Sheep edited successfully`,
-            })
+            }),
           );
           reset();
         })
@@ -218,7 +218,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               visible: true,
               error: false,
               message: `Sheep added successfully`,
-            })
+            }),
           );
           reset();
         })
@@ -257,6 +257,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               accessibilityLabel="Image picker for the sheep photo"
               value={value}
               onChange={(value) => setValue("picture", value)}
+              sheepId={formData.sheep_id}
             />
           )}
           name="picture"
@@ -277,7 +278,8 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               noDuplicate: (value) => {
                 if (!formData.sheep_id && value !== "" && value !== null) {
                   const duplicate = sheep.find(
-                    (s) => s.name && s.name.toLowerCase() === value.toLowerCase()
+                    (s) =>
+                      s.name && s.name.toLowerCase() === value.toLowerCase(),
                   );
                   if (duplicate) {
                     return "Name already exists";
@@ -326,7 +328,7 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
                   const duplicate = sheep.find(
                     (sheep) =>
                       sheep.tag_id &&
-                      sheep.tag_id.toLowerCase() === value.toLowerCase()
+                      sheep.tag_id.toLowerCase() === value.toLowerCase(),
                   );
                   if (duplicate) {
                     return "Tag Id must be unique";
@@ -364,9 +366,10 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
                 "Scrapie Tag Id should not consist of whitespaces",
               noDuplicate: (value) => {
                 if (!formData.sheep_id && value) {
-                  const duplicate = sheep.find((sheep) => 
-                    sheep.scrapie_id &&
-                    sheep.scrapie_id.toLowerCase() === value.toLowerCase()
+                  const duplicate = sheep.find(
+                    (sheep) =>
+                      sheep.scrapie_id &&
+                      sheep.scrapie_id.toLowerCase() === value.toLowerCase(),
                   );
                   if (duplicate) {
                     return "Scrapie Tag Id must be unique";
@@ -414,7 +417,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               label="Sex (required)"
               field="sex"
               searchable={false}
-              onChange={(value) => setValue("sex", value, { shouldValidate: true })}
+              onChange={(value) =>
+                setValue("sex", value, { shouldValidate: true })
+              }
               value={value}
             />
           )}
@@ -606,7 +611,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               data={breeds}
               label="Breed (required)"
               field="breed"
-              onChange={(value) => setValue("breed_id", value, { shouldValidate: true })}
+              onChange={(value) =>
+                setValue("breed_id", value, { shouldValidate: true })
+              }
               value={value}
             />
           )}
@@ -629,7 +636,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               data={colors}
               label={"Color"}
               field="color"
-              onChange={(value) => setValue("color_id", value, { shouldValidate: true })}
+              onChange={(value) =>
+                setValue("color_id", value, { shouldValidate: true })
+              }
               value={value}
             />
           )}
@@ -652,7 +661,9 @@ const AddForm = ({ isModalVisible, toggleModal }) => {
               data={markings}
               label={"Marking"}
               field={"marking"}
-              onChange={(value) => setValue("marking_id", value, { shouldValidate: true })}
+              onChange={(value) =>
+                setValue("marking_id", value, { shouldValidate: true })
+              }
               value={value}
             />
           )}

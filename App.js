@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { NavigationContainer } from "@react-navigation/native";
 
 import {
-  initializeDatabase, // Add this import
+  initializeDatabase,
   fetchAllSheep,
   insertBreedData,
   insertColorData,
@@ -45,16 +45,27 @@ export default function App() {
       await initializeDatabase();
 
       let currentSchemaVersion = await getCurrentSchemaVersion();
-      const expectedSchemaVersion = 4;
+      const expectedSchemaVersion = 5;
+
+      console.log(
+        `📊 Schema version: current=${currentSchemaVersion}, expected=${expectedSchemaVersion}`,
+      );
 
       if (currentSchemaVersion === 0) {
+        console.log("🆕 Fresh install, setting schema to v5");
         await setCurrentSchemaVersion(expectedSchemaVersion);
         currentSchemaVersion = expectedSchemaVersion;
       }
 
       if (currentSchemaVersion < expectedSchemaVersion) {
+        console.log(
+          `⬆️  Upgrading schema from v${currentSchemaVersion} to v${expectedSchemaVersion}`,
+        );
         await executeMigration();
         await updateSchemaVersion(expectedSchemaVersion);
+        console.log("✅ Schema migration complete");
+      } else {
+        console.log("✅ Schema is up to date");
       }
 
       try {
@@ -63,6 +74,10 @@ export default function App() {
         await insertMarkingData();
         await insertMedList();
         await insertVaxList();
+        //test and demo data. uncomment for production releases
+        //await insertSheepData();
+        //await insertMedData();
+        //await insertVaxData();
       } catch (e) {
         SplashScreen.hide();
         console.error("Error inserting initial data:", e);

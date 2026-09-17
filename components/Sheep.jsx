@@ -92,7 +92,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
         tag_id: item.tag_id,
         title: null,
         field: "sheep",
-      })
+      }),
     );
   };
   const onEditSheep = (item) => {
@@ -121,7 +121,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
             visible: true,
             error: false,
             message: `Sheep ${name} deleted`,
-          })
+          }),
         );
       })
       .catch((err) => {
@@ -132,7 +132,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
               visible: true,
               error: true,
               message: `This Sheep is someone's parent, please delete the child first`,
-            })
+            }),
           );
         } else {
           dispatch(
@@ -140,7 +140,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
               visible: true,
               error: true,
               message: `Something went wrong. Please try again`,
-            })
+            }),
           );
         }
       });
@@ -208,7 +208,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
                   item.sheep_id,
                   isSecondaryFormDialogVisible,
                   dateFormat,
-                  dispatch
+                  dispatch,
                 );
               }}
             />
@@ -226,7 +226,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
 
                   isSecondaryFormDialogVisible,
                   dateFormat,
-                  dispatch
+                  dispatch,
                 );
               }}
             />
@@ -338,7 +338,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
                                 item.sheep_id,
                                 isSecondaryFormDialogVisible,
                                 dateFormat,
-                                dispatch
+                                dispatch,
                               );
                             }}
                           />
@@ -354,7 +354,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
                                 item.sheep_id,
                                 isSecondaryFormDialogVisible,
                                 dateFormat,
-                                dispatch
+                                dispatch,
                               );
                             }}
                           />
@@ -370,7 +370,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
                                 item.sheep_id,
                                 isSecondaryFormDialogVisible,
                                 dateFormat,
-                                dispatch
+                                dispatch,
                               );
                             }}
                           />
@@ -413,7 +413,7 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
                                 item.sheep_id,
                                 isSecondaryFormDialogVisible,
                                 dateFormat,
-                                dispatch
+                                dispatch,
                               );
                             }}
                           />
@@ -482,8 +482,8 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
                   {item.father_name
                     ? item.father_name
                     : item.father_tag_id
-                    ? item.father_tag_id
-                    : "NA"}
+                      ? item.father_tag_id
+                      : "NA"}
                 </Text>
               </Text>
               <Text style={styles.info}>
@@ -492,8 +492,8 @@ const Sheep = React.memo(function Sheep({ item, index, dateFormat }) {
                   {item.mother_name
                     ? item.mother_name
                     : item.mother_tag_id
-                    ? item.mother_tag_id
-                    : "NA"}
+                      ? item.mother_tag_id
+                      : "NA"}
                 </Text>
               </Text>
               <Text style={styles.info}>
